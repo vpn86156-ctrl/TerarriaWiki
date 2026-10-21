@@ -1,0 +1,1759 @@
+```html
+<!DOCTYPE html>
+<html lang="ru" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Terraria 1.4.4+ — Интерактивный Гид, 1:1 Броня и Оружие, Лор и Симуляторы</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --card-bg: rgba(17, 25, 43, 0.88);
+            --slot-bg: #1e2b4d;
+            --slot-border: #3d5285;
+            --accent: #fbbf24;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        .font-pixel {
+            font-family: 'Press Start 2P', monospace;
+            line-height: 1.5;
+        }
+
+        /* Crisp 1:1 Pixel Rendering for Authentic Terraria Sprites */
+        .sprite {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            user-select: none;
+        }
+
+        .glass-card {
+            background: linear-gradient(145deg, rgba(22, 32, 56, 0.92), rgba(13, 19, 36, 0.96));
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(99, 132, 204, 0.28);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.75), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+            border-radius: 1.25rem;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .inv-slot {
+            background: radial-gradient(circle at 30% 30%, rgba(46, 65, 114, 0.95), rgba(26, 37, 68, 0.98));
+            border: 2px solid #455d94;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.35);
+            border-radius: 0.85rem;
+            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        .inv-slot:hover {
+            border-color: #fbbf24;
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55), 0 8px 20px rgba(251, 191, 36, 0.28);
+            z-index: 10;
+        }
+
+        .inv-slot-active {
+            border-color: #fbbf24 !important;
+            background: radial-gradient(circle at 30% 30%, rgba(79, 70, 125, 0.95), rgba(35, 45, 82, 0.98)) !important;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.25), 0 8px 20px rgba(251, 191, 36, 0.3) !important;
+        }
+
+        .rarity-white { color: #ffffff; }
+        .rarity-blue { color: #9696ff; }
+        .rarity-green { color: #96ff96; }
+        .rarity-orange { color: #ffc896; }
+        .rarity-light-red { color: #ff9696; }
+        .rarity-pink { color: #ff96ff; }
+        .rarity-lime { color: #96ff0a; }
+        .rarity-yellow { color: #ffff0a; }
+        .rarity-cyan { color: #05c8ff; }
+        .rarity-red { color: #ff2864; }
+        .rarity-purple { color: #b428ff; }
+        .rarity-rainbow {
+            background: linear-gradient(90deg, #ff5e5e, #ffb84d, #ffff4d, #4dff4d, #4dd2ff, #b84dff, #ff5e5e);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbowFlow 3s linear infinite;
+        }
+
+        @keyframes rainbowFlow {
+            to { background-position: 200% center; }
+        }
+
+        @keyframes floatPedestal {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.35; transform: scale(1); }
+            50% { opacity: 0.65; transform: scale(1.08); }
+        }
+
+        .animate-pedestal { animation: floatPedestal 3.2s ease-in-out infinite; }
+        .animate-glow { animation: pulseGlow 4s ease-in-out infinite; }
+
+        .fade-enter {
+            animation: fadeInSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeInSlide {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #2d3e66; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a66a3; }
+
+        @media (max-width: 1023px) {
+            body { padding-bottom: 5rem; }
+        }
+    </style>
+</head>
+<body id="biome-body" class="min-h-screen flex flex-col selection:bg-amber-400 selection:text-slate-950 transition-colors duration-700">
+
+    <!-- Ambient Background Particles -->
+    <canvas id="bg-particles" class="fixed inset-0 pointer-events-none z-0 opacity-50"></canvas>
+
+    <!-- Item Inspection Tooltip -->
+    <div id="terra-tooltip" onclick="hideItemTooltip()" class="fixed z-[100] hidden w-[90vw] max-w-xs bg-[#10162b]/98 border-2 border-[#fbbf24] rounded-2xl p-4 shadow-[0_16px_40px_rgba(0,0,0,0.95)] backdrop-blur-xl">
+        <div class="flex items-center justify-between gap-2.5 border-b border-slate-700/80 pb-2.5 mb-2.5">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center p-1 shrink-0">
+                    <img id="tt-img" src="" alt="" class="w-8 h-8 object-contain sprite" crossorigin="anonymous">
+                </div>
+                <div class="min-w-0">
+                    <div id="tt-title" class="font-bold text-sm leading-tight rarity-yellow truncate">Предмет</div>
+                    <div id="tt-type" class="text-[11px] text-slate-400 truncate">Оружие • Terraria 1.4.4</div>
+                </div>
+            </div>
+            <button onclick="hideItemTooltip()" class="lg:hidden text-slate-400 hover:text-white px-2 py-1 text-xs">✕</button>
+        </div>
+        <div id="tt-stats" class="text-xs text-slate-200 space-y-1 leading-relaxed"></div>
+        <div id="tt-how" class="mt-2.5 pt-2 border-t border-slate-800 text-[11px] text-amber-300/95 font-medium"></div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-[#090d16]/95 backdrop-blur-xl border-t border-slate-800 px-2 py-1.5 grid grid-cols-5 gap-1">
+        <a href="#classes" class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-amber-400 hover:bg-slate-800/70">
+            <i class="fa-solid fa-shield-halved text-sm mb-0.5"></i>
+            <span>Классы</span>
+        </a>
+        <a href="#shimmer-lab" class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-fuchsia-300 hover:bg-slate-800/70">
+            <i class="fa-solid fa-wand-magic-sparkles text-sm mb-0.5"></i>
+            <span>Эфир</span>
+        </a>
+        <a href="#bosses" class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-rose-400 hover:bg-slate-800/70">
+            <i class="fa-solid fa-skull text-sm mb-0.5"></i>
+            <span>Боссы</span>
+        </a>
+        <a href="#simulators" class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-cyan-300 hover:bg-slate-800/70">
+            <i class="fa-solid fa-hammer text-sm mb-0.5"></i>
+            <span>Зенит</span>
+        </a>
+        <a href="#tips" class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-emerald-400 hover:bg-slate-800/70">
+            <i class="fa-solid fa-seedling text-sm mb-0.5"></i>
+            <span>Сиды</span>
+        </a>
+    </nav>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-[#090d16]/95 backdrop-blur-xl border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+            <a href="#" class="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-emerald-900/80 to-slate-900 border-2 border-emerald-500/60 flex items-center justify-center shadow-lg group-hover:scale-105 group-hover:border-amber-400 transition-all">
+                    <img data-sprite="Zenith" alt="Logo" class="w-7 h-7 sm:w-8 sm:h-8 object-contain sprite group-hover:rotate-12 transition-transform" crossorigin="anonymous">
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <span class="font-pixel text-xs sm:text-base tracking-wider text-emerald-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">TERRARIA</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">1.4.4+</span>
+                    </div>
+                    <span class="text-[10px] sm:text-xs text-slate-400 font-medium block">Оригинальные Спрайты 1:1</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden lg:flex items-center gap-1 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+                <a href="#classes" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-amber-400 transition flex items-center gap-1.5">Классы и Броня</a>
+                <a href="#shimmer-lab" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-fuchsia-400 transition flex items-center gap-1.5">Мерцание</a>
+                <a href="#bosses" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-rose-400 transition flex items-center gap-1.5">Боссы</a>
+                <a href="#lore" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-purple-400 transition flex items-center gap-1.5">Сюжет</a>
+                <a href="#simulators" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-cyan-400 transition flex items-center gap-1.5">Зенит и Гоблин</a>
+                <a href="#tips" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-emerald-400 transition flex items-center gap-1.5">Сиды</a>
+            </nav>
+
+            <!-- Biome Atmosphere Selector -->
+            <select id="biome-select" onchange="changeBiomeAtmosphere(this.value)" class="bg-slate-900 border-2 border-slate-700 hover:border-amber-400 text-[11px] sm:text-xs font-bold rounded-xl px-2.5 sm:px-3 py-2 text-slate-100 focus:outline-none cursor-pointer transition">
+                <option value="forest">🌲 Лес</option>
+                <option value="shimmer">✨ Эфир</option>
+                <option value="hallow">🦄 Освящение</option>
+                <option value="crimson">🩸 Багрянец</option>
+                <option value="corruption">👾 Порча</option>
+            </select>
+        </div>
+    </header>
+
+    <main class="flex-grow relative z-10 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-14 sm:space-y-20">
+
+        <!-- Hero Banner -->
+        <section class="relative rounded-3xl overflow-hidden border border-indigo-500/30 bg-gradient-to-br from-[#111936] via-[#151c38] to-[#0d1324] p-5 sm:p-10 shadow-2xl">
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center relative z-10">
+                <div class="lg:col-span-7 space-y-4 sm:space-y-5">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-[11px] sm:text-xs font-bold">
+                        <img data-sprite="Zenith" class="w-4 h-4 sprite shrink-0" alt="" crossorigin="anonymous">
+                        <span>Оригинальные 1:1 игровые спрайты брони, оружия и боссов</span>
+                    </div>
+                    <h1 class="font-pixel text-lg sm:text-3xl lg:text-4xl text-white leading-snug">
+                        ЭНЦИКЛОПЕДИЯ И ГАЙД ПО <span class="rarity-rainbow">TERRARIA</span>
+                    </h1>
+                    <p class="text-slate-300 text-xs sm:text-base leading-relaxed max-w-2xl">
+                        Изучайте точные сборки всех <strong>4 классов</strong> с оригинальными спрайтами брони и оружия из игры на каждом этапе. Нажимайте на предметы для подробных характеристик, проверяйте рецепты <strong>Мерцания</strong> и используйте симуляторы!
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-3 pt-1">
+                        <a href="#classes" class="px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg transition flex items-center justify-center gap-2">
+                            <img data-sprite="Zenith" class="w-5 h-5 sprite shrink-0" alt="" crossorigin="anonymous">
+                            <span>Классы и Броня 1:1</span>
+                        </a>
+                        <a href="#shimmer-lab" class="px-4 py-3 rounded-xl bg-fuchsia-950/70 hover:bg-fuchsia-900/80 border border-fuchsia-500/40 text-fuchsia-200 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2">
+                            <img data-sprite="Bottomless_Shimmer_Bucket" class="w-5 h-5 sprite shrink-0" alt="" crossorigin="anonymous">
+                            <span>Лаборатория Мерцания</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Guide NPC Card -->
+                <div class="lg:col-span-5">
+                    <div class="glass-card p-4 sm:p-5 border-2 border-amber-500/35 relative">
+                        <div class="flex items-center justify-between border-b border-slate-700/70 pb-3 mb-3 gap-2">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center p-1.5 shadow-inner shrink-0">
+                                    <img data-sprite="Guide" alt="Гид" class="h-9 sm:h-10 object-contain sprite animate-pedestal" crossorigin="anonymous">
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5">
+                                        <h3 class="font-extrabold text-white text-sm sm:text-base">Гид (Эндрю)</h3>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Помощник</span>
+                                    </div>
+                                    <p class="text-[11px] sm:text-xs text-slate-400 truncate">Живая энциклопедия крафтов</p>
+                                </div>
+                            </div>
+                            <button onclick="triggerVoodooEasterEgg()" class="w-9 h-9 rounded-xl bg-rose-950/60 border border-rose-500/40 flex items-center justify-center shrink-0 hover:scale-110 transition" title="Кукла вуду Гида">
+                                <img data-sprite="Guide_Voodoo_Doll" class="w-6 h-6 sprite" alt="Voodoo" crossorigin="anonymous">
+                            </button>
+                        </div>
+
+                        <div id="guide-quote-box" class="bg-slate-950/85 border border-slate-800 rounded-xl p-3.5 sm:p-4 min-h-[88px] flex items-center text-xs sm:text-sm text-amber-100 leading-relaxed">
+                            «Привет! Нажми на любое оружие, броню или аксессуар ниже — я покажу тебе точное окно характеристик прямо как в инвентаре Terraria!»
+                        </div>
+
+                        <div class="mt-3 flex items-center gap-2">
+                            <button onclick="nextGuideTip()" class="flex-1 py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-md">
+                                <i class="fa-solid fa-comment-dots"></i> Секрет Гида
+                            </button>
+                            <button onclick="triggerVoodooEasterEgg()" class="py-2.5 px-3 rounded-xl bg-rose-950/90 hover:bg-rose-900 border border-rose-600/50 text-rose-200 text-xs font-bold transition flex items-center gap-1.5 shrink-0">
+                                <img data-sprite="Guide_Voodoo_Doll" class="w-4 h-4 sprite" alt="" crossorigin="anonymous"> В лаву!
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Classes Section -->
+        <section id="classes" class="space-y-5 sm:space-y-6 scroll-mt-20">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-2 sm:gap-4">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-xs font-pixel text-amber-400 uppercase mb-1">
+                        <i class="fa-solid fa-shield-halved"></i> Оригинальные Спрайты 1:1
+                    </div>
+                    <h2 class="text-xl sm:text-3xl font-black text-white">Классы, Броня и Оружие по Этапам Игры</h2>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-400 max-w-md">
+                    Выберите <strong>Класс</strong> и <strong>Этап прохождения</strong>. Нажимайте на слоты инвентаря, чтобы изучить параметры предметов!
+                </p>
+            </div>
+
+            <!-- Class & Stage Selector Bar -->
+            <div class="glass-card p-3 sm:p-4 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3.5">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 flex-1">
+                    <button onclick="selectClass('melee')" id="class-btn-melee" class="class-tab-btn inv-slot inv-slot-active p-2.5 sm:p-3 flex items-center gap-2.5 text-left">
+                        <div class="w-9 h-11 rounded-lg bg-slate-950/70 border border-slate-700/60 flex items-center justify-center p-1 shrink-0">
+                            <img data-sprite="Solar_Flare_Helmet" class="max-w-full max-h-full object-contain sprite" alt="Воин" crossorigin="anonymous">
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-extrabold text-white text-xs sm:text-sm leading-tight">Воин</div>
+                            <div class="text-[10px] sm:text-[11px] text-orange-300 font-medium leading-tight mt-0.5">Танк • Мечи</div>
+                        </div>
+                    </button>
+
+                    <button onclick="selectClass('ranger')" id="class-btn-ranger" class="class-tab-btn inv-slot p-2.5 sm:p-3 flex items-center gap-2.5 text-left">
+                        <div class="w-9 h-11 rounded-lg bg-slate-950/70 border border-slate-700/60 flex items-center justify-center p-1 shrink-0">
+                            <img data-sprite="Vortex_Helmet" class="max-w-full max-h-full object-contain sprite" alt="Стрелок" crossorigin="anonymous">
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-extrabold text-white text-xs sm:text-sm leading-tight">Стрелок</div>
+                            <div class="text-[10px] sm:text-[11px] text-emerald-300 font-medium leading-tight mt-0.5">Луки • Пушки</div>
+                        </div>
+                    </button>
+
+                    <button onclick="selectClass('mage')" id="class-btn-mage" class="class-tab-btn inv-slot p-2.5 sm:p-3 flex items-center gap-2.5 text-left">
+                        <div class="w-9 h-11 rounded-lg bg-slate-950/70 border border-slate-700/60 flex items-center justify-center p-1 shrink-0">
+                            <img data-sprite="Nebula_Helmet" class="max-w-full max-h-full object-contain sprite" alt="Маг" crossorigin="anonymous">
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-extrabold text-white text-xs sm:text-sm leading-tight">Маг</div>
+                            <div class="text-[10px] sm:text-[11px] text-fuchsia-300 font-medium leading-tight mt-0.5">Магия • AoE</div>
+                        </div>
+                    </button>
+
+                    <button onclick="selectClass('summoner')" id="class-btn-summoner" class="class-tab-btn inv-slot p-2.5 sm:p-3 flex items-center gap-2.5 text-left">
+                        <div class="w-9 h-11 rounded-lg bg-slate-950/70 border border-slate-700/60 flex items-center justify-center p-1 shrink-0">
+                            <img data-sprite="Stardust_Helmet" class="max-w-full max-h-full object-contain sprite" alt="Призыватель" crossorigin="anonymous">
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-extrabold text-white text-xs sm:text-sm leading-tight">Призыватель</div>
+                            <div class="text-[10px] sm:text-[11px] text-cyan-300 font-medium leading-tight mt-0.5">Миньоны</div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Stages -->
+                <div class="bg-slate-950/90 p-1.5 rounded-2xl border border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-1.5 shrink-0">
+                    <button onclick="selectStage('prehm')" id="stage-btn-prehm" class="stage-btn px-2.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-400 hover:text-white flex items-center justify-center text-center">
+                        <span>1. До-Хардмод</span>
+                    </button>
+                    <button onclick="selectStage('earlyhm')" id="stage-btn-earlyhm" class="stage-btn px-2.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-400 hover:text-white flex items-center justify-center text-center">
+                        <span>2. Хардмод</span>
+                    </button>
+                    <button onclick="selectStage('postplantera')" id="stage-btn-postplantera" class="stage-btn px-2.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-400 hover:text-white flex items-center justify-center text-center">
+                        <span>3. Плантера</span>
+                    </button>
+                    <button onclick="selectStage('endgame')" id="stage-btn-endgame" class="stage-btn px-2.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold transition bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md flex items-center justify-center text-center">
+                        <span>4. Финал</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Class Showcase Display -->
+            <div id="class-showcase-card" class="glass-card p-4 sm:p-8 fade-enter">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
+                    <div class="lg:col-span-5 flex flex-col justify-between bg-slate-950/85 border-2 border-slate-800/90 rounded-2xl p-4 sm:p-6 relative overflow-hidden">
+                        <div id="armor-aura" class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 rounded-full blur-3xl pointer-events-none animate-glow bg-orange-500/30"></div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-2 relative z-10">
+                            <span id="armor-stage-badge" class="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-red-500/20 text-red-300 border border-red-500/30">Финал Игры</span>
+                            <div class="flex items-center gap-1.5 bg-slate-900/90 border border-amber-500/40 px-2.5 py-1 rounded-lg">
+                                <i class="fa-solid fa-shield text-amber-400 text-xs"></i>
+                                <span id="armor-defense-badge" class="font-pixel text-[11px] sm:text-xs text-amber-400">78 Защиты</span>
+                            </div>
+                        </div>
+
+                        <div class="my-5 flex flex-col items-center justify-center relative z-10 min-h-[175px] sm:min-h-[195px]">
+                            <div class="relative flex items-center justify-center animate-pedestal">
+                                <img id="armor-full-sprite" src="" alt="Armor Set" class="h-28 sm:h-36 w-auto object-contain sprite drop-shadow-[0_10px_25px_rgba(251,191,36,0.45)]" crossorigin="anonymous">
+                            </div>
+                            <div class="w-32 h-3.5 rounded-full bg-gradient-to-r from-transparent via-amber-400/50 to-transparent blur-sm mt-2"></div>
+                            <div class="w-40 h-2 bg-slate-800 rounded-full border border-slate-600 mt-1"></div>
+                        </div>
+
+                        <div class="text-center relative z-10 mb-4">
+                            <h3 id="armor-title" class="font-pixel text-xs sm:text-base text-amber-300 tracking-wide">Броня Солнечной Вспышки</h3>
+                            <p id="armor-craft-recipe" class="text-xs text-slate-400 mt-1.5">Крафт: 36 Люминитовых слитков + 45 Фрагментов</p>
+                        </div>
+
+                        <div id="armor-pieces-grid" class="grid grid-cols-3 gap-2 sm:gap-3 relative z-10 pt-4 border-t border-slate-800/90"></div>
+                    </div>
+
+                    <div class="lg:col-span-7 flex flex-col justify-between space-y-5 sm:space-y-6">
+                        <div class="space-y-3.5">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span id="class-role-badge" class="px-3 py-1 rounded-lg bg-orange-500/20 text-orange-300 text-xs font-extrabold border border-orange-500/30">Воин • Ближний бой</span>
+                                    <span id="class-diff-badge" class="px-3 py-1 rounded-lg bg-slate-800/90 text-slate-300 text-xs font-semibold">Выживаемость: Максимальная</span>
+                                </div>
+                            </div>
+                            <h4 id="class-stage-headline" class="text-lg sm:text-2xl font-black text-white leading-snug">Финальная сборка Воина</h4>
+                            <div class="bg-gradient-to-r from-amber-500/15 via-slate-900/90 to-slate-900/90 border-l-4 border-amber-400 rounded-r-xl p-3.5 sm:p-4 shadow-md">
+                                <div class="text-xs font-extrabold uppercase tracking-wider text-amber-400 mb-1 flex items-center gap-2">
+                                    <i class="fa-solid fa-bolt"></i> Бонус полного комплекта:
+                                </div>
+                                <p id="armor-set-bonus" class="text-xs sm:text-sm text-slate-200 leading-relaxed"></p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <h5 class="text-xs font-pixel text-emerald-400 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-khanda"></i> Лучшее Оружие Этапа
+                            </h5>
+                            <div id="weapons-slots-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3"></div>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <h5 class="text-xs font-pixel text-cyan-400 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-gem"></i> Лучшие Аксессуары
+                            </h5>
+                            <div id="accessories-slots-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Shimmer Lab -->
+        <section id="shimmer-lab" class="space-y-5 sm:space-y-6 scroll-mt-20">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-2 sm:gap-4">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-xs font-pixel text-fuchsia-400 uppercase mb-1">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Главная Фишка 1.4.4
+                    </div>
+                    <h2 class="text-xl sm:text-3xl font-black text-white">Интерактивная Лаборатория Мерцания (Shimmer)</h2>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 sm:p-8 border-fuchsia-500/30 bg-gradient-to-br from-[#1a1033]/90 via-[#121830]/95 to-[#0d1326]/95">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
+                    <div class="lg:col-span-7 space-y-3.5">
+                        <div class="text-xs font-bold text-fuchsia-300 uppercase tracking-wider">Выберите предмет для погружения в Мерцание:</div>
+                        <div id="shimmer-items-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3"></div>
+                    </div>
+
+                    <div class="lg:col-span-5">
+                        <div class="bg-slate-950/90 border-2 border-fuchsia-500/40 rounded-2xl p-5 sm:p-6 text-center space-y-4 relative overflow-hidden">
+                            <div class="text-xs font-bold text-fuchsia-300 uppercase tracking-widest relative z-10">✨ Трансмутация в Эфире ✨</div>
+                            <div class="flex items-center justify-center gap-3 sm:gap-6 relative z-10 py-2">
+                                <div class="flex flex-col items-center gap-2">
+                                    <div class="w-16 h-16 rounded-2xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center p-2">
+                                        <img id="shimmer-in-img" src="" class="w-10 h-10 object-contain sprite" alt="" crossorigin="anonymous">
+                                    </div>
+                                    <span id="shimmer-in-name" class="text-xs font-bold text-slate-300">Кристалл</span>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <i class="fa-solid fa-angles-right text-xl text-fuchsia-400 animate-pulse"></i>
+                                    <span class="text-[9px] font-pixel text-fuchsia-300 mt-1">SHIMMER</span>
+                                </div>
+                                <div class="flex flex-col items-center gap-2">
+                                    <div class="w-20 h-20 rounded-2xl bg-fuchsia-950/80 border-2 border-fuchsia-400 flex items-center justify-center p-2">
+                                        <img id="shimmer-out-img" src="" class="w-12 h-12 object-contain sprite" alt="" crossorigin="anonymous">
+                                    </div>
+                                    <span id="shimmer-out-name" class="text-xs font-extrabold text-fuchsia-300">Артефакт</span>
+                                </div>
+                            </div>
+                            <div id="shimmer-result-desc" class="bg-slate-900/90 border border-fuchsia-500/30 rounded-xl p-3.5 text-xs sm:text-sm text-slate-200 leading-relaxed relative z-10"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bosses Section -->
+        <section id="bosses" class="space-y-5 sm:space-y-6 scroll-mt-20">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-xs font-pixel text-rose-400 uppercase mb-1">
+                        <i class="fa-solid fa-skull"></i> Боссы и Прогресс
+                    </div>
+                    <h2 class="text-xl sm:text-3xl font-black text-white">Интерактивный Чек-лист Боссов</h2>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 flex items-center gap-3">
+                        <span id="boss-progress-text" class="text-xs font-extrabold text-emerald-400">Побеждено: 0 / 12</span>
+                        <div class="w-20 sm:w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="boss-progress-bar" class="h-full bg-emerald-400 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <button onclick="resetBossChecklist()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition">Сбросить</button>
+                </div>
+            </div>
+            <div id="boss-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- Lore Section -->
+        <section id="lore" class="space-y-5 sm:space-y-6 scroll-mt-20">
+            <div>
+                <div class="inline-flex items-center gap-2 text-xs font-pixel text-purple-400 uppercase mb-1"><i class="fa-solid fa-scroll"></i> Канон Re-Logic</div>
+                <h2 class="text-xl sm:text-3xl font-black text-white">Сюжет и История Мира Terraria</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                <div class="glass-card p-5 border-t-4 border-t-emerald-500 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-pixel text-emerald-400">АКТ I</span>
+                            <img data-sprite="Eye_of_Cthulhu" class="w-9 h-9 object-contain sprite" alt="" crossorigin="anonymous">
+                        </div>
+                        <h3 class="text-base font-extrabold text-white">Дриады против Ктулху</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">Древний бог разрушения Ктулху напал на Terraria. Орден Дриад вырвал ему глаза, мозг и часть скелета, заставив бежать на Луну.</p>
+                    </div>
+                </div>
+                <div class="glass-card p-5 border-t-4 border-t-rose-500 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-pixel text-rose-400">АКТ II</span>
+                            <img data-sprite="Guide_Voodoo_Doll" class="w-8 h-8 object-contain sprite" alt="" crossorigin="anonymous">
+                        </div>
+                        <h3 class="text-base font-extrabold text-white">Баланс и Стена Плоти</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">Мир поддерживается Порчей, Багрянцем и Освящением. Стражем ядра выступает Стена Плоти, связанная с душой Гида.</p>
+                    </div>
+                </div>
+                <div class="glass-card p-5 border-t-4 border-t-cyan-500 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-pixel text-cyan-400">АКТ III</span>
+                            <img data-sprite="Skeletron_Prime" class="w-8 h-8 object-contain sprite" alt="" crossorigin="anonymous">
+                        </div>
+                        <h3 class="text-base font-extrabold text-white">Плен Механика</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">Культисты заставили Механика конструировать кибернетические органы для восстановления Ктулху (Близнецы, Уничтожитель, Прайм).</p>
+                    </div>
+                </div>
+                <div class="glass-card p-5 border-t-4 border-t-amber-400 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-pixel text-amber-400">АКТ IV</span>
+                            <img data-sprite="Zenith" class="w-8 h-8 object-contain sprite" alt="" crossorigin="anonymous">
+                        </div>
+                        <h3 class="text-base font-extrabold text-white">Финал с Лунным Лордом</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">После победы над Культистом и башнями вы сходите лицом к лицу с самим Лунным Лордом и открываете крафт Зенита.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulators Section -->
+        <section id="simulators" class="space-y-6 sm:space-y-8 scroll-mt-20">
+            <div>
+                <div class="inline-flex items-center gap-2 text-xs font-pixel text-cyan-400 uppercase mb-1"><i class="fa-solid fa-hammer"></i> Интерактивные Симуляторы</div>
+                <h2 class="text-xl sm:text-3xl font-black text-white">Древо Крафта «Зенита» и Симулятор Перековки</h2>
+            </div>
+
+            <!-- Zenith Crafting Tree -->
+            <div class="glass-card p-4 sm:p-8 border-amber-500/30">
+                <div class="flex items-center gap-3.5 border-b border-slate-800 pb-4 mb-5">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/15 border-2 border-amber-400 flex items-center justify-center p-2 shrink-0">
+                        <img data-sprite="Zenith" class="w-9 h-9 object-contain sprite" alt="" crossorigin="anonymous">
+                    </div>
+                    <div>
+                        <h3 class="text-base sm:text-xl font-black text-white">Схема Крафта Меча «Зенит» (10 Мечей)</h3>
+                        <p class="text-xs text-slate-400">Нажмите на любой меч, чтобы узнать способ получения!</p>
+                    </div>
+                </div>
+                <div id="zenith-swords-grid" class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2 sm:gap-2.5"></div>
+                <div id="zenith-detail-box" class="mt-5 bg-slate-950/90 border border-amber-500/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center p-2 shrink-0">
+                            <img id="zenith-selected-img" src="" class="w-9 h-9 object-contain sprite" alt="" crossorigin="anonymous">
+                        </div>
+                        <div>
+                            <div id="zenith-detail-title" class="font-extrabold text-amber-300 text-sm sm:text-base">Терра-клинок</div>
+                            <p id="zenith-detail-desc" class="text-xs text-slate-300 mt-1">Крафтится из Истинной Грани Ночи + Истинного Экскалибура.</p>
+                        </div>
+                    </div>
+                    <span id="zenith-detail-stage" class="text-xs font-extrabold px-3.5 py-1.5 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">Пост-Плантера</span>
+                </div>
+            </div>
+
+            <!-- Goblin Reforge & Pylons -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Reforge -->
+                <div class="lg:col-span-6 glass-card p-5 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-center p-1.5 shrink-0">
+                                    <img data-sprite="Goblin_Tinkerer" class="h-9 object-contain sprite" alt="" crossorigin="anonymous">
+                                </div>
+                                <div>
+                                    <h3 class="font-extrabold text-white text-sm">Симулятор Перековки</h3>
+                                    <p class="text-xs text-slate-400">Поймайте Легендарный или Мифический!</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-slate-400 block">Потрачено:</span>
+                                <span id="goblin-gold-spent" class="font-pixel text-[11px] text-amber-400">0 Зол.</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="setReforgeWeapon('zenith')" id="ref-wpn-zenith" class="py-2 px-2 rounded-xl bg-slate-800 border-2 border-amber-400 text-xs font-bold text-white flex items-center justify-center gap-1.5">
+                                <img data-sprite="Zenith" class="w-5 h-5 sprite" alt="" crossorigin="anonymous"> Зенит
+                            </button>
+                            <button onclick="setReforgeWeapon('sdmg')" id="ref-wpn-sdmg" class="py-2 px-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-slate-300 flex items-center justify-center gap-1.5">
+                                <img data-sprite="S.D.M.G." class="w-5 h-5 sprite" alt="" crossorigin="anonymous"> К.П.Д.
+                            </button>
+                            <button onclick="setReforgeWeapon('prism')" id="ref-wpn-prism" class="py-2 px-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-slate-300 flex items-center justify-center gap-1.5">
+                                <img data-sprite="Last_Prism" class="w-5 h-5 sprite" alt="" crossorigin="anonymous"> Призма
+                            </button>
+                        </div>
+
+                        <div class="bg-slate-950/90 border-2 border-slate-800 rounded-2xl p-4 text-center space-y-2">
+                            <div class="w-16 h-16 mx-auto rounded-2xl inv-slot flex items-center justify-center p-2">
+                                <img id="reforge-item-sprite" data-sprite="Zenith" class="w-11 h-11 object-contain sprite" alt="" crossorigin="anonymous">
+                            </div>
+                            <div id="reforge-item-name" class="font-pixel text-xs rarity-red pt-1">Зенит</div>
+                            <div id="reforge-stats-box" class="min-h-[44px] flex flex-wrap items-center justify-center gap-2 text-xs text-slate-300">Нажмите Перековать!</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800 flex items-center gap-2">
+                        <button onclick="performReforge()" class="flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 text-slate-950 font-black text-xs shadow-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-hammer"></i> Перековать (18 Зол.)
+                        </button>
+                        <button onclick="autoRollBestPrefix()" class="py-3 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-amber-400/40 text-xs font-bold text-amber-300">⚡ Топ</button>
+                    </div>
+                </div>
+
+                <!-- Pylons -->
+                <div class="lg:col-span-6 glass-card p-5 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center p-1.5 shrink-0">
+                                    <img id="active-pylon-sprite" data-sprite="Forest_Pylon" class="h-9 object-contain sprite" alt="" crossorigin="anonymous">
+                                </div>
+                                <div>
+                                    <h3 class="font-extrabold text-white text-sm">Калькулятор Пилонов</h3>
+                                    <p class="text-xs text-slate-400">Лучшие соседи для скидки 25%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <button onclick="selectPylonBiome('forest')" id="pylon-btn-forest" class="pylon-btn p-2 rounded-xl bg-emerald-950/90 border-2 border-emerald-400 text-xs font-bold text-emerald-200 flex items-center gap-2">
+                                <img data-sprite="Forest_Pylon" class="w-5 h-6 object-contain sprite" alt="" crossorigin="anonymous"> <span>Лес</span>
+                            </button>
+                            <button onclick="selectPylonBiome('cavern')" id="pylon-btn-cavern" class="pylon-btn p-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-slate-300 flex items-center gap-2">
+                                <img data-sprite="Cavern_Pylon" class="w-5 h-6 object-contain sprite" alt="" crossorigin="anonymous"> <span>Пещеры</span>
+                            </button>
+                            <button onclick="selectPylonBiome('desert')" id="pylon-btn-desert" class="pylon-btn p-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-slate-300 flex items-center gap-2">
+                                <img data-sprite="Desert_Pylon" class="w-5 h-6 object-contain sprite" alt="" crossorigin="anonymous"> <span>Пустыня</span>
+                            </button>
+                            <button onclick="selectPylonBiome('jungle')" id="pylon-btn-jungle" class="pylon-btn p-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-slate-300 flex items-center gap-2">
+                                <img data-sprite="Jungle_Pylon" class="w-5 h-6 object-contain sprite" alt="" crossorigin="anonymous"> <span>Джунгли</span>
+                            </button>
+                        </div>
+                        <div id="pylon-info-box" class="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tips & Seeds Section -->
+        <section id="tips" class="space-y-6 scroll-mt-20">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-3">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-xs font-pixel text-emerald-400 uppercase mb-1"><i class="fa-solid fa-lightbulb"></i> Секреты и Сиды</div>
+                    <h2 class="text-xl sm:text-3xl font-black text-white">Полезные Советы и Секретные Сиды Миров</h2>
+                </div>
+            </div>
+            <div id="tips-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-[#060911] py-8 mt-12 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
+            <div class="flex items-center justify-center gap-2 mb-2">
+                <img data-sprite="Zenith" class="w-5 h-5 sprite" alt="" crossorigin="anonymous">
+                <span class="font-pixel text-emerald-400">TERRARIA COMPENDIUM • 1:1 In-Game Sprites</span>
+            </div>
+            <p>Оригинальные спрайты оружия, брони и боссов загружены из проверенных игровых репозиториев.</p>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="terra-toast" class="fixed bottom-20 lg:bottom-5 right-4 left-4 sm:left-auto z-50 max-w-sm bg-slate-900/95 border-2 border-amber-400 rounded-2xl p-4 shadow-2xl transform translate-y-36 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3.5">
+        <div id="terra-toast-icon" class="text-2xl">🔥</div>
+        <div>
+            <div id="terra-toast-title" class="font-extrabold text-white text-sm">Событие</div>
+            <div id="terra-toast-msg" class="text-xs text-slate-300 mt-0.5">Уведомление</div>
+        </div>
+    </div>
+
+    <script>
+        /* ============================================================================
+           ROBUST IN-GAME SPRITE MAPPING WITH RELIABLE CDN HOSTING
+           (Directly mapped to verified high-res transparent PNG sprite sheets)
+        ============================================================================ */
+        const SPRITE_URLS = {
+            // Armor Full Sets / Helmets
+            Solar_Flare_Helmet: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/4/4c/Solar_Flare_Helmet.png",
+            Solar_Flare_Breastplate: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/6/67/Solar_Flare_Breastplate.png",
+            Solar_Flare_Leggings: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/8/82/Solar_Flare_Leggings.png",
+            Solar_Flare_armor: "https://terraria.wiki.gg/images/e/ed/Solar_Flare_armor_%28male%29.png",
+
+            Vortex_Helmet: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/3/36/Vortex_Helmet.png",
+            Vortex_Breastplate: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/f/f3/Vortex_Breastplate.png",
+            Vortex_Leggings: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/a/a9/Vortex_Leggings.png",
+            Vortex_armor: "https://terraria.wiki.gg/images/6/6b/Vortex_armor_%28male%29.png",
+
+            Nebula_Helmet: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/d/df/Nebula_Helmet.png",
+            Nebula_Breastplate: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/9/91/Nebula_Breastplate.png",
+            Nebula_Leggings: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/7/75/Nebula_Leggings.png",
+            Nebula_armor: "https://terraria.wiki.gg/images/2/23/Nebula_armor_%28male%29.png",
+
+            Stardust_Helmet: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/b/b1/Stardust_Helmet.png",
+            Stardust_Plate: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/9/9f/Stardust_Breastplate.png",
+            Stardust_Leggings: "https://hydra-media.cursecdn.com/terraria.gamepedia.com/2/28/Stardust_Leggings.png",
+            Stardust_armor: "https://terraria.wiki.gg/images/b/b3/Stardust_armor_%28male%29.png",
+
+            // Pre-Hardmode / Early HM Armor
+            Molten_Helmet: "https://terraria.wiki.gg/images/c/c8/Molten_Helmet.png",
+            Molten_Breastplate: "https://terraria.wiki.gg/images/d/df/Molten_Breastplate.png",
+            Molten_Greaves: "https://terraria.wiki.gg/images/4/40/Molten_Greaves.png",
+            Molten_armor: "https://terraria.wiki.gg/images/0/08/Molten_armor_%28male%29.png",
+
+            Hallowed_Mask: "https://terraria.wiki.gg/images/e/ea/Hallowed_Mask.png",
+            Hallowed_Plate_Mail: "https://terraria.wiki.gg/images/a/a2/Hallowed_Plate_Mail.png",
+            Hallowed_Greaves: "https://terraria.wiki.gg/images/6/6b/Hallowed_Greaves.png",
+            Hallowed_armor: "https://terraria.wiki.gg/images/4/4c/Hallowed_armor_%28male%29.png",
+
+            Beetle_Helmet: "https://terraria.wiki.gg/images/d/d7/Beetle_Helmet.png",
+            Beetle_Shell: "https://terraria.wiki.gg/images/f/f3/Beetle_Shell.png",
+            Beetle_Leggings: "https://terraria.wiki.gg/images/1/1d/Beetle_Leggings.png",
+            Beetle_armor: "https://terraria.wiki.gg/images/d/d5/Beetle_armor_%28male%29.png",
+
+            Necro_Helmet: "https://terraria.wiki.gg/images/f/f2/Necro_Helmet.png",
+            Necro_Breastplate: "https://terraria.wiki.gg/images/c/c1/Necro_Breastplate.png",
+            Necro_Greaves: "https://terraria.wiki.gg/images/6/6a/Necro_Greaves.png",
+            Necro_armor: "https://terraria.wiki.gg/images/5/52/Necro_armor_%28male%29.png",
+
+            Frost_Helmet: "https://terraria.wiki.gg/images/0/0d/Frost_Helmet.png",
+            Frost_Breastplate: "https://terraria.wiki.gg/images/6/62/Frost_Breastplate.png",
+            Frost_Leggings: "https://terraria.wiki.gg/images/1/19/Frost_Leggings.png",
+            Frost_armor: "https://terraria.wiki.gg/images/9/91/Frost_armor_%28male%29.png",
+
+            Shroomite_Headgear: "https://terraria.wiki.gg/images/9/99/Shroomite_Headgear.png",
+            Shroomite_Breastplate: "https://terraria.wiki.gg/images/b/be/Shroomite_Breastplate.png",
+            Shroomite_Leggings: "https://terraria.wiki.gg/images/c/cf/Shroomite_Leggings.png",
+            Shroomite_armor: "https://terraria.wiki.gg/images/2/29/Shroomite_armor_%28male%29.png",
+
+            Jungle_Hat: "https://terraria.wiki.gg/images/3/36/Jungle_Hat.png",
+            Jungle_Shirt: "https://terraria.wiki.gg/images/d/d4/Jungle_Shirt.png",
+            Jungle_Pants: "https://terraria.wiki.gg/images/e/ea/Jungle_Pants.png",
+            Jungle_armor: "https://terraria.wiki.gg/images/9/9c/Jungle_armor_%28male%29.png",
+
+            Titanium_Headgear: "https://terraria.wiki.gg/images/1/18/Titanium_Headgear.png",
+            Titanium_Breastplate: "https://terraria.wiki.gg/images/b/bf/Titanium_Breastplate.png",
+            Titanium_Leggings: "https://terraria.wiki.gg/images/0/06/Titanium_Leggings.png",
+            Titanium_armor: "https://terraria.wiki.gg/images/f/f6/Titanium_armor_%28male%29.png",
+
+            Spectre_Mask: "https://terraria.wiki.gg/images/c/c5/Spectre_Mask.png",
+            Spectre_Robe: "https://terraria.wiki.gg/images/8/87/Spectre_Robe.png",
+            Spectre_Pants: "https://terraria.wiki.gg/images/a/a2/Spectre_Pants.png",
+            Spectre_armor: "https://terraria.wiki.gg/images/a/ab/Spectre_armor_%28male%29.png",
+
+            Obsidian_Outlaw_Hat: "https://terraria.wiki.gg/images/2/23/Obsidian_Outlaw_Hat.png",
+            Obsidian_Longcoat: "https://terraria.wiki.gg/images/8/82/Obsidian_Longcoat.png",
+            Obsidian_Pants: "https://terraria.wiki.gg/images/e/ef/Obsidian_Pants.png",
+            Obsidian_armor: "https://terraria.wiki.gg/images/c/cb/Obsidian_armor_%28male%29.png",
+
+            Spider_Mask: "https://terraria.wiki.gg/images/b/bf/Spider_Mask.png",
+            Spider_Breastplate: "https://terraria.wiki.gg/images/4/4d/Spider_Breastplate.png",
+            Spider_Greaves: "https://terraria.wiki.gg/images/4/4b/Spider_Greaves.png",
+            Spider_armor: "https://terraria.wiki.gg/images/a/ac/Spider_armor_%28male%29.png",
+
+            Spooky_Helmet: "https://terraria.wiki.gg/images/0/09/Spooky_Helmet.png",
+            Spooky_Breastplate: "https://terraria.wiki.gg/images/9/97/Spooky_Breastplate.png",
+            Spooky_Leggings: "https://terraria.wiki.gg/images/7/7b/Spooky_Leggings.png",
+            Spooky_armor: "https://terraria.wiki.gg/images/2/24/Spooky_armor_%28male%29.png",
+
+            // Weapons & Tools
+            Zenith: "https://terraria.wiki.gg/images/d/de/Zenith.png",
+            Terra_Blade: "https://terraria.wiki.gg/images/5/53/Terra_Blade.png",
+            Meowmere: "https://terraria.wiki.gg/images/5/5e/Meowmere.png",
+            Star_Wrath: "https://terraria.wiki.gg/images/4/42/Star_Wrath.png",
+            Night_Edge: "https://terraria.wiki.gg/images/c/ca/Night%27s_Edge.png",
+            True_Night_Edge: "https://terraria.wiki.gg/images/5/59/True_Night%27s_Edge.png",
+            Sunfury: "https://terraria.wiki.gg/images/f/f0/Sunfury.png",
+            Cascade: "https://terraria.wiki.gg/images/4/40/Cascade.png",
+            Shadowflame_Knife: "https://terraria.wiki.gg/images/e/e0/Shadowflame_Knife.png",
+            Light_Disc: "https://terraria.wiki.gg/images/2/23/Light_Disc.png",
+            Daybreak: "https://terraria.wiki.gg/images/3/3b/Daybreak.png",
+            Vampire_Knives: "https://terraria.wiki.gg/images/9/90/Vampire_Knives.png",
+
+            Hellwing_Bow: "https://terraria.wiki.gg/images/8/83/Hellwing_Bow.png",
+            Phoenix_Blaster: "https://terraria.wiki.gg/images/7/7d/Phoenix_Blaster.png",
+            Minishark: "https://terraria.wiki.gg/images/e/ef/Minishark.png",
+            Daedalus_Stormbow: "https://terraria.wiki.gg/images/9/9c/Daedalus_Stormbow.png",
+            Megashark: "https://terraria.wiki.gg/images/e/e9/Megashark.png",
+            Dart_Rifle: "https://terraria.wiki.gg/images/3/3f/Dart_Rifle.png",
+            Tsunami: "https://terraria.wiki.gg/images/d/d2/Tsunami.png",
+            Phantasm: "https://terraria.wiki.gg/images/a/ac/Phantasm.png",
+            Vortex_Beater: "https://terraria.wiki.gg/images/4/42/Vortex_Beater.png",
+            SDMG: "https://terraria.wiki.gg/images/3/36/S.D.M.G..png",
+            Celebration_Mk2: "https://terraria.wiki.gg/images/9/9e/Celebration_Mk2.png",
+            Eventide: "https://terraria.wiki.gg/images/2/2a/Eventide.png",
+
+            Demon_Scythe: "https://terraria.wiki.gg/images/7/7f/Demon_Scythe.png",
+            Water_Bolt: "https://terraria.wiki.gg/images/f/f6/Water_Bolt.png",
+            Flamelash: "https://terraria.wiki.gg/images/4/43/Flamelash.png",
+            Sky_Fracture: "https://terraria.wiki.gg/images/5/52/Sky_Fracture.png",
+            Golden_Shower: "https://terraria.wiki.gg/images/7/74/Golden_Shower.png",
+            Crystal_Serpent: "https://terraria.wiki.gg/images/8/87/Crystal_Serpent.png",
+            Razorblade_Typhoon: "https://terraria.wiki.gg/images/8/8e/Razorblade_Typhoon.png",
+            Razorpine: "https://terraria.wiki.gg/images/0/07/Razorpine.png",
+            Nightglow: "https://terraria.wiki.gg/images/3/32/Nightglow.png",
+            Last_Prism: "https://terraria.wiki.gg/images/d/d6/Last_Prism.png",
+            Lunar_Flare: "https://terraria.wiki.gg/images/e/e0/Lunar_Flare.png",
+            Nebula_Blaze: "https://terraria.wiki.gg/images/3/30/Nebula_Blaze.png",
+
+            Spinal_Tap: "https://terraria.wiki.gg/images/1/1a/Spinal_Tap.png",
+            Imp_Staff: "https://terraria.wiki.gg/images/a/a2/Imp_Staff.png",
+            Vampire_Frog_Staff: "https://terraria.wiki.gg/images/f/f4/Vampire_Frog_Staff.png",
+            Sanguine_Staff: "https://terraria.wiki.gg/images/6/61/Sanguine_Staff.png",
+            Cool_Whip: "https://terraria.wiki.gg/images/8/8a/Cool_Whip.png",
+            Blade_Staff: "https://terraria.wiki.gg/images/4/4e/Blade_Staff.png",
+            Kaleidoscope: "https://terraria.wiki.gg/images/9/99/Kaleidoscope.png",
+            Xeno_Staff: "https://terraria.wiki.gg/images/7/73/Xeno_Staff.png",
+            Morning_Star: "https://terraria.wiki.gg/images/2/23/Morning_Star.png",
+            Stardust_Dragon_Staff: "https://terraria.wiki.gg/images/9/91/Stardust_Dragon_Staff.png",
+            Terraprisma: "https://terraria.wiki.gg/images/4/4d/Terraprisma.png",
+
+            // Accessories & Items
+            Shield_of_Cthulhu: "https://terraria.wiki.gg/images/1/10/Shield_of_Cthulhu.png",
+            Feral_Claws: "https://terraria.wiki.gg/images/c/c0/Feral_Claws.png",
+            Terraspark_Boots: "https://terraria.wiki.gg/images/e/e9/Terraspark_Boots.png",
+            Worm_Scarf: "https://terraria.wiki.gg/images/1/14/Worm_Scarf.png",
+            Berserker_Glove: "https://terraria.wiki.gg/images/e/ef/Berserker%27s_Glove.png",
+            Fin_Wings: "https://terraria.wiki.gg/images/f/f6/Fin_Wings.png",
+            Warrior_Emblem: "https://terraria.wiki.gg/images/3/3a/Warrior_Emblem.png",
+            Yoyo_Bag: "https://terraria.wiki.gg/images/c/cc/Yoyo_Bag.png",
+            Fire_Gauntlet: "https://terraria.wiki.gg/images/a/a7/Fire_Gauntlet.png",
+            Master_Ninja_Gear: "https://terraria.wiki.gg/images/d/da/Master_Ninja_Gear.png",
+            Celestial_Shell: "https://terraria.wiki.gg/images/5/5a/Celestial_Shell.png",
+            Fishron_Wings: "https://terraria.wiki.gg/images/1/1d/Fishron_Wings.png",
+            Celestial_Starboard: "https://terraria.wiki.gg/images/9/91/Celestial_Starboard.png",
+            Soaring_Insignia: "https://terraria.wiki.gg/images/f/f2/Soaring_Insignia.png",
+            Ankh_Shield: "https://terraria.wiki.gg/images/8/8c/Ankh_Shield.png",
+
+            Shark_Tooth_Necklace: "https://terraria.wiki.gg/images/d/d3/Shark_Tooth_Necklace.png",
+            Bundle_of_Horseshoe_Balloons: "https://terraria.wiki.gg/images/b/bd/Bundle_of_Horseshoe_Balloons.png",
+            Brain_of_Confusion: "https://terraria.wiki.gg/images/e/e8/Brain_of_Confusion.png",
+            Magic_Quiver: "https://terraria.wiki.gg/images/d/d9/Magic_Quiver.png",
+            Ranger_Emblem: "https://terraria.wiki.gg/images/1/1c/Ranger_Emblem.png",
+            Fairy_Wings: "https://terraria.wiki.gg/images/a/a9/Fairy_Wings.png",
+            Stinger_Necklace: "https://terraria.wiki.gg/images/5/5c/Stinger_Necklace.png",
+            Sniper_Scope: "https://terraria.wiki.gg/images/0/02/Sniper_Scope.png",
+            Recon_Scope: "https://terraria.wiki.gg/images/a/a4/Recon_Scope.png",
+            Molten_Quiver: "https://terraria.wiki.gg/images/3/36/Molten_Quiver.png",
+            Vortex_Booster: "https://terraria.wiki.gg/images/4/40/Vortex_Booster.png",
+
+            Mana_Flower: "https://terraria.wiki.gg/images/1/12/Mana_Flower.png",
+            Celestial_Cuffs: "https://terraria.wiki.gg/images/8/8d/Celestial_Cuffs.png",
+            Celestial_Emblem: "https://terraria.wiki.gg/images/3/30/Celestial_Emblem.png",
+            Mana_Cloak: "https://terraria.wiki.gg/images/6/64/Mana_Cloak.png",
+            Sorcerer_Emblem: "https://terraria.wiki.gg/images/7/7b/Sorcerer_Emblem.png",
+            Arcane_Flower: "https://terraria.wiki.gg/images/5/5d/Arcane_Flower.png",
+            Destroyer_Emblem: "https://terraria.wiki.gg/images/b/bd/Destroyer_Emblem.png",
+            Magnet_Flower: "https://terraria.wiki.gg/images/3/3d/Magnet_Flower.png",
+            Nebula_Mantle: "https://terraria.wiki.gg/images/3/3d/Nebula_Mantle.png",
+
+            Pygmy_Necklace: "https://terraria.wiki.gg/images/9/91/Pygmy_Necklace.png",
+            Summoner_Emblem: "https://terraria.wiki.gg/images/0/03/Summoner_Emblem.png",
+            Papyrus_Scarab: "https://terraria.wiki.gg/images/b/bd/Papyrus_Scarab.png",
+            Necromantic_Scroll: "https://terraria.wiki.gg/images/d/df/Necromantic_Scroll.png",
+
+            // Shimmer / Consumables / NPCs / Bosses
+            Life_Crystal: "https://terraria.wiki.gg/images/3/38/Life_Crystal.png",
+            Vital_Crystal: "https://terraria.wiki.gg/images/f/f6/Vital_Crystal.png",
+            Life_Fruit: "https://terraria.wiki.gg/images/8/8d/Life_Fruit.png",
+            Aegis_Fruit: "https://terraria.wiki.gg/images/d/da/Aegis_Fruit.png",
+            Mana_Crystal: "https://terraria.wiki.gg/images/d/df/Mana_Crystal.png",
+            Arcane_Crystal: "https://terraria.wiki.gg/images/6/63/Arcane_Crystal.png",
+            Apple: "https://terraria.wiki.gg/images/5/53/Apple.png",
+            Ambrosia: "https://terraria.wiki.gg/images/8/84/Ambrosia.png",
+            Rod_of_Discord: "https://terraria.wiki.gg/images/f/fd/Rod_of_Discord.png",
+            Rod_of_Harmony: "https://terraria.wiki.gg/images/4/4c/Rod_of_Harmony.png",
+            Bottomless_Water_Bucket: "https://terraria.wiki.gg/images/8/82/Bottomless_Water_Bucket.png",
+            Bottomless_Shimmer_Bucket: "https://terraria.wiki.gg/images/d/da/Bottomless_Shimmer_Bucket.png",
+            Spell_Tome: "https://terraria.wiki.gg/images/6/64/Spell_Tome.png",
+            Advanced_Combat_Techniques_Volume_Two: "https://terraria.wiki.gg/images/9/9a/Advanced_Combat_Techniques_Volume_Two.png",
+            Gold_Worm: "https://terraria.wiki.gg/images/7/77/Gold_Worm.png",
+            Gummy_Worm: "https://terraria.wiki.gg/images/3/31/Gummy_Worm.png",
+
+            King_Slime: "https://terraria.wiki.gg/images/b/be/King_Slime.png",
+            Eye_of_Cthulhu: "https://terraria.wiki.gg/images/e/e5/Eye_of_Cthulhu.png",
+            Brain_of_Cthulhu: "https://terraria.wiki.gg/images/1/12/Brain_of_Cthulhu.png",
+            Queen_Bee: "https://terraria.wiki.gg/images/e/e1/Queen_Bee.png",
+            Skeletron_Head: "https://terraria.wiki.gg/images/f/fb/Skeletron_Head.png",
+            Wall_of_Flesh: "https://terraria.wiki.gg/images/4/4b/Wall_of_Flesh.png",
+            Skeletron_Prime: "https://terraria.wiki.gg/images/b/b3/Skeletron_Prime.png",
+            Planters_First_Form: "https://terraria.wiki.gg/images/b/bd/Plantera%27s_First_Form.png",
+            Golem: "https://terraria.wiki.gg/images/d/d9/Golem.png",
+            Empress_of_Light: "https://terraria.wiki.gg/images/e/ea/Empress_of_Light.png",
+            Lunatic_Cultist: "https://terraria.wiki.gg/images/7/78/Lunatic_Cultist.png",
+            Moon_Lord: "https://terraria.wiki.gg/images/1/11/Moon_Lord.png",
+
+            Guide: "https://terraria.wiki.gg/images/a/ab/Guide.png",
+            Goblin_Tinkerer: "https://terraria.wiki.gg/images/b/be/Goblin_Tinkerer.png",
+            Guide_Voodoo_Doll: "https://terraria.wiki.gg/images/d/d4/Guide_Voodoo_Doll.png",
+            Celestial_Sigil: "https://terraria.wiki.gg/images/1/1d/Celestial_Sigil.png",
+            Lifeforce_Potion: "https://terraria.wiki.gg/images/d/d3/Lifeforce_Potion.png",
+            Bast_Statue: "https://terraria.wiki.gg/images/3/3a/Bast_Statue.png",
+            Bewitching_Table: "https://terraria.wiki.gg/images/4/4c/Bewitching_Table.png",
+            Terraformer: "https://terraria.wiki.gg/images/e/e2/Terraformer.png",
+            Waffles_Iron: "https://terraria.wiki.gg/images/8/87/Waffle%27s_Iron.png",
+            Moon_Lord_Legs: "https://terraria.wiki.gg/images/7/77/Moon_Lord_Legs.png",
+
+            Forest_Pylon: "https://terraria.wiki.gg/images/a/a2/Forest_Pylon.png",
+            Cavern_Pylon: "https://terraria.wiki.gg/images/c/c5/Cavern_Pylon.png",
+            Desert_Pylon: "https://terraria.wiki.gg/images/5/52/Desert_Pylon.png",
+            Jungle_Pylon: "https://terraria.wiki.gg/images/9/91/Jungle_Pylon.png",
+            Snow_Pylon: "https://terraria.wiki.gg/images/5/52/Snow_Pylon.png",
+            Ocean_Pylon: "https://terraria.wiki.gg/images/9/9d/Ocean_Pylon.png",
+            Hallow_Pylon: "https://terraria.wiki.gg/images/f/ff/Hallow_Pylon.png",
+            Mushroom_Pylon: "https://terraria.wiki.gg/images/3/3b/Mushroom_Pylon.png",
+
+            Copper_Shortsword: "https://terraria.wiki.gg/images/4/4b/Copper_Shortsword.png",
+            Starfury: "https://terraria.wiki.gg/images/e/e5/Starfury.png",
+            Enchanted_Sword: "https://terraria.wiki.gg/images/7/7e/Enchanted_Sword.png",
+            Bee_Keeper: "https://terraria.wiki.gg/images/a/ac/Bee_Keeper.png",
+            Seedler: "https://terraria.wiki.gg/images/0/01/Seedler.png",
+            The_Horsemans_Blade: "https://terraria.wiki.gg/images/a/ad/The_Horseman%27s_Blade.png",
+            Influx_Waver: "https://terraria.wiki.gg/images/e/e4/Influx_Waver.png"
+        };
+
+        function getSpriteUrl(key) {
+            if (!key) return "https://terraria.wiki.gg/images/3/38/Life_Crystal.png";
+            const cleanKey = key.replace(/https?:\/\/.*\/images\//g, '').replace(/\.(png|gif)/g, '');
+            return SPRITE_URLS[cleanKey] || SPRITE_URLS[key] || "https://terraria.wiki.gg/images/3/38/Life_Crystal.png";
+        }
+
+        /* ============================================================================
+           DATA SETS
+        ============================================================================ */
+        const CLASSES_DATA = {
+            melee: {
+                name: 'Воин (Melee)',
+                role: 'Воин • Максимальная защита и сокрушительный ближний бой',
+                difficulty: 'Выживаемость: ★★★★★',
+                auraColor: 'bg-orange-500/35',
+                stages: {
+                    prehm: {
+                        badge: '1. До-Хардмод • Orange Rarity',
+                        headline: 'Воин До-Хардмода — Литая броня и Грань Ночи',
+                        armorName: 'Литая броня (Molten Armor)',
+                        armorSprite: 'Molten_armor',
+                        craft: 'Крафт: 45 Слитков адского камня',
+                        defense: '25 Защиты',
+                        bonus: '+10% к урону ближнего боя и полный иммунитет к дебаффу «В огне!»',
+                        pieces: [
+                            { slot: 'Шлем', name: 'Литой шлем', stat: '8 Защ • +7% Крит', img: 'Molten_Helmet' },
+                            { slot: 'Нагрудник', name: 'Литой нагрудник', stat: '9 Защ • +7% Урон', img: 'Molten_Breastplate' },
+                            { slot: 'Поножи', name: 'Литые поножи', stat: '8 Защ • +7% Скор', img: 'Molten_Greaves' }
+                        ],
+                        weapons: [
+                            { name: 'Грань Ночи', en: "Night's Edge", dmg: '42 урона', rarity: 'rarity-orange', img: 'Night_Edge', stats: 'Широкая энергетическая дуга', how: 'Крафт на Алтаре: Травяной клинок + Мурамаса + Вулкан + Бич света' },
+                            { name: 'Солнечная ярость', en: 'Sunfury', dmg: '64 урона', rarity: 'rarity-orange', img: 'Sunfury', stats: 'Мощнейший огненный кистень', how: 'Теневые сундуки в Преисподней' },
+                            { name: 'Каскад', en: 'Cascade', dmg: '27 урона', rarity: 'rarity-orange', img: 'Cascade', stats: 'Взрывное огненное йо-йо', how: 'Падает с врагов в Преисподней после Скелетрона' }
+                        ],
+                        accessories: [
+                            { name: 'Щит Ктулху', stat: 'Рывок +2 Защиты', img: 'Shield_of_Cthulhu', how: 'Глаз Ктулху (Эксперт)' },
+                            { name: 'Звериные когти', stat: '+12% скорости и авто-атака', img: 'Feral_Claws', how: 'Сундуки в Джунглях' },
+                            { name: 'Терраискромётные ботинки', stat: 'Сверхскорость + лавоходы', img: 'Terraspark_Boots', how: 'Мастерская изобретателя' },
+                            { name: 'Шарф-червь', stat: '-17% урона', img: 'Worm_Scarf', how: 'Пожиратель Миров (Эксперт)' }
+                        ]
+                    },
+                    earlyhm: {
+                        badge: '2. Начало Хардмода • Pink Rarity',
+                        headline: 'Воин Хардмода — Святая броня и Истинная Грань Ночи',
+                        armorName: 'Святая броня (Hallowed Armor)',
+                        armorSprite: 'Hallowed_armor',
+                        craft: 'Крафт: 54 Святых слитка',
+                        defense: '50 Защиты',
+                        bonus: 'Святая защита: позволяет полностью уклониться от следующей атаки!',
+                        pieces: [
+                            { slot: 'Маска', name: 'Святая маска', stat: '24 Защ • +10% Урон', img: 'Hallowed_Mask' },
+                            { slot: 'Латы', name: 'Святые латы', stat: '15 Защ • +7% Крит', img: 'Hallowed_Plate_Mail' },
+                            { slot: 'Поножи', name: 'Святые поножи', stat: '11 Защ • +7% Урон', img: 'Hallowed_Greaves' }
+                        ],
+                        weapons: [
+                            { name: 'Истинная Грань Ночи', en: "True Night's Edge", dmg: '70 урона', rarity: 'rarity-yellow', img: 'True_Night_Edge', stats: 'Выпускает зелёный диск', how: 'Крафт: Грань Ночи + Души механиков' },
+                            { name: 'Теневой нож', en: 'Shadowflame Knife', dmg: '47 урона', rarity: 'rarity-pink', img: 'Shadowflame_Knife', stats: 'Рикошетит между врагами', how: 'Призыватель гоблинов' },
+                            { name: 'Световой диск', en: 'Light Disc', dmg: '60 урона', rarity: 'rarity-pink', img: 'Light_Disc', stats: 'Скоростной бумеранг', how: 'Крафт из Святых слитков' }
+                        ],
+                        accessories: [
+                            { name: 'Перчатка берсерка', stat: '+8 Защиты, авто-атака', img: 'Berserker_Glove', how: 'Силовая перчатка + Кастет' },
+                            { name: 'Крылья феи', stat: 'Полёт и падение', img: 'Fin_Wings', how: 'Души полёта + Пыльца' },
+                            { name: 'Эмблема Воина', stat: '+15% к урону', img: 'Warrior_Emblem', how: 'Стена Плоти' },
+                            { name: 'Сумка для йо-йо', stat: 'Два йо-йо', img: 'Yoyo_Bag', how: 'Скелетон-торговец' }
+                        ]
+                    },
+                    postplantera: {
+                        badge: '3. Пост-Плантера • Yellow Rarity',
+                        headline: 'Воин Пост-Плантеры — Жучья броня и Терра-клинок',
+                        armorName: 'Жучья броня (Beetle Armor)',
+                        armorSprite: 'Beetle_armor',
+                        craft: 'Крафт: Черепашья броня + 18 Жучьих хитинов',
+                        defense: '73 Защиты',
+                        bonus: 'Жуки снижают получаемый урон до 45% или ускоряют атаки на +30%.',
+                        pieces: [
+                            { slot: 'Шлем', name: 'Жучий шлем', stat: '23 Защ • +6% Урон', img: 'Beetle_Helmet' },
+                            { slot: 'Панцирь', name: 'Жучий панцирь', stat: '32 Защ • Защита 45%', img: 'Beetle_Shell' },
+                            { slot: 'Поножи', name: 'Жучьи поножи', stat: '18 Защ • +6% Скор', img: 'Beetle_Leggings' }
+                        ],
+                        weapons: [
+                            { name: 'Терра-клинок', en: 'Terra Blade', dmg: '85 урона', rarity: 'rarity-yellow', img: 'Terra_Blade', stats: 'Волны на весь экран', how: 'Истинный Экскалибур + Истинная Грань Ночи' },
+                            { name: 'Дневной свет', en: 'Daybreak', dmg: '150 урона', rarity: 'rarity-red', img: 'Daybreak', stats: 'Солнечные копья', how: 'Солнечные фрагменты' },
+                            { name: 'Вампирские ножи', en: 'Vampire Knives', dmg: '29 урона', rarity: 'rarity-yellow', img: 'Vampire_Knives', stats: 'Лечение при ударе', how: 'Багряный сундук в Данже' }
+                        ],
+                        accessories: [
+                            { name: 'Огненная рукавица', stat: '+12% урона и поджог', img: 'Fire_Gauntlet', how: 'Мастерская изобретателя' },
+                            { name: 'Снаряжение ниндзя', stat: 'Рывок + уклонение', img: 'Master_Ninja_Gear', how: 'Таби + Чёрный пояс' },
+                            { name: 'Небесная ракушка', stat: 'Оборотень ночью', img: 'Celestial_Shell', how: 'Лунный амулет + Ракушка' },
+                            { name: 'Крылья Рыброна', stat: 'Сверхбыстрый полёт', img: 'Fishron_Wings', how: 'Герцог Рыброн' }
+                        ]
+                    },
+                    endgame: {
+                        badge: '4. Пост-Мунлорд • Red Rarity',
+                        headline: 'Финальная сборка Воина — Солнечная Вспышка и Зенит',
+                        armorName: 'Броня Солнечной Вспышки',
+                        armorSprite: 'Solar_Flare_armor',
+                        craft: 'Крафт: Люминит + Солнечные фрагменты',
+                        defense: '78 Защиты',
+                        bonus: 'Снижает урон на 12%, даёт щиты и огненный таран с мощным взрывом!',
+                        pieces: [
+                            { slot: 'Шлем', name: 'Шлем вспышки', stat: '24 Защ • +26% Крит', img: 'Solar_Flare_Helmet' },
+                            { slot: 'Латы', name: 'Нагрудник вспышки', stat: '34 Защ • +29% Урон', img: 'Solar_Flare_Breastplate' },
+                            { slot: 'Поножи', name: 'Поножи вспышки', stat: '20 Защ • +15% Скор', img: 'Solar_Flare_Leggings' }
+                        ],
+                        weapons: [
+                            { name: 'Зенит', en: 'Zenith', dmg: '190 урона', rarity: 'rarity-red', img: 'Zenith', stats: 'Вихрь из 10 мечей сквозь стены', how: 'Крафт из 10 легендарных мечей' },
+                            { name: 'Звёздный гнев', en: 'Star Wrath', dmg: '170 урона', rarity: 'rarity-red', img: 'Star_Wrath', stats: 'Падающие звёзды с неба', how: 'Лунный Лорд' },
+                            { name: 'Мяумур', en: 'Meowmere', dmg: '200 урона', rarity: 'rarity-red', img: 'Meowmere', stats: 'Рикошетящие котики', how: 'Лунный Лорд' }
+                        ],
+                        accessories: [
+                            { name: 'Небесная платформа', stat: 'Лучший полёт', img: 'Celestial_Starboard', how: 'Лунный Лорд (Эксперт)' },
+                            { name: 'Парящая инсигния', stat: 'Бесконечный полёт', img: 'Soaring_Insignia', how: 'Императрица Света (Эксперт)' },
+                            { name: 'Щит Анх', stat: 'Иммунитет к дебаффам', img: 'Ankh_Shield', how: 'Крафт из артефактов' },
+                            { name: 'Огненная рукавица', stat: '+12% урона', img: 'Fire_Gauntlet', how: 'Мастерская изобретателя' }
+                        ]
+                    }
+                }
+            },
+            ranger: {
+                name: 'Стрелок (Ranger)',
+                role: 'Стрелок • Снайперский урон и бесконечный шквал пуль',
+                difficulty: 'Выживаемость: ★★★★☆',
+                auraColor: 'bg-emerald-500/35',
+                stages: {
+                    prehm: {
+                        badge: '1. До-Хардмод • Orange Rarity',
+                        headline: 'Стрелок До-Хардмода — Некро-броня',
+                        armorName: 'Некро-броня (Necro Armor)',
+                        armorSprite: 'Necro_armor',
+                        craft: 'Крафт: 150 Костей + 135 Паутины',
+                        defense: '19 Защиты',
+                        bonus: '+10% к криту и 20% шанс не потратить боеприпасы.',
+                        pieces: [
+                            { slot: 'Шлем', name: 'Некро-шлем', stat: '6 Защ • +5% Урон', img: 'Necro_Helmet' },
+                            { slot: 'Латы', name: 'Некро-нагрудник', stat: '7 Защ • +5% Урон', img: 'Necro_Breastplate' },
+                            { slot: 'Поножи', name: 'Некро-поножи', stat: '6 Защ • +5% Урон', img: 'Necro_Greaves' }
+                        ],
+                        weapons: [
+                            { name: 'Лук адского крыла', en: 'Hellwing Bow', dmg: '22 урона', rarity: 'rarity-orange', img: 'Hellwing_Bow', stats: 'Огненные мыши', how: 'Теневые сундуки в Аду' },
+                            { name: 'Бластер Феникса', en: 'Phoenix Blaster', dmg: '30 урона', rarity: 'rarity-orange', img: 'Phoenix_Blaster', stats: 'Точный пистолет', how: 'Пистолет из Данжа + Адский слиток' },
+                            { name: 'Мини-акула', en: 'Minishark', dmg: '6 урона', rarity: 'rarity-green', img: 'Minishark', stats: 'Высокая скорострельность', how: 'Продавец оружия' }
+                        ],
+                        accessories: [
+                            { name: 'Ожерелье из зубов', stat: 'Игнорирует 5 защиты', img: 'Shark_Tooth_Necklace', how: 'Кровавая луна' },
+                            { name: 'Щит Ктулху', stat: 'Рывок', img: 'Shield_of_Cthulhu', how: 'Глаз Ктулху (Эксперт)' },
+                            { name: 'Связка шариков', stat: 'Множественный прыжок', img: 'Bundle_of_Horseshoe_Balloons', how: 'Небесные острова' },
+                            { name: 'Мозг запутанности', stat: '17% уклонение', img: 'Brain_of_Confusion', how: 'Мозг Ктулху (Эксперт)' }
+                        ]
+                    },
+                    earlyhm: {
+                        badge: '2. Начало Хардмода • Light Red Rarity',
+                        headline: 'Стрелок Хардмода — Морозная броня и Лук Дедала',
+                        armorName: 'Морозная броня (Frost Armor)',
+                        armorSprite: 'Frost_armor',
+                        craft: 'Крафт: Титановые слитки + Морозные ядра',
+                        defense: '43 Защиты',
+                        bonus: 'Все выстрелы поджигают врагов Ледяным обжигом (+10% урон).',
+                        pieces: [
+                            { slot: 'Шлем', name: 'Морозный шлем', stat: '10 Защ • +16% Урон', img: 'Frost_Helmet' },
+                            { slot: 'Латы', name: 'Морозный нагрудник', stat: '20 Защ • +11% Крит', img: 'Frost_Breastplate' },
+                            { slot: 'Поножи', name: 'Морозные поножи', stat: '13 Защ • +8% Скор', img: 'Frost_Leggings' }
+                        ],
+                        weapons: [
+                            { name: 'Лук Дедала', en: 'Daedalus Stormbow', dmg: '38 урона', rarity: 'rarity-light-red', img: 'Daedalus_Stormbow', stats: 'Ливень стрел с небес', how: 'Освященный мимик' },
+                            { name: 'Мега-акула', en: 'Megashark', dmg: '25 урона', rarity: 'rarity-pink', img: 'Megashark', stats: 'Легендарный пулемёт', how: 'Мини-акула + Души могущества' },
+                            { name: 'Дротикомёт', en: 'Dart Rifle', dmg: '52 урона', rarity: 'rarity-light-red', img: 'Dart_Rifle', stats: 'Стреляет проклятыми дротиками', how: 'Искаженный мимик' }
+                        ],
+                        accessories: [
+                            { name: 'Магический колчан', stat: 'Скорость стрел', img: 'Magic_Quiver', how: 'Скелет-лучник' },
+                            { name: 'Эмблема Стрелка', stat: '+15% урона', img: 'Ranger_Emblem', how: 'Стена Плоти' },
+                            { name: 'Крылья феи', stat: 'Полёт', img: 'Fairy_Wings', how: 'Мифриловая наковальня' },
+                            { name: 'Ожерелье жала', stat: 'Пробитие брони', img: 'Stinger_Necklace', how: 'Ожерелье зубов + Пчеловод' }
+                        ]
+                    },
+                    postplantera: {
+                        badge: '3. Пост-Плантера • Yellow Rarity',
+                        headline: 'Стрелок Пост-Плантеры — Грибная броня и Цунами',
+                        armorName: 'Грибная броня (Shroomite Armor)',
+                        armorSprite: 'Shroomite_armor',
+                        craft: 'Крафт: 54 Грибных слитка',
+                        defense: '51 Защиты',
+                        bonus: 'Стелс-режим при остановке: +60% урона и снижение агрессии.',
+                        pieces: [
+                            { slot: 'Шлем', name: 'Грибной убор', stat: '11 Защ • +15% Урон', img: 'Shroomite_Headgear' },
+                            { slot: 'Латы', name: 'Грибной нагрудник', stat: '24 Защ • +13% Крит', img: 'Shroomite_Breastplate' },
+                            { slot: 'Поножи', name: 'Грибные поножи', stat: '16 Защ • +12% Скор', img: 'Shroomite_Leggings' }
+                        ],
+                        weapons: [
+                            { name: 'Цунами', en: 'Tsunami', dmg: '53 урона', rarity: 'rarity-yellow', img: 'Tsunami', stats: 'Стена из 5 стрел за выстрел', how: 'Герцог Рыброн' },
+                            { name: 'Фантазм', en: 'Phantasm', dmg: '50 урона', rarity: 'rarity-red', img: 'Phantasm', stats: 'Самонаводящиеся стрелы', how: 'Фрагменты Вихря' },
+                            { name: 'Пулемёт Вихря', en: 'Vortex Beater', dmg: '50 урона', rarity: 'rarity-red', img: 'Vortex_Beater', stats: 'Автомат с ракетами', how: 'Фрагменты Вихря' }
+                        ],
+                        accessories: [
+                            { name: 'Прицел снайпера', stat: '+10% урона и крита', img: 'Sniper_Scope', how: 'Прицел винтовки + Эмблема' },
+                            { name: 'Разведывательный прицел', stat: '+10% урона + агро', img: 'Recon_Scope', how: 'Прицел + Гнилые останки' },
+                            { name: 'Расплавленный колчан', stat: 'Поджог стрел', img: 'Molten_Quiver', how: 'Колчан + Магмовый камень' },
+                            { name: 'Снаряжение ниндзя', stat: 'Рывок', img: 'Master_Ninja_Gear', how: 'Данж' }
+                        ]
+                    },
+                    endgame: {
+                        badge: '4. Пост-Мунлорд • Red Rarity',
+                        headline: 'Финальная сборка Стрелка — Броня Вихря и К.П.Д.',
+                        armorName: 'Броня Вихря (Vortex Armor)',
+                        armorSprite: 'Vortex_armor',
+                        craft: 'Крафт: Люминит + Фрагменты Вихря',
+                        defense: '62 Защиты',
+                        bonus: 'Стелс-режим в полёте: +80% урона и полная невидимость!',
+                        pieces: [
+                            { slot: 'Шлем', name: 'Шлем Вихря', stat: '14 Защ • +16% Урон', img: 'Vortex_Helmet' },
+                            { slot: 'Латы', name: 'Нагрудник Вихря', stat: '28 Защ • +12% Урон', img: 'Vortex_Breastplate' },
+                            { slot: 'Поножи', name: 'Поножи Вихря', stat: '20 Защ • +8% Урон', img: 'Vortex_Leggings' }
+                        ],
+                        weapons: [
+                            { name: 'К.П.Д. (S.D.M.G.)', en: 'S.D.M.G.', dmg: '85 урона', rarity: 'rarity-red', img: 'SDMG', stats: 'Космический пулемёт-дельфин', how: 'Лунный Лорд' },
+                            { name: 'Празднование Мк2', en: 'Celebration Mk2', dmg: '50 урона', rarity: 'rarity-red', img: 'Celebration_Mk2', stats: 'Многоствольный фейерверк', how: 'Лунный Лорд' },
+                            { name: 'Сумрак', en: 'Eventide', dmg: '50 урона', rarity: 'rarity-yellow', img: 'Eventide', stats: 'Лучи сумерек', how: 'Императрица Света' }
+                        ],
+                        accessories: [
+                            { name: 'Прицел снайпера', stat: '+10% урона/крита', img: 'Sniper_Scope', how: 'Мастерская изобретателя' },
+                            { name: 'Разведывательный прицел', stat: '+10% урона', img: 'Recon_Scope', how: 'Мастерская изобретателя' },
+                            { name: 'Ускоритель Вихря', stat: 'Крылья с парением', img: 'Vortex_Booster', how: 'Манипулятор' },
+                            { name: 'Парящая инсигния', stat: 'Бесконечный полёт', img: 'Soaring_Insignia', how: 'Императрица (Эксперт)' }
+                        ]
+                    }
+                }
+            },
+            mage: {
+                name: 'Маг (Mage)',
+                role: 'Маг • Разрушительные заклинания и вампиризм',
+                difficulty: 'Выживаемость: ★★★☆☆',
+                auraColor: 'bg-fuchsia-500/35',
+                stages: {
+                    prehm: {
+                        badge: '1. До-Хардмод • Orange Rarity',
+                        headline: 'Маг До-Хардмода — Броня Джунглей',
+                        armorName: 'Броня Джунглей (Jungle Armor)',
+                        armorSprite: 'Jungle_armor',
+                        craft: 'Крафт: 32 Споры джунглей + Жала + Лозы',
+                        defense: '17 Защиты',
+                        bonus: 'Снижает расход маны на 16% и даёт +80 к мане.',
+                        pieces: [
+                            { slot: 'Шляпа', name: 'Шляпа джунглей', stat: '5 Защ • +40 Маны', img: 'Jungle_Hat' },
+                            { slot: 'Рубашка', name: 'Рубашка', stat: '6 Защ • +20 Маны', img: 'Jungle_Shirt' },
+                            { slot: 'Штаны', name: 'Штаны джунглей', stat: '6 Защ • +20 Маны', img: 'Jungle_Pants' }
+                        ],
+                        weapons: [
+                            { name: 'Демоническая коса', en: 'Demon Scythe', dmg: '35 урона', rarity: 'rarity-orange', img: 'Demon_Scythe', stats: 'Пробивающие серпы', how: 'Демоны в Аду' },
+                            { name: 'Водяной скипетр', en: 'Water Bolt', dmg: '19 урона', rarity: 'rarity-green', img: 'Water_Bolt', stats: 'Водяные шары рикошетят', how: 'Книжные полки в Данже' },
+                            { name: 'Огненная плеть', en: 'Flamelash', dmg: '32 урона', rarity: 'rarity-orange', img: 'Flamelash', stats: 'Управляемый шар огня', how: 'Теневые сундуки в Аду' }
+                        ],
+                        accessories: [
+                            { name: 'Цветок маны', stat: 'Авто-питьё зелий маны', img: 'Mana_Flower', how: 'Дар природы + Зелье маны' },
+                            { name: 'Небесные наручники', stat: 'Регенерация маны от урона', img: 'Celestial_Cuffs', how: 'Наручники + Магнит' },
+                            { name: 'Терраискромётные ботинки', stat: 'Скорость', img: 'Terraspark_Boots', how: 'Мастерская' },
+                            { name: 'Щит Ктулху', stat: 'Рывок', img: 'Shield_of_Cthulhu', how: 'Глаз Ктулху' }
+                        ]
+                    },
+                    earlyhm: {
+                        badge: '2. Начало Хардмода • Pink Rarity',
+                        headline: 'Маг Хардмода — Титановая броня',
+                        armorName: 'Титановая броня (Titanium Armor)',
+                        armorSprite: 'Titanium_armor',
+                        craft: 'Крафт: Титановые слитки',
+                        defense: '32 Защиты',
+                        bonus: 'Титановые осколки защищают мага и ранят врагов.',
+                        pieces: [
+                            { slot: 'Убор', name: 'Титановый убор', stat: '4 Защ • +100 Маны', img: 'Titanium_Headgear' },
+                            { slot: 'Латы', name: 'Титановый латы', stat: '15 Защ • +4% Урон', img: 'Titanium_Breastplate' },
+                            { slot: 'Поножи', name: 'Поножи', stat: '11 Защ • +3% Урон', img: 'Titanium_Leggings' }
+                        ],
+                        weapons: [
+                            { name: 'Небесный разлом', en: 'Sky Fracture', dmg: '38 урона', rarity: 'rarity-light-red', img: 'Sky_Fracture', stats: 'Призрачные мечи света', how: 'Магическая ракета + Души Света' },
+                            { name: 'Золотой душ', en: 'Golden Shower', dmg: '30 урона', rarity: 'rarity-light-red', img: 'Golden_Shower', stats: 'Накладывает Ихор (-15 брони)', how: 'Книга + Ихор' },
+                            { name: 'Кристальный змей', en: 'Crystal Serpent', dmg: '40 урона', rarity: 'rarity-pink', img: 'Crystal_Serpent', stats: 'Осколки при попадании', how: 'Рыбалка в Освящении' }
+                        ],
+                        accessories: [
+                            { name: 'Небесная эмблема', stat: '+15% маг. урона', img: 'Celestial_Emblem', how: 'Магнит + Эмблема Мстителя' },
+                            { name: 'Плащ маны', stat: 'Падение звезд', img: 'Mana_Cloak', how: 'Цветок маны + Звёздный плащ' },
+                            { name: 'Эмблема Мага', stat: '+15% маг. урона', img: 'Sorcerer_Emblem', how: 'Стена Плоти' },
+                            { name: 'Крылья феи', stat: 'Полёт', img: 'Fairy_Wings', how: 'Мифриловая наковальня' }
+                        ]
+                    },
+                    postplantera: {
+                        badge: '3. Пост-Плантера • Yellow Rarity',
+                        headline: 'Маг Пост-Плантеры — Спектральная броня и Бритвенный тайфун',
+                        armorName: 'Спектральная броня (Spectre Armor)',
+                        armorSprite: 'Spectre_armor',
+                        craft: 'Крафт: Спектральные слитки (Хлорофит + Эктоплазма)',
+                        defense: '42 Защиты',
+                        bonus: 'С капюшоном: 20% урона превращается в исцеление здоровья!',
+                        pieces: [
+                            { slot: 'Маска/Капюшон', name: 'Спектральная маска', stat: '18 Защ • +10% Урон', img: 'Spectre_Mask' },
+                            { slot: 'Мантия', name: 'Спектральная роба', stat: '14 Защ • +7% Урон', img: 'Spectre_Robe' },
+                            { slot: 'Штаны', name: 'Спектральные штаны', stat: '10 Защ • +8% Урон', img: 'Spectre_Pants' }
+                        ],
+                        weapons: [
+                            { name: 'Бритвенный тайфун', en: 'Razorblade Typhoon', dmg: '85 урона', rarity: 'rarity-yellow', img: 'Razorblade_Typhoon', stats: 'Самонаводящиеся диски', how: 'Герцог Рыброн' },
+                            { name: 'Сосновая хвоя', en: 'Razorpine', dmg: '48 урона', rarity: 'rarity-yellow', img: 'Razorpine', stats: 'Сверхбыстрый пулемёт', how: 'Морозная луна' },
+                            { name: 'Сияние ночи', en: 'Nightglow', dmg: '50 урона', rarity: 'rarity-yellow', img: 'Nightglow', stats: 'Радужные кристаллы', how: 'Императрица Света' }
+                        ],
+                        accessories: [
+                            { name: 'Небесная эмблема', stat: '+15% маг. урона', img: 'Celestial_Emblem', how: 'Мастерская' },
+                            { name: 'Чародейский цветок', stat: '-8% расход маны', img: 'Arcane_Flower', how: 'Цветок маны + Пыльца' },
+                            { name: 'Эмблема Разрушителя', stat: '+10% урона и крит', img: 'Destroyer_Emblem', how: 'Эмблема + Глаз Голема' },
+                            { name: 'Снаряжение ниндзя', stat: 'Рывок', img: 'Master_Ninja_Gear', how: 'Данж' }
+                        ]
+                    },
+                    endgame: {
+                        badge: '4. Пост-Мунлорд • Red Rarity',
+                        headline: 'Финальная сборка Мага — Броня Туманности и Последняя Призма',
+                        armorName: 'Броня Туманности (Nebula Armor)',
+                        armorSprite: 'Nebula_armor',
+                        craft: 'Крафт: Люминит + Фрагменты Туманности',
+                        defense: '46 Защиты',
+                        bonus: 'Огоньки-бустеры дают до +45% к урону и регенерацию маны/HP!',
+                        pieces: [
+                            { slot: 'Шлем', name: 'Шлем Туманности', stat: '14 Защ • +60 Маны', img: 'Nebula_Helmet' },
+                            { slot: 'Латы', name: 'Нагрудник', stat: '18 Защ • +9% Урон', img: 'Nebula_Breastplate' },
+                            { slot: 'Поножи', name: 'Поножи', stat: '14 Защ • +10% Урон', img: 'Nebula_Leggings' }
+                        ],
+                        weapons: [
+                            { name: 'Последняя призма', en: 'Last Prism', dmg: '100 урона', rarity: 'rarity-red', img: 'Last_Prism', stats: 'Смертоносный радужный луч', how: 'Лунный Лорд' },
+                            { name: 'Лунные огни', en: 'Lunar Flare', dmg: '100 урона', rarity: 'rarity-red', img: 'Lunar_Flare', stats: 'Лучи сквозь стены', how: 'Лунный Лорд' },
+                            { name: 'Вспышка Туманности', en: 'Nebula Blaze', dmg: '130 урона', rarity: 'rarity-red', img: 'Nebula_Blaze', stats: 'Быстрые сгустки', how: 'Фрагменты Туманности' }
+                        ],
+                        accessories: [
+                            { name: 'Магнитный цветок', stat: 'Авто-зелья + звёзды', img: 'Magnet_Flower', how: 'Мастерская' },
+                            { name: 'Небесная эмблема', stat: '+15% маг. урона', img: 'Celestial_Emblem', how: 'Мастерская' },
+                            { name: 'Мантия Туманности', stat: 'Крылья с рывком', img: 'Nebula_Mantle', how: 'Манипулятор' },
+                            { name: 'Парящая инсигния', stat: 'Бесконечный полёт', img: 'Soaring_Insignia', how: 'Императрица (Эксперт)' }
+                        ]
+                    }
+                }
+            },
+            summoner: {
+                name: 'Призыватель (Summoner)',
+                role: 'Призыватель • Армия из 11 миньонов и мощные хлысты',
+                difficulty: 'Выживаемость: ★★☆☆☆',
+                auraColor: 'bg-cyan-500/35',
+                stages: {
+                    prehm: {
+                        badge: '1. До-Хардмод • Orange Rarity',
+                        headline: 'Призыватель До-Хардмода — Обсидиановая броня',
+                        armorName: 'Обсидиановая броня (Obsidian Armor)',
+                        armorSprite: 'Obsidian_armor',
+                        craft: 'Крафт: 60 Обсидиана + 30 Шёлка',
+                        defense: '15 Защиты',
+                        bonus: '+1 миньон, +31% к урону призыва и дальности хлыста!',
+                        pieces: [
+                            { slot: 'Шляпа', name: 'Обсидиановая шляпа', stat: '4 Защ • +8% Урон', img: 'Obsidian_Outlaw_Hat' },
+                            { slot: 'Пальто', name: 'Пальто', stat: '6 Защ • +1 Миньон', img: 'Obsidian_Longcoat' },
+                            { slot: 'Штаны', name: 'Штаны', stat: '5 Защ • +8% Урон', img: 'Obsidian_Pants' }
+                        ],
+                        weapons: [
+                            { name: 'Спинной хребет', en: 'Spinal Tap', dmg: '27 урона', rarity: 'rarity-orange', img: 'Spinal_Tap', stats: 'Хлыст (+7 метка)', how: 'Кости + Паутина' },
+                            { name: 'Посох чертёнка', en: 'Imp Staff', dmg: '17 урона', rarity: 'rarity-orange', img: 'Imp_Staff', stats: 'Огненные шары', how: 'Адский слиток' },
+                            { name: 'Посох лягушек', en: 'Vampire Frog Staff', dmg: '11 урона', rarity: 'rarity-orange', img: 'Vampire_Frog_Staff', stats: 'Частые атаки', how: 'Кровавая луна' }
+                        ],
+                        accessories: [
+                            { name: 'Ожерелье пигмеев', stat: '+1 миньон', img: 'Pygmy_Necklace', how: 'Знахарь ночью' },
+                            { name: 'Звериные когти', stat: 'Авто-атака хлыстом', img: 'Feral_Claws', how: 'Сундуки в Джунглях' },
+                            { name: 'Щит Ктулху', stat: 'Рывок', img: 'Shield_of_Cthulhu', how: 'Глаз Ктулху' },
+                            { name: 'Терраискромётные ботинки', stat: 'Скорость', img: 'Terraspark_Boots', how: 'Мастерская' }
+                        ]
+                    },
+                    earlyhm: {
+                        badge: '2. Начало Хардмода • Light Red Rarity',
+                        headline: 'Призыватель Хардмода — Паучья броня',
+                        armorName: 'Паучья броня (Spider Armor)',
+                        armorSprite: 'Spider_armor',
+                        craft: 'Крафт: 36 Паучьих клыков',
+                        defense: '20 Защиты',
+                        bonus: '+3 слота миньонов и +28% к урону призыва!',
+                        pieces: [
+                            { slot: 'Маска', name: 'Паучья маска', stat: '5 Защ • +1 Миньон', img: 'Spider_Mask' },
+                            { slot: 'Латы', name: 'Нагрудник', stat: '8 Защ • +1 Миньон', img: 'Spider_Breastplate' },
+                            { slot: 'Поножи', name: 'Поножи', stat: '7 Защ • +1 Миньон', img: 'Spider_Greaves' }
+                        ],
+                        weapons: [
+                            { name: 'Посох сангвиника', en: 'Sanguine Staff', dmg: '35 урона', rarity: 'rarity-light-red', img: 'Sanguine_Staff', stats: 'Точные летучие мыши', how: 'Дреднаутилус (Кровавая луна)' },
+                            { name: 'Холодный хлыст', en: 'Cool Whip', dmg: '45 урона', rarity: 'rarity-pink', img: 'Cool_Whip', stats: 'Атакующая снежинка', how: 'Души + Морозное ядро' },
+                            { name: 'Посох клинков', en: 'Blade Staff', dmg: '6 урона', rarity: 'rarity-light-red', img: 'Blade_Staff', stats: 'Игнорирует 25 брони', how: 'Королева Слизней' }
+                        ],
+                        accessories: [
+                            { name: 'Эмблема Призывателя', stat: '+15% урон', img: 'Summoner_Emblem', how: 'Стена Плоти' },
+                            { name: 'Перчатка берсерка', stat: 'Авто-хлыст', img: 'Berserker_Glove', how: 'Перчатка + Кастет' },
+                            { name: 'Ожерелье пигмеев', stat: '+1 миньон', img: 'Pygmy_Necklace', how: 'Знахарь' },
+                            { name: 'Крылья феи', stat: 'Полёт', img: 'Fairy_Wings', how: 'Наковальня' }
+                        ]
+                    },
+                    postplantera: {
+                        badge: '3. Пост-Плантера • Yellow Rarity',
+                        headline: 'Призыватель Пост-Плантеры — Жуткая броня и Калейдоскоп',
+                        armorName: 'Жуткая броня (Spooky Armor)',
+                        armorSprite: 'Spooky_armor',
+                        craft: 'Крафт: 750 Жуткой древесины',
+                        defense: '30 Защиты',
+                        bonus: '+4 миньона и колоссальные +58% к урону призыва!',
+                        pieces: [
+                            { slot: 'Шлем', name: 'Жуткий шлем', stat: '9 Защ • +1 Миньон', img: 'Spooky_Helmet' },
+                            { slot: 'Латы', name: 'Нагрудник', stat: '11 Защ • +2 Миньона', img: 'Spooky_Breastplate' },
+                            { slot: 'Поножи', name: 'Поножи', stat: '10 Защ • +1 Миньон', img: 'Spooky_Leggings' }
+                        ],
+                        weapons: [
+                            { name: 'Калейдоскоп', en: 'Kaleidoscope', dmg: '180 урона', rarity: 'rarity-yellow', img: 'Kaleidoscope', stats: 'Сильнейший хлыст', how: 'Императрица Света' },
+                            { name: 'Посох Ксено', en: 'Xeno Staff', dmg: '36 урона', rarity: 'rarity-yellow', img: 'Xeno_Staff', stats: 'НЛО с лазерами', how: 'Марсианская тарелка' },
+                            { name: 'Утренняя звезда', en: 'Morning Star', dmg: '165 урона', rarity: 'rarity-yellow', img: 'Morning_Star', stats: 'Тяжелый хлыст из Данжа', how: 'Скелеты в Данже' }
+                        ],
+                        accessories: [
+                            { name: 'Папирусный скарабей', stat: '+1 миньон, +15% урон', img: 'Papyrus_Scarab', how: 'Свиток + Жук-геркулес' },
+                            { name: 'Некромантский свиток', stat: '+1 миньон', img: 'Necromantic_Scroll', how: 'Тыквенная луна' },
+                            { name: 'Снаряжение ниндзя', stat: 'Рывок', img: 'Master_Ninja_Gear', how: 'Данж' },
+                            { name: 'Перчатка берсерка', stat: 'Авто-хлыст', img: 'Berserker_Glove', how: 'Мастерская' }
+                        ]
+                    },
+                    endgame: {
+                        badge: '4. Пост-Мунлорд • Red Rarity',
+                        headline: 'Финальная сборка Призывателя — Звёздная Пыль и Террапризма',
+                        armorName: 'Броня Звёздной Пыли',
+                        armorSprite: 'Stardust_armor',
+                        craft: 'Крафт: Люминит + Фрагменты Звёздной Пыли',
+                        defense: '38 Защиты',
+                        bonus: '+5 миньонов, +1 страж и личный Хранитель Звёздной Пыли!',
+                        pieces: [
+                            { slot: 'Шлем', name: 'Шлем', stat: '10 Защ • +1 Миньон', img: 'Stardust_Helmet' },
+                            { slot: 'Латы', name: 'Латы', stat: '16 Защ • +2 Миньона', img: 'Stardust_Plate' },
+                            { slot: 'Поножи', name: 'Поножи', stat: '12 Защ • +2 Миньона', img: 'Stardust_Leggings' }
+                        ],
+                        weapons: [
+                            { name: 'Террапризма', en: 'Terraprisma', dmg: '90 урона', rarity: 'rarity-rainbow', img: 'Terraprisma', stats: 'Радужные клинки', how: 'Императрица Света (днем)' },
+                            { name: 'Дракон Пыли', en: 'Stardust Dragon Staff', dmg: '40 урона', rarity: 'rarity-red', img: 'Stardust_Dragon_Staff', stats: 'Гигантский дракон', how: 'Фрагменты Пыли' },
+                            { name: 'Калейдоскоп', en: 'Kaleidoscope', dmg: '180 урона', rarity: 'rarity-yellow', img: 'Kaleidoscope', stats: 'Лучший хлыст', how: 'Императрица Света' }
+                        ],
+                        accessories: [
+                            { name: 'Папирусный скарабей', stat: '+1 миньон', img: 'Papyrus_Scarab', how: 'Знахарь' },
+                            { name: 'Некромантский свиток', stat: '+1 миньон', img: 'Necromantic_Scroll', how: 'Тыквенная луна' },
+                            { name: 'Ожерелье пигмеев', stat: '+1 миньон (всего 11!)', img: 'Pygmy_Necklace', how: 'Знахарь' },
+                            { name: 'Парящая инсигния', stat: 'Бесконечный полёт', img: 'Soaring_Insignia', how: 'Императрица (Эксперт)' }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const SHIMMER_RECIPES = [
+            { inName: 'Кристалл жизни', inImg: 'Life_Crystal', outName: 'Жизненный кристалл', outImg: 'Vital_Crystal', desc: 'Навсегда ускоряет регенерацию здоровья на <strong>+20%</strong>!' },
+            { inName: 'Фрукт жизни', inImg: 'Life_Fruit', outName: 'Фрукт Эгиды', outImg: 'Aegis_Fruit', desc: 'Навсегда увеличивает защиту персонажа на <strong>+4 ед.</strong>!' },
+            { inName: 'Кристалл маны', inImg: 'Mana_Crystal', outName: 'Тайный кристалл', outImg: 'Arcane_Crystal', desc: 'Навсегда уменьшает задержку восстановления маны!' },
+            { inName: 'Яблоко', inImg: 'Apple', outName: 'Амброзия', outImg: 'Ambrosia', desc: 'Навсегда даёт <strong>+5% к скорости копания</strong> блоков!' },
+            { inName: 'Жезл раздора', inImg: 'Rod_of_Discord', outName: 'Жезл гармонии', outImg: 'Rod_of_Harmony', desc: 'Убирает урон от телепортации — телепортируйтесь БЕСКОНЕЧНО!' },
+            { inName: 'Бездонное ведро воды', inImg: 'Bottomless_Water_Bucket', outName: 'Ведро мерцания', outImg: 'Bottomless_Shimmer_Bucket', desc: 'Позволяет разливать Мерцание где угодно!' },
+            { inName: 'Золотой червяк', inImg: 'Gold_Worm', outName: 'Мармеладный червяк', outImg: 'Gummy_Worm', desc: 'Навсегда увеличивает навык рыбалки на +3 ед.!' }
+        ];
+
+        const BOSSES_DATA = [
+            { id: 'king_slime', name: '1. Король Слизней', stage: 'До-Хардмод', img: 'King_Slime', summon: 'Корона слизня', drop: 'Ездовой слизень', tip: 'Постройте платформу в воздухе и расстреливайте сверху.' },
+            { id: 'eye_cthulhu', name: '2. Глаз Ктулху', stage: 'До-Хардмод', img: 'Eye_of_Cthulhu', summon: 'Подозрительный глаз', drop: 'Щит Ктулху', tip: 'Используйте Ботинки Гермеса для уворота от рывков во 2-й фазе.' },
+            { id: 'evil_boss', name: '3. Пожиратель / Мозг', stage: 'До-Хардмод', img: 'Brain_of_Cthulhu', summon: 'Сферы / Сердца', drop: 'Шарф-червь / Мозг', tip: 'Против Червя берите пробивающее оружие.' },
+            { id: 'queen_bee', name: '4. Королева Пчёл', stage: 'До-Хардмод', img: 'Queen_Bee', summon: 'Личинка в улье', drop: 'Пчелогранаты', tip: 'Окунитесь в мёд для быстрой регенерации здоровья.' },
+            { id: 'skeletron', name: '5. Скелетрон', stage: 'До-Хардмод', img: 'Skeletron_Head', summon: 'Старик у Данжа', drop: 'Доступ в Данж', tip: 'Сначала уничтожьте обе руки.' },
+            { id: 'wall_of_flesh', name: '6. Стена Плоти', stage: 'Финал До-Хардмода', img: 'Wall_of_Flesh', summon: 'Кукла вуду Гида', drop: 'Эмблемы', tip: 'Постройте длинный мост через Ад.' },
+            { id: 'mech_bosses', name: '7. Механические Боссы', stage: 'Хардмод', img: 'Skeletron_Prime', summon: 'Мех. червь / глаз', drop: 'Святые слитки', tip: 'Лук Дедала уничтожает Уничтожителя за секунды.' },
+            { id: 'plantera', name: '8. Плантера', stage: 'Хардмод', img: 'Planters_First_Form', summon: 'Розовый бутон', drop: 'Ключ от Храма', tip: 'Летайте по кругу в большом зале.' },
+            { id: 'golem', name: '9. Голем', stage: 'Пост-Плантера', img: 'Golem', summon: 'Ячейка в Храме', drop: 'Киркопил', tip: 'Платформа под потолком спасет от прыжков.' },
+            { id: 'empress', name: '10. Императрица Света', stage: 'Пост-Плантера', img: 'Empress_of_Light', summon: 'Златоглазка днём', drop: 'Калейдоскоп', tip: 'Днём убивает с 1 удара, но даёт Террапризму.' },
+            { id: 'cultist', name: '11. Лунатик-Культист', stage: 'Финал', img: 'Lunatic_Cultist', summon: 'Сектанты у Данжа', drop: 'Манипулятор', tip: 'Бейте только настоящего Культиста.' },
+            { id: 'moon_lord', name: '12. Лунный Лорд', stage: 'Финальный Босс', img: 'Moon_Lord', summon: 'Башни / Печать', drop: 'Люминит, Зенит', tip: 'Прячьтесь за блоками от Смертельного Луча.' }
+        ];
+
+        const ZENITH_SWORDS = [
+            { name: 'Медный кинжал', stage: 'Старт', img: 'Copper_Shortsword', how: 'Дается при старте игры.' },
+            { name: 'Звёздная ярость', stage: 'До-Хардмод', img: 'Starfury', how: 'Небесные сундуки на островах.' },
+            { name: 'Зачарованный меч', stage: 'До-Хардмод', img: 'Enchanted_Sword', how: 'Подземные святилища меча.' },
+            { name: 'Пчеловод', stage: 'До-Хардмод', img: 'Bee_Keeper', how: 'Падает с Королевы Пчёл.' },
+            { name: 'Сеятель', stage: 'Плантера', img: 'Seedler', how: 'Падает с Плантеры.' },
+            { name: 'Клинок Всадника', stage: 'Пост-Плантера', img: 'The_Horsemans_Blade', how: 'Тыквенная Луна.' },
+            { name: 'Колебатель приливов', stage: 'Пост-Голем', img: 'Influx_Waver', how: 'Марсианское безумие.' },
+            { name: 'Терра-клинок', stage: 'Пост-Плантера', img: 'Terra_Blade', how: 'Крафт на Мифриловой наковальне.' },
+            { name: 'Звёздный гнев', stage: 'Мунлорд', img: 'Star_Wrath', how: 'Падает с Лунного Лорда.' },
+            { name: 'Мяумур', stage: 'Мунлорд', img: 'Meowmere', how: 'Падает с Лунного Лорда.' }
+        ];
+
+        const PYLON_DATA = {
+            forest: { title: '🌲 Пилон Леса', sprite: 'Forest_Pylon', pair: 'Зоолог + Гольфист', why: 'Зоолог любит Лес и Гольфиста.' },
+            cavern: { title: '⛏️ Пилон Пещер', sprite: 'Cavern_Pylon', pair: 'Гоблин-изобретатель + Механик', why: 'Гоблин любит Пещеры и Механика (-25% на перековку!).' },
+            desert: { title: '🌵 Пилон Пустыни', sprite: 'Desert_Pylon', pair: 'Продавец оружия + Медсестра', why: 'Дешевые патроны и лечение.' },
+            jungle: { title: '🌴 Пилон Джунглей', sprite: 'Jungle_Pylon', pair: 'Знахарь + Дриада', why: 'Быстрый телепорт к арене Плантеры.' }
+        };
+
+        const TIPS_DATA = [
+            { badge: '🏟️ Арена', img: 'Bast_Statue', title: '5 Баффов для арены', desc: 'Поставьте: Костёр, Сердечный фонарь, Статую Бастет (+5 Защиты), Подсолнух и Звезду в банке.' },
+            { badge: '🧪 Зелья', img: 'Lifeforce_Potion', title: 'Главные баффы', desc: 'Перед боссом пейте: Зелье Жизненной силы (+20% HP), Выносливость (-10% урон) и Железную кожу.' },
+            { badge: '⚡ Лайфхак', img: 'Bewitching_Table', title: 'Столы навсегда', desc: 'Классовые столы (Точильный камень, Хрустальный шар, Колдовской стол) теперь действуют до смерти персонажа!' },
+            { badge: '🌍 Сид', img: 'Waffles_Iron', title: 'get fixed boi (Zenith)', desc: 'Легендарная сложность: старт в Аду, Мехадуза и безумные ловушки.', seedCode: 'get fixed boi' },
+            { badge: '🌍 Сид', img: 'Moon_Lord_Legs', title: '05162020 (Пьяный мир)', desc: 'Порча и Багрянец генерируются одновременно в одном мире!', seedCode: '05162020' }
+        ];
+
+        /* ============================================================================
+           STATE & APP CONTROLLERS
+        ============================================================================ */
+        let currentClass = 'melee';
+        let currentStage = 'endgame';
+        let defeatedBosses = new Set();
+        let currentGuideIndex = 0;
+        let currentReforgeWeapon = 'zenith';
+        let totalGoldSpent = 0;
+
+        const GUIDE_QUOTES = [
+            "«Привет! Нажми на любое оружие или броню ниже — я покажу тебе точное окно характеристик прямо как в инвентаре Terraria!»",
+            "«В обновлении 1.4.4 вы можете мгновенно переключаться между 3 комплектами брони клавишами F1, F2 и F3!»",
+            "«Бросьте Очиститель в озеро Мерцания после победы над Лунным Лордом, чтобы получить мощнейший Терраформер!»",
+            "«Соедини Ракушку Океана, Демоническую ракушку и Зеркало — получится Ракушкофон!»"
+        ];
+
+        // Tooltip logic
+        const tooltipEl = document.getElementById('terra-tooltip');
+        function showItemTooltip(e, title, rarityClass, typeText, statsText, howText, spriteKey) {
+            document.getElementById('tt-img').src = getSpriteUrl(spriteKey);
+            const titleEl = document.getElementById('tt-title');
+            titleEl.textContent = title;
+            titleEl.className = `font-bold text-sm leading-tight ${rarityClass || 'rarity-yellow'}`;
+            document.getElementById('tt-type').textContent = typeText;
+            document.getElementById('tt-stats').innerHTML = statsText;
+            document.getElementById('tt-how').innerHTML = `📍 <strong>Как получить:</strong> ${howText}`;
+            
+            tooltipEl.classList.remove('hidden');
+            moveItemTooltip(e);
+        }
+
+        function moveItemTooltip(e) {
+            if (tooltipEl.classList.contains('hidden')) return;
+            if (window.innerWidth < 768) {
+                tooltipEl.style.left = '50%';
+                tooltipEl.style.top = '50%';
+                tooltipEl.style.transform = 'translate(-50%, -50%)';
+                return;
+            }
+            tooltipEl.style.transform = 'none';
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 100);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 100);
+            let x = clientX + 16;
+            let y = clientY + 16;
+            tooltipEl.style.left = `${Math.max(8, x)}px`;
+            tooltipEl.style.top = `${Math.max(8, y)}px`;
+        }
+
+        function hideItemTooltip() {
+            tooltipEl.classList.add('hidden');
+        }
+
+        function selectClass(c) {
+            currentClass = c;
+            document.querySelectorAll('.class-tab-btn').forEach(b => b.classList.remove('inv-slot-active'));
+            document.getElementById(`class-btn-${c}`).classList.add('inv-slot-active');
+            renderClassShowcase();
+        }
+
+        function selectStage(s) {
+            currentStage = s;
+            document.querySelectorAll('.stage-btn').forEach(b => {
+                b.className = 'stage-btn px-2.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-400 hover:text-white flex items-center justify-center text-center';
+            });
+            document.getElementById(`stage-btn-${s}`).className = 'stage-btn px-2.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold transition bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md flex items-center justify-center text-center';
+            renderClassShowcase();
+        }
+
+        function renderClassShowcase() {
+            const cls = CLASSES_DATA[currentClass];
+            const stg = cls.stages[currentStage];
+
+            document.getElementById('armor-stage-badge').textContent = stg.badge;
+            document.getElementById('armor-defense-badge').textContent = stg.defense;
+            document.getElementById('armor-full-sprite').src = getSpriteUrl(stg.armorSprite);
+            document.getElementById('armor-title').textContent = stg.armorName;
+            document.getElementById('armor-craft-recipe').textContent = stg.craft;
+
+            // Armor pieces
+            document.getElementById('armor-pieces-grid').innerHTML = stg.pieces.map(p => `
+                <div class="inv-slot p-2 flex flex-col items-center text-center cursor-pointer"
+                     onclick="showItemTooltip(event, '${p.name}', 'rarity-yellow', 'Броня (${p.slot})', '${p.stat}', '${stg.craft}', '${p.img}')"
+                     onmouseenter="showItemTooltip(event, '${p.name}', 'rarity-yellow', 'Броня (${p.slot})', '${p.stat}', '${stg.craft}', '${p.img}')"
+                     onmousemove="moveItemTooltip(event)" onmouseleave="hideItemTooltip()">
+                    <div class="h-9 flex items-center justify-center mb-1">
+                        <img src="${getSpriteUrl(p.img)}" alt="" class="h-8 w-8 object-contain sprite" crossorigin="anonymous">
+                    </div>
+                    <div class="text-[10px] font-extrabold text-white truncate w-full">${p.name}</div>
+                    <div class="text-[9px] text-amber-300 truncate w-full">${p.stat}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('class-role-badge').textContent = cls.role;
+            document.getElementById('class-diff-badge').textContent = cls.difficulty;
+            document.getElementById('class-stage-headline').textContent = stg.headline;
+            document.getElementById('armor-set-bonus').textContent = stg.bonus;
+
+            // Weapons
+            document.getElementById('weapons-slots-grid').innerHTML = stg.weapons.map(w => `
+                <div class="inv-slot p-3 flex items-center gap-3 cursor-pointer"
+                     onclick="showItemTooltip(event, '${w.name} (${w.en})', '${w.rarity}', 'Оружие', '${w.stats}', '${w.how}', '${w.img}')"
+                     onmouseenter="showItemTooltip(event, '${w.name} (${w.en})', '${w.rarity}', 'Оружие', '${w.stats}', '${w.how}', '${w.img}')"
+                     onmousemove="moveItemTooltip(event)" onmouseleave="hideItemTooltip()">
+                    <div class="w-12 h-12 rounded-xl bg-slate-950/80 border border-slate-700 flex items-center justify-center p-1.5 shrink-0">
+                        <img src="${getSpriteUrl(w.img)}" alt="" class="w-9 h-9 object-contain sprite" crossorigin="anonymous">
+                    </div>
+                    <div class="min-w-0">
+                        <div class="font-extrabold text-xs sm:text-sm ${w.rarity} truncate">${w.name}</div>
+                        <div class="text-[11px] text-amber-300 font-bold">${w.dmg}</div>
+                        <div class="text-[10px] text-slate-400 truncate">${w.how}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Accessories
+            document.getElementById('accessories-slots-grid').innerHTML = stg.accessories.map(a => `
+                <div class="inv-slot p-2 flex flex-col items-center text-center cursor-pointer"
+                     onclick="showItemTooltip(event, '${a.name}', 'rarity-cyan', 'Аксессуар', '${a.stat}', '${a.how}', '${a.img}')"
+                     onmouseenter="showItemTooltip(event, '${a.name}', 'rarity-cyan', 'Аксессуар', '${a.stat}', '${a.how}', '${a.img}')"
+                     onmousemove="moveItemTooltip(event)" onmouseleave="hideItemTooltip()">
+                    <div class="w-10 h-10 rounded-lg bg-slate-950/70 border border-slate-700 flex items-center justify-center p-1.5 mb-1">
+                        <img src="${getSpriteUrl(a.img)}" alt="" class="w-7 h-7 object-contain sprite" crossorigin="anonymous">
+                    </div>
+                    <div class="font-bold text-xs text-cyan-300 truncate w-full">${a.name}</div>
+                    <div class="text-[10px] text-slate-300 truncate w-full">${a.stat}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderShimmerLab() {
+            document.getElementById('shimmer-items-grid').innerHTML = SHIMMER_RECIPES.map((r, i) => `
+                <button onclick="selectShimmer(${i})" id="shm-btn-${i}" class="inv-slot p-3 flex flex-col items-center text-center gap-1 ${i === 0 ? 'inv-slot-active' : ''}">
+                    <img src="${getSpriteUrl(r.inImg)}" class="w-8 h-8 object-contain sprite" crossorigin="anonymous">
+                    <span class="text-xs font-bold text-white truncate w-full">${r.inName}</span>
+                </button>
+            `).join('');
+            selectShimmer(0);
+        }
+
+        function selectShimmer(i) {
+            document.querySelectorAll('#shimmer-items-grid button').forEach(b => b.classList.remove('inv-slot-active'));
+            document.getElementById(`shm-btn-${i}`).classList.add('inv-slot-active');
+            const r = SHIMMER_RECIPES[i];
+            document.getElementById('shimmer-in-img').src = getSpriteUrl(r.inImg);
+            document.getElementById('shimmer-in-name').textContent = r.inName;
+            document.getElementById('shimmer-out-img').src = getSpriteUrl(r.outImg);
+            document.getElementById('shimmer-out-name').textContent = r.outName;
+            document.getElementById('shimmer-result-desc').innerHTML = r.desc;
+        }
+
+        function renderBosses() {
+            document.getElementById('boss-grid').innerHTML = BOSSES_DATA.map(b => {
+                const done = defeatedBosses.has(b.id);
+                return `
+                    <div onclick="toggleBoss('${b.id}')" class="glass-card p-4 cursor-pointer flex flex-col justify-between transition hover:-translate-y-1 ${done ? 'border-emerald-500 bg-emerald-950/20' : ''}">
+                        <div>
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-13 h-13 rounded-2xl bg-slate-950 border border-slate-700 flex items-center justify-center p-2 shrink-0">
+                                        <img src="${getSpriteUrl(b.img)}" class="w-9 h-9 object-contain sprite" alt="" crossorigin="anonymous">
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-300">${b.stage}</span>
+                                        <h4 class="font-extrabold text-sm sm:text-base mt-1 ${done ? 'line-through text-emerald-300' : 'text-white'}">${b.name}</h4>
+                                    </div>
+                                </div>
+                                <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold ${done ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-600'}">
+                                    ${done ? '✓' : ''}
+                                </div>
+                            </div>
+                            <div class="space-y-1 text-xs">
+                                <p class="text-amber-300"><strong>Призыв:</strong> ${b.summon}</p>
+                                <p class="text-cyan-300"><strong>Лут:</strong> ${b.drop}</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-800 text-xs text-slate-300">💡 ${b.tip}</div>
+                    </div>
+                `;
+            }).join('');
+            const pct = Math.round((defeatedBosses.size / BOSSES_DATA.length) * 100);
+            document.getElementById('boss-progress-text').textContent = `Побеждено: ${defeatedBosses.size} / ${BOSSES_DATA.length}`;
+            document.getElementById('boss-progress-bar').style.width = `${pct}%`;
+        }
+
+        function toggleBoss(id) {
+            if (defeatedBosses.has(id)) defeatedBosses.delete(id);
+            else defeatedBosses.add(id);
+            renderBosses();
+        }
+
+        function resetBossChecklist() {
+            defeatedBosses.clear();
+            renderBosses();
+        }
+
+        function renderZenithTree() {
+            document.getElementById('zenith-swords-grid').innerHTML = ZENITH_SWORDS.map((sw, i) => `
+                <button onclick="showZenithSword(${i})" id="zen-btn-${i}" class="inv-slot p-2 flex flex-col items-center justify-center gap-1 text-center ${i === 7 ? 'inv-slot-active' : ''}">
+                    <div class="h-10 flex items-center justify-center">
+                        <img src="${getSpriteUrl(sw.img)}" class="h-8 w-8 object-contain sprite" alt="" crossorigin="anonymous">
+                    </div>
+                    <span class="text-[11px] font-bold text-white truncate w-full">${sw.name}</span>
+                </button>
+            `).join('');
+            showZenithSword(7);
+        }
+
+        function showZenithSword(i) {
+            document.querySelectorAll('#zenith-swords-grid button').forEach(b => b.classList.remove('inv-slot-active'));
+            document.getElementById(`zen-btn-${i}`).classList.add('inv-slot-active');
+            const sw = ZENITH_SWORDS[i];
+            document.getElementById('zenith-selected-img').src = getSpriteUrl(sw.img);
+            document.getElementById('zenith-detail-title').textContent = sw.name;
+            document.getElementById('zenith-detail-desc').textContent = sw.how;
+            document.getElementById('zenith-detail-stage').textContent = sw.stage;
+        }
+
+        const PREFIXES = [
+            { name: 'Острый', stats: ['+15% урона'], rarity: 'rarity-green', best: false },
+            { name: 'Демонический', stats: ['+15% урона', '+5% крит'], rarity: 'rarity-orange', best: false },
+            { name: 'Божественный', stats: ['+15% урона', '+5% крит', '+15% отбрасывание'], rarity: 'rarity-pink', best: false },
+            { name: 'Нереальный', stats: ['+15% урона', '+10% скорости', '+5% крит'], rarity: 'rarity-purple', best: true },
+            { name: 'Мифический', stats: ['+15% урона', '+10% скорости', '-10% маны'], rarity: 'rarity-purple', best: true },
+            { name: 'Легендарный', stats: ['+15% урона', '+10% скорости', '+5% крит', '+10% размера'], rarity: 'rarity-rainbow', best: true }
+        ];
+
+        function setReforgeWeapon(w) {
+            currentReforgeWeapon = w;
+            const map = { zenith: 'Zenith', sdmg: 'SDMG', prism: 'Last_Prism' };
+            const names = { zenith: 'Зенит', sdmg: 'К.П.Д.', prism: 'Последняя призма' };
+            document.getElementById('reforge-item-sprite').src = getSpriteUrl(map[w]);
+            document.getElementById('reforge-item-name').textContent = names[w];
+        }
+
+        function performReforge() {
+            totalGoldSpent += 18;
+            document.getElementById('goblin-gold-spent').textContent = `${totalGoldSpent} Зол.`;
+            const p = PREFIXES[Math.floor(Math.random() * PREFIXES.length)];
+            const names = { zenith: 'Зенит', sdmg: 'К.П.Д.', prism: 'Последняя призма' };
+            const el = document.getElementById('reforge-item-name');
+            el.textContent = `${p.name} ${names[currentReforgeWeapon]}`;
+            el.className = `font-pixel text-xs pt-1 ${p.rarity}`;
+            document.getElementById('reforge-stats-box').innerHTML = p.stats.map(s => `<span class="px-2 py-0.5 rounded bg-slate-900 text-emerald-400 font-bold">${s}</span>`).join('');
+            return p;
+        }
+
+        function autoRollBestPrefix() {
+            let res = performReforge();
+            let c = 0;
+            while (!res.best && c < 25) { res = performReforge(); c++; }
+        }
+
+        function selectPylonBiome(k) {
+            const data = PYLON_DATA[k];
+            document.getElementById('active-pylon-sprite').src = getSpriteUrl(data.sprite);
+            document.getElementById('pylon-info-box').innerHTML = `
+                <div class="font-extrabold text-emerald-300 text-sm">${data.title}</div>
+                <div class="text-xs text-white bg-slate-900 p-2.5 rounded-xl border border-slate-700">
+                    👥 <strong>Соседи:</strong> <span class="text-amber-300 font-bold">${data.pair}</span>
+                </div>
+                <p class="text-xs text-slate-300">${data.why}</p>
+            `;
+        }
+
+        function renderTips() {
+            document.getElementById('tips-container').innerHTML = TIPS_DATA.map(t => `
+                <div ${t.seedCode ? `onclick="copySeed('${t.seedCode}')"` : ''} class="glass-card p-5 flex flex-col justify-between ${t.seedCode ? 'cursor-pointer hover:border-emerald-400' : ''}">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">${t.badge}</span>
+                            <img src="${getSpriteUrl(t.img)}" class="w-8 h-8 object-contain sprite" alt="" crossorigin="anonymous">
+                        </div>
+                        <h3 class="text-base font-extrabold text-white">${t.title}</h3>
+                        <p class="text-xs sm:text-sm text-slate-300">${t.desc}</p>
+                    </div>
+                    ${t.seedCode ? `<div class="mt-4 pt-3 border-t border-slate-800 text-xs font-mono text-amber-400">📋 Клик для копирования сида: ${t.seedCode}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function copySeed(s) {
+            const t = document.createElement('textarea');
+            t.value = s;
+            document.body.appendChild(t);
+            t.select();
+            document.execCommand('copy');
+            document.body.removeChild(t);
+            showToast('🌍', 'Сид скопирован!', `Сид «${s}» скопирован в буфер обмена.`);
+        }
+
+        function nextGuideIndexTip() {
+            currentGuideIndex = (currentGuideIndex + 1) % GUIDE_QUOTES.length;
+            document.getElementById('guide-quote-box').textContent = GUIDE_QUOTES[currentGuideIndex];
+        }
+
+        function triggerVoodooEasterEgg() {
+            document.getElementById('guide-quote-box').innerHTML = `<span class="text-rose-400 font-bold">🔥 Стена Плоти пробудилась! Древние духи света и тьмы вырвались на свободу!</span>`;
+            showToast('💀', 'Хардмод начался!', 'Вы бросили куклу вуду Гида в лаву!');
+        }
+
+        function changeBiomeAtmosphere(b) {
+            const themes = { forest: '#090d16', shimmer: '#160b29', hallow: '#140c26', crimson: '#1f080c', corruption: '#120a21' };
+            document.getElementById('biome-body').style.backgroundColor = themes[b] || '#090d16';
+        }
+
+        let toastTimer = null;
+        function showToast(icon, title, msg) {
+            const toast = document.getElementById('terra-toast');
+            document.getElementById('terra-toast-icon').textContent = icon;
+            document.getElementById('terra-toast-title').textContent = title;
+            document.getElementById('terra-toast-msg').textContent = msg;
+            toast.classList.remove('translate-y-36', 'opacity-0');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.add('translate-y-36', 'opacity-0'), 4000);
+        }
+
+        window.onload = function() {
+            renderClassShowcase();
+            renderShimmerLab();
+            renderBosses();
+            renderZenithTree();
+            selectPylonBiome('forest');
+            renderTips();
+        };
+    </script>
+</body>
+</html>
+```
