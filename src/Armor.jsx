@@ -2,7 +2,7 @@ import React from 'react';
 export const buildEras=['До хардмода','Мех. боссы','После Плантеры','Финал'];
 export const armorSets={
  warrior:[['Molten_armor','Расплавленная броня'],['Adamantite_melee','Адамантитовая броня · шлем воина'],['Beetle_shell','Броня жука'],['Solar_Flare_armor','Солнечная броня']],
- ranger:[['Necro_armor','Некроброня'],['Titanium_ranged','Титановая броня · маска стрелка'],['Shroomite_bullet','Грибная броня'],['Vortex_armor','Броня вихря']],
+ ranger:[['Necro_armor','Некроброня'],['Titanium_ranged','Титановая броня · шлем стрелка'],['Shroomite_bullet','Грибная броня'],['Vortex_armor','Броня вихря']],
  mage:[['Meteor_armor','Метеоритная броня'],['Adamantite_magic','Адамантитовая броня · головной убор мага'],['Spectre_mask','Спектральная броня · маска'],['Nebula_armor','Броня туманности']],
  summoner:[['Bee_armor','Пчелиная броня'],['Spider_armor','Паучья броня'],['Spooky_armor','Жуткая броня'],['Stardust_armor','Броня звёздной пыли']]
 };
