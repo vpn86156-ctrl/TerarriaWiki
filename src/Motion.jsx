@@ -5,7 +5,7 @@ export function useReducedMotion(){const [reduced,setReduced]=useState(()=>windo
 
 // Observe inserted cards as well as the initial page. Filters, stage changes and
 // React remounts must not leave new cards outside the reveal lifecycle.
-const revealSelector='.expedition-teaser,.tool-heading,.exp-panel,.goal-card,.enemy-card,.quest-card,.potion-row,.biome-dossier,.trophy-room,.world-clock,.village,.world-map,.herb-card,.compass-result,.guide-card,.class-card,.boss-card,.tip-card,.treasure-card,.advice,.route-panel,.route-stage-banner,.route-warning,.route-next,.tool-output,.tool-settings,.tool-links>button,.forge-group,.forge-showcase,.page-heading,.hero,.journey,.route-teaser,.treasury-teaser,.collection-banner,.progress-panel,.lore-teaser,.empty-state,.tip-feature,.story-passage,.story-footnote,.info-banner';
+const revealSelector='.focus-hero,.focus-card,.difficulty-notes,.rare-alternative,.resume-button,.expedition-teaser,.tool-heading,.exp-panel,.goal-card,.enemy-card,.quest-card,.potion-row,.biome-dossier,.trophy-room,.world-clock,.village,.world-map,.herb-card,.compass-result,.guide-card,.class-card,.boss-card,.tip-card,.treasure-card,.advice,.route-panel,.route-stage-banner,.route-warning,.route-next,.tool-output,.tool-settings,.tool-links>button,.forge-group,.forge-showcase,.page-heading,.hero,.journey,.route-teaser,.treasury-teaser,.collection-banner,.progress-panel,.lore-teaser,.empty-state,.tip-feature,.story-passage,.story-footnote,.info-banner';
 export function ScrollReveals({page,enabled=true}){
  useEffect(()=>{
   const root=document.querySelector('main');if(!root||!enabled||!('IntersectionObserver' in window))return;

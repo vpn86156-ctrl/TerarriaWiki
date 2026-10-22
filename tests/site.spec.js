@@ -19,7 +19,7 @@ test('class stages and searchable guides',async({page})=>{
  await page.getByRole('button',{name:'До хардмода',exact:true}).click();
  await expect(page.getByRole('dialog')).toContainText('Метеоритная броня');
  await page.keyboard.press('Escape');await page.locator('#search').fill('Зенит');
- await page.locator('.search-results button').click();
+ await page.locator('.search-results button').filter({hasText:'Путь к Зениту'}).click();
  await expect(page.getByRole('dialog')).toContainText('Путь к Зениту');
 });
 test('boss progress persists and filters work',async({page})=>{

@@ -5,4 +5,6 @@ rmSync('assets',{recursive:true,force:true});
 mkdirSync('assets',{recursive:true});
 cpSync('dist/assets','assets',{recursive:true});
 copyFileSync('dist/index.html','index.html');
+cpSync('dist/icons','icons',{recursive:true});
+for(const file of ['manifest.webmanifest','sw.js','offline-build.json'])copyFileSync(`dist/${file}`,file);
 writeFileSync('.nojekyll','');
