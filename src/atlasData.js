@@ -300,7 +300,7 @@ export const atlasLandmarks = {
   sky: [
     [490, 148],
     [640, 65],
-    [735, 145],
+    [735, 200],
   ],
   forest: [
     [452, 217],

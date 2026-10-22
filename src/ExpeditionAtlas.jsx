@@ -10,7 +10,16 @@ import {
   Gem,
   AlertTriangle,
   Compass,
+  Eye,
+  Sparkles,
 } from "lucide-react";
+import { AtlasEncounters } from "./AtlasEncounters";
+import {
+  atlasBuildings,
+  atlasDiscoveries,
+  atlasDiscoveryIds,
+} from "./atlasAdventureData";
+import { captureRun, mayWriteRun } from "./runKeys";
 import { AtlasWorld } from "./AtlasWorld";
 import {
   atlasRegions,
@@ -27,6 +36,7 @@ import { brainBoss } from "./Adventure";
 import { treasures } from "./treasures";
 import { ToolHeading, Pixel, Jump } from "./HubKit";
 import "./expeditionAtlas.css";
+import "./atlasEncounters.css";
 const categories = [
   ["resources", "Руды и ресурсы", Pickaxe],
   ["creatures", "Мобы", Skull],
@@ -41,7 +51,48 @@ export function ExpeditionAtlas(ctx) {
     [phase, setPhase] = useState(() => Math.min(2, stageTier(ctx.routeStage))),
     [category, setCategory] = useState("resources"),
     [expanded, setExpanded] = useState(false),
-    [oceanSide, setOceanSide] = useState("west");
+    [oceanSide, setOceanSide] = useState("west"),
+    [encounter, setEncounter] = useState(null),
+    [saveError, setSaveError] = useState(""),
+    [runToken] = useState(captureRun),
+    [discoveries, setDiscoveries] = useState(() => {
+      try {
+        const v = JSON.parse(
+          localStorage.getItem("terraria-atlas-discoveries"),
+        );
+        return Array.isArray(v)
+          ? [...new Set(v.filter((id) => atlasDiscoveryIds.includes(id)))]
+          : [];
+      } catch {
+        return [];
+      }
+    });
+  function inspect(kind, id, biome) {
+    if (dialog.current?.open) dialog.current.close();
+    if (biome && biome !== selectedId) select(biome);
+    setSaveError("");
+    if (kind === "discovery" && !discoveries.includes(id)) {
+      try {
+        if (!mayWriteRun(runToken)) throw new Error("stale");
+        const next = [...discoveries, id];
+        localStorage.setItem(
+          "terraria-atlas-discoveries",
+          JSON.stringify(next),
+        );
+        setDiscoveries(next);
+      } catch {
+        setSaveError(
+          "Не удалось сохранить открытие. Проверь свободное место браузера или обнови вкладку после смены прохождения.",
+        );
+      }
+    }
+    setEncounter({ kind, id });
+  }
+  function closeEncounter() {
+    setEncounter(null);
+    requestAnimationFrame(() => frame.current?.focus({ preventScroll: true }));
+  }
+
   const frame = useRef(null),
     sheet = useRef(null),
     dialog = useRef(null),
@@ -151,6 +202,8 @@ export function ExpeditionAtlas(ctx) {
         category={category}
         onSelect={select}
         onPin={pin}
+        onInspect={inspect}
+        discoveries={discoveries}
       />
       <div className="exp-atlas-corner">
         <span>{selected ? "ВНУТРИ БИОМА" : "ТВОЙ СЛЕДУЮЩИЙ ГОРИЗОНТ"}</span>
@@ -232,6 +285,57 @@ export function ExpeditionAtlas(ctx) {
           </button>
         ))}
       </div>
+      <details className="atlas-found-notes">
+        <summary>
+          <Sparkles size={14} />
+          Маленькие открытия · {discoveries.length} / {atlasDiscoveryIds.length}
+        </summary>
+        {discoveries.length ? (
+          <div>
+            {atlasDiscoveries
+              .filter((d) => discoveries.includes(d.id))
+              .map((d) => (
+                <button key={d.id} onClick={() => inspect("discovery", d.id)}>
+                  {d.name}
+                  <ArrowRight size={13} />
+                </button>
+              ))}
+          </div>
+        ) : (
+          <p>
+            Вглядись в необычные детали внутри биомов. Найденные заметки
+            останутся в этом прохождении; предметы и победы не добавляются.
+          </p>
+        )}
+      </details>
+      {selected &&
+        (atlasBuildings.some((b) => b.biome === selected.id) ||
+          atlasDiscoveries.some((d) => d.biome === selected.id)) && (
+          <div className="atlas-place-details" aria-label="Детали местности">
+            {atlasBuildings
+              .filter((b) => b.biome === selected.id)
+              .map((b) => (
+                <button
+                  key={b.id}
+                  onClick={() => inspect("building", b.id, b.biome)}
+                >
+                  <Eye size={15} />
+                  {b.name}
+                </button>
+              ))}
+            {atlasDiscoveries
+              .filter((d) => d.biome === selected.id)
+              .map((d) => (
+                <button key={d.id} onClick={() => inspect("discovery", d.id)}>
+                  <Sparkles size={15} />
+                  {discoveries.includes(d.id) ? d.name : d.clue}
+                  <small>
+                    {discoveries.includes(d.id) ? "Открыто" : "Исследовать"}
+                  </small>
+                </button>
+              ))}
+          </div>
+        )}
       {selected ? (
         <section
           className="biome-dossier exp-atlas-dossier"
@@ -448,9 +552,19 @@ export function ExpeditionAtlas(ctx) {
         Это составной учебный мир. Искажение и Багрянец показаны вместе для
         сравнения; в обычной генерации мир обычно получает один из них.
         Положение островов, руд, сундуков и размеры областей условны.
-        Оригинальные спрайты и фрагменты текстур © Re-Logic; ландшафт и
-        интерфейс созданы для атласа.
+        Оригинальные игровые тайлы, стены, мебель, деревья и фоны © Re-Logic;
+        ландшафт и интерфейс созданы для атласа.
       </p>
+      {encounter && (
+        <AtlasEncounters
+          key={encounter.kind + encounter.id}
+          encounter={encounter}
+          onClose={closeEncounter}
+          onTool={ctx.onTool}
+          saved={discoveries.includes(encounter.id)}
+          error={saveError}
+        />
+      )}
       <dialog
         className="exp-atlas-dialog"
         ref={dialog}
