@@ -1,0 +1,56 @@
+{
+  "copyright": "Terraria sprites belong to Re-Logic. Fan project.",
+  "method": "Original animation frame extracted at native resolution and encoded as lossless WebP. No redrawing, resizing or AI generation. Frame index is zero-based.",
+  "frames": [
+    {
+      "file": "Adamantite_melee.webp",
+      "source": "https://github.com/bramaudi/terrabook/blob/main/public/images/Adamantite_armor.webp",
+      "frame": 1
+    },
+    {
+      "file": "Adamantite_magic.webp",
+      "source": "https://github.com/bramaudi/terrabook/blob/main/public/images/Adamantite_armor.webp",
+      "frame": 0
+    },
+    {
+      "file": "Titanium_ranged.webp",
+      "source": "https://github.com/bramaudi/terrabook/blob/main/public/images/Titanium_armor.webp",
+      "frame": 2
+    },
+    {
+      "file": "Beetle_shell.webp",
+      "source": "https://github.com/bramaudi/terrabook/blob/main/public/images/Beetle_armor.webp",
+      "frame": 0
+    },
+    {
+      "file": "Spectre_mask.webp",
+      "source": "https://github.com/bramaudi/terrabook/blob/main/public/images/Spectre_armor.webp",
+      "frame": 0
+    },
+    {
+      "file": "Shroomite_bullet.webp",
+      "source": "https://github.com/bramaudi/terrabook/blob/main/public/images/Shroomite_armor.webp",
+      "frame": 2
+    },
+    {
+      "file": "Hallowed_melee.webp",
+      "source": "https://github.com/bramaudi/terrabook/blob/main/public/images/Hallowed_armor.webp",
+      "frame": 1
+    },
+    {
+      "file": "Hallowed_magic.webp",
+      "source": "https://github.com/bramaudi/terrabook/blob/main/public/images/Hallowed_armor.webp",
+      "frame": 0
+    },
+    {
+      "file": "Hallowed_summon.webp",
+      "source": "https://github.com/bramaudi/terrabook/blob/main/public/images/Hallowed_armor.webp",
+      "frame": 2
+    },
+    {
+      "file": "Hallowed_ranged.webp",
+      "source": "https://github.com/bramaudi/terrabook/blob/main/public/images/Hallowed_armor.webp",
+      "frame": 3
+    }
+  ]
+}
