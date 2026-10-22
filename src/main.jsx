@@ -11,6 +11,7 @@ import './expedition.css';
 import './quality.css';
 import './companion.css';
 import './crafting.css';
+const ExpeditionAtlas=lazy(()=>import('./ExpeditionAtlas').then(m=>({default:m.ExpeditionAtlas})));
 const Crafting=lazy(()=>import('./Crafting'));
 import {PersonalHome,runLabel} from './PersonalHome';
 import {GuideQuick} from './GuideQuick';
@@ -33,7 +34,7 @@ import {Treasury,TreasuryTeaser,TreasureDetails} from './Treasury';
 import {treasures,blueprints} from './treasures';
 import {Adventure,ZenithRelic,VictoryBurst,RouteTeaser,BossManual} from './Adventure';
 const asset = n => `${import.meta.env.BASE_URL}assets/${n}.webp`;
-const nav = [{id:'home',name:'Главная',icon:Compass},{id:'journey',name:'Мой этап',icon:Map},{id:'focus',name:'Моя цель',icon:Target},{id:'guides',name:'Прохождение',icon:BookOpen},{id:'crafting',name:'Как скрафтить',icon:Hammer},{id:'classes',name:'Классы и билды',icon:Swords},{id:'bosses',name:'Боссы',icon:Skull},{id:'treasures',name:'Редкие предметы',icon:Gem},{id:'lore',name:'История мира',icon:ScrollText},{id:'tips',name:'Советы и секреты',icon:Lightbulb},{id:'hub',name:'Штаб путешественника',icon:Compass},{id:'tools',name:'Конструктор билда',icon:Pickaxe},{id:'runs',name:'Мои прохождения',icon:Layers}];
+const nav = [{id:'home',name:'Главная',icon:Compass},{id:'journey',name:'Мой этап',icon:Map},{id:'world',name:'Мир экспедиций',icon:Compass},{id:'focus',name:'Моя цель',icon:Target},{id:'guides',name:'Прохождение',icon:BookOpen},{id:'crafting',name:'Как скрафтить',icon:Hammer},{id:'classes',name:'Классы и билды',icon:Swords},{id:'bosses',name:'Боссы',icon:Skull},{id:'treasures',name:'Редкие предметы',icon:Gem},{id:'lore',name:'История мира',icon:ScrollText},{id:'tips',name:'Советы и секреты',icon:Lightbulb},{id:'hub',name:'Штаб путешественника',icon:Compass},{id:'tools',name:'Конструктор билда',icon:Pickaxe},{id:'runs',name:'Мои прохождения',icon:Layers}];
 function useSaved(key,initial){const [runId]=useState(()=>captureRun());const [value,setValue]=useState(()=>{try{return JSON.parse(localStorage.getItem(key))??initial}catch{return initial}});useEffect(()=>{try{if(!key.startsWith('terraria-motion')&&!['terraria-effects','terraria-quick'].includes(key)&&!mayWriteRun(runId))return;localStorage.setItem(key,JSON.stringify(value))}catch{}},[key,value]);return [value,setValue]}
 function Sprite({name,...props}){return <img src={asset(name)} alt="" className="sprite" {...props}/>}
 function App(){
@@ -60,7 +61,7 @@ function App(){
  function openHub(tab='next',entry={}){setHubTab(typeof tab==='string'?tab:'next');setHubEntry(entry);setHubLaunch(v=>v+1);setModal(null);go('hub')}
  function discover(id){if(!secrets.includes(id)){setSecrets(v=>[...v,id]);toast('Найдена записка Гида! Она сохранена в штабе.')}else toast('Эта записка уже есть в штабе → Записки Гида.')}
  const systemReduced=useReducedMotion(),effectiveMotion=motion&&(motionMode==='full'||!systemReduced);
- const contextScene=page==='hub'?hubScene:page==='lore'?storyScene:page==='journey'?(['underworld'].includes(routeStage)?'hell':['evil'].includes(routeStage)?'blood':['lunar','endgame'].includes(routeStage)?'lunar':'journey'):page;
+ const contextScene=['hub','world'].includes(page)?hubScene:page==='lore'?storyScene:page==='journey'?(['underworld'].includes(routeStage)?'hell':['evil'].includes(routeStage)?'blood':['lunar','endgame'].includes(routeStage)?'lunar':'journey'):page;
  const scene=modal?.type==='boss'&&modal.data[0]==='Wall_of_Flesh'?'hell':contextScene;
  function enableFullMotion(){setMotion(true);setMotionMode('full')}
  useEffect(()=>{const r=document.documentElement;r.dataset.quick=quick?'on':'off';for(const key of ['reveal','particles','float','ambient'])r.dataset[key]=effects[key]===false?'off':'on'},[quick,effects]);
@@ -102,6 +103,7 @@ function App(){
  {page==='runs'&&<Suspense fallback={<p>Открываем прохождения…</p>}><RunsPage/></Suspense>}
  {page==='focus'&&<Suspense fallback={<p className="hub-loading">Открываем твой план…</p>}><FocusPage goal={focusValid(focus)?focus:null} onChoose={pinGoal} onClear={()=>setFocus(null)} onBoss={b=>setModal({type:'boss',data:b})} onRoute={openRoute} onAlchemy={fillSupplies} onHub={openHub} profile={profile} done={done}/></Suspense>}
  {page==='hub'&&<Suspense fallback={<p className="hub-loading">Открываем штаб путешественника…</p>}><ExpeditionHub key={hubLaunch} onFocus={pinGoal} entry={hubEntry} tab={hubTab} setTab={setHubTab} profile={profile} setProfile={setProfile} done={done} found={found} routeStage={routeStage} setRouteStage={setRouteStage} onRoute={openRoute} onBoss={b=>setModal({type:'boss',data:b})} onTreasure={openTreasure} onGuide={openGuide} onNavigate={go} onScene={setHubScene} quick={quick} setQuick={setQuick} motion={motion} setMotion={setMotion} motionMode={motionMode} setMotionMode={setMotionMode} reduced={systemReduced} effects={effects} setEffects={setEffects} completed={completed} setCompleted={setCompleted} secrets={secrets} discover={discover}/></Suspense>}
+ {page==='world'&&<div className="atlas-standalone"><Suspense fallback={<p className="hub-loading">Разворачиваем мир…</p>}><ExpeditionAtlas routeStage={routeStage} done={done} onScene={setHubScene} onEnemy={(biome,enemy)=>openHub('bestiary',{biome,enemy})} onTreasure={openTreasure} onBoss={b=>setModal({type:'boss',data:b})} onTool={openHub}/></Suspense></div>}
  {page==='crafting'&&<Suspense fallback={<p className="loading-tools">Открываем мастерскую…</p>}><Crafting/></Suspense>}
  {page==='journey'&&<Adventure onHub={openHub} onFocus={pinGoal} stageId={routeStage} setStageId={setRouteStage} onBoss={b=>setModal({type:'boss',data:b})} onGuide={openGuide} onTreasure={openTreasure} found={found}/>}
  {page==='guides'&&<><PageHeading label="ОТ ДЕРЕВЯННОГО МЕЧА ДО ЗЕНИТА" title="Твоё большое приключение" description="Понятные руководства для каждого этапа. Исследуй мир в своём темпе."/><RouteTeaser stageId={routeStage} onClick={()=>openRoute()}/><div className="tabs">{[['all','Все гайды'],...['Основы','Сражения','Прогрессия','Крафт','Исследование'].map(x=>[x,x])].map(([id,name])=><button className={tab===id?'selected':''} onClick={()=>setTab(id)} key={id}>{name}</button>)}</div><div className="guide-grid all-guides">{filtered.map(g=><GuideCard openGuide={openGuide} save={save} saved={saved} read={read} key={g.id} g={g}/>)}</div><div className="info-banner"><Lightbulb/><p>Нет строгого порядка. Исследуй, строй и экспериментируй — мир Terraria создан для твоих открытий.</p></div></>}

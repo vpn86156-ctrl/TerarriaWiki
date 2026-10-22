@@ -1,0 +1,807 @@
+.expedition-atlas {
+  min-width: 0;
+}
+.atlas-standalone {
+  padding: 22px 6px 42px;
+}
+.expedition-atlas .tool-heading > small {
+  display: none;
+}
+.expedition-atlas .tool-heading h2 {
+  font-size: 34px;
+  letter-spacing: -1px;
+}
+.exp-atlas-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 25px 0 15px;
+}
+.exp-atlas-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-size: 11px;
+  color: #b6c5c2;
+}
+.exp-atlas-breadcrumb > svg:first-child {
+  color: #adcaac;
+}
+.exp-atlas-breadcrumb button {
+  padding: 6px 0;
+  color: #b6c5c2;
+  white-space: nowrap;
+}
+.exp-atlas-breadcrumb span {
+  color: #e2eadf;
+}
+.exp-atlas-phase {
+  display: flex;
+  border: 1px solid #bdd5bd24;
+  background: #131e22;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 3px;
+}
+.exp-atlas-phase button {
+  padding: 9px 12px;
+  border-radius: 5px;
+  color: #93a6a8;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.exp-atlas-phase button[aria-pressed="true"] {
+  background: #adc4a625;
+  color: #dae6cf;
+  box-shadow: inset 0 0 0 1px #c9debe25;
+}
+.exp-atlas-frame {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: #263b52;
+  border-radius: 13px;
+  border: 1px solid #9abbab45;
+  box-shadow: 0 20px 60px #0003;
+  aspect-ratio: 1.5;
+  min-width: 0;
+  outline-offset: 4px;
+}
+.atlas-world-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.atlas-camera {
+  transform-origin: 0 0;
+  transition: transform 1.2s cubic-bezier(0.19, 0.72, 0.18, 1);
+  will-change: transform;
+}
+.atlas-region {
+  cursor: zoom-in;
+}
+.atlas-region-hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 2;
+  transition:
+    fill 0.3s,
+    stroke 0.3s;
+}
+.atlas-region:hover .atlas-region-hit,
+.atlas-region:focus-visible .atlas-region-hit {
+  fill: #ffffff0c;
+  stroke: #eadc9c99;
+  stroke-dasharray: 8 5;
+}
+.atlas-region:focus-visible {
+  outline: none;
+}
+.atlas-map-label rect {
+  fill: #0d1d28e0;
+  stroke: #bfd6cb55;
+  stroke-width: 1;
+}
+.atlas-map-label text {
+  fill: #edf1dc;
+  font:
+    600 15px "Manrope Variable",
+    sans-serif;
+  paint-order: stroke;
+  stroke: #10222b;
+  stroke-width: 1px;
+}
+.atlas-map-label .atlas-dormant-label {
+  font-size: 10px;
+  fill: #dec9e8;
+  stroke: none;
+  letter-spacing: 1px;
+}
+.atlas-region.dormant rect.atlas-region-hit {
+  stroke: #c3a2de35;
+  stroke-dasharray: 5 7;
+  fill: #bd8fda09;
+}
+.exp-atlas-frame:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 90px #07111b66;
+  background: linear-gradient(
+    #0a152b55,
+    transparent 20%,
+    transparent 83%,
+    #0911198c
+  );
+}
+.exp-atlas-corner {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  pointer-events: none;
+  color: #fff8df;
+  text-shadow: 0 2px 9px #142638;
+  max-width: 70%;
+}
+.exp-atlas-corner > span {
+  font-size: 7px;
+  letter-spacing: 2px;
+  color: #cfdfd7;
+  display: block;
+  margin-bottom: 7px;
+}
+.exp-atlas-corner strong {
+  font-size: 26px;
+  letter-spacing: -0.6px;
+  font-weight: 700;
+  display: block;
+}
+.exp-atlas-corner small {
+  display: block;
+  font-size: 10px;
+  color: #bcd2d6;
+  margin-top: 7px;
+}
+.is-focused .exp-atlas-corner {
+  background: #101e2dbb;
+  padding: 14px 18px;
+  border-radius: 9px;
+  backdrop-filter: blur(8px);
+}
+.exp-atlas-scale {
+  position: absolute;
+  bottom: 20px;
+  left: 25px;
+  color: #cad8cc;
+  pointer-events: none;
+  display: grid;
+  gap: 8px;
+}
+.exp-atlas-scale > span {
+  font-size: 7px;
+  letter-spacing: 2px;
+}
+.exp-atlas-scale > i {
+  width: 80px;
+  height: 7px;
+  border: 1px solid #d6e5d788;
+  border-top: 0;
+  display: block;
+}
+.exp-atlas-scale small {
+  font-size: 9px;
+  color: #b1c5be;
+}
+.exp-atlas-back,
+.exp-atlas-expand {
+  position: absolute;
+  z-index: 2;
+  border: 1px solid #d7e7d44d;
+  background: #101c2ae0;
+  color: #dfe6dc;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 14px;
+  border-radius: 7px;
+  font-size: 11px;
+}
+.exp-atlas-back {
+  top: 20px;
+  right: 20px;
+}
+.exp-atlas-expand {
+  right: 20px;
+  bottom: 20px;
+  padding: 11px;
+}
+.exp-atlas-back:hover,
+.exp-atlas-expand:hover {
+  background: #314539;
+}
+.atlas-scene-pin {
+  cursor: pointer;
+  animation: atlas-pin-in 0.7s 0.5s both;
+}
+.atlas-scene-pin > rect {
+  fill: #101d2df2;
+  stroke: #a9c5b099;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 5px 4px #0005);
+}
+.atlas-scene-pin.active > rect,
+.atlas-scene-pin:hover > rect,
+.atlas-scene-pin:focus-visible > rect {
+  fill: #25413b;
+  stroke: #e7d39b;
+  stroke-width: 2;
+}
+.atlas-scene-pin > text {
+  font:
+    600 14px "Manrope Variable",
+    sans-serif;
+  fill: #ebeddd;
+}
+.atlas-scene-pin > circle {
+  fill: #e2ca89;
+  stroke: #fff4c6;
+  stroke-width: 1;
+}
+.atlas-torch {
+  animation: atlas-torch 3s ease-in-out infinite alternate;
+}
+.exp-atlas-under {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 13px 2px;
+  color: #97aba9;
+  font-size: 10px;
+}
+.exp-atlas-under > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.exp-atlas-under small {
+  font-size: 8px;
+  color: #6d8586;
+  white-space: nowrap;
+}
+.exp-world-picker.world-map {
+  position: static;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 5px 0 25px;
+  padding: 0;
+  background: none;
+  border: 0;
+  overflow: visible;
+  box-shadow: none;
+  border-radius: 0;
+}
+.exp-world-picker > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  font-size: 10px;
+  padding: 8px 11px;
+  border-radius: 6px;
+  border: 1px solid #c0cfca1d;
+  background: #121e2270;
+  color: #aabbba;
+}
+.exp-world-picker > button > i {
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  background: var(--biome);
+  border-radius: 50%;
+}
+.exp-world-picker > button[aria-pressed="true"] {
+  color: #e8eadf;
+  background: color-mix(in srgb, var(--biome) 12%, #15252b);
+  border-color: var(--biome);
+}
+.exp-atlas-dossier {
+  scroll-margin-top: 100px;
+  padding: 25px;
+  background: linear-gradient(125deg, #22302b80, #1d2330b0);
+  border: 1px solid color-mix(in srgb, var(--biome) 30%, transparent);
+  border-radius: 13px;
+}
+.exp-atlas-dossier-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.exp-atlas-dossier .biome-title {
+  border: 0;
+  margin: 0;
+  padding: 0 0 16px;
+}
+.exp-atlas-dossier .biome-title .eyebrow {
+  font-size: 8px;
+}
+.exp-atlas-dossier .biome-title h3 {
+  font-size: 28px;
+}
+.exp-atlas-phase-tag {
+  font-size: 10px;
+  color: #bac9bc;
+  border: 1px solid #cadcbb25;
+  border-radius: 30px;
+  padding: 8px 12px;
+  text-align: center;
+}
+.exp-atlas-dossier > p {
+  font-size: 13px;
+  line-height: 1.9;
+  margin-bottom: 18px;
+}
+.exp-atlas-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 0 20px;
+}
+.exp-atlas-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 13px;
+  border: 1px solid #b9cfc226;
+  background: #182329;
+  border-radius: 7px;
+  font-size: 11px;
+  color: #a7bbb7;
+}
+.exp-atlas-tabs button[aria-pressed="true"] {
+  color: #e2e8d6;
+  background: #91b79c21;
+  border-color: #a5bf9d77;
+}
+.exp-atlas-tabs button > span {
+  font-size: 9px;
+  background: #07151b4d;
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+.exp-atlas-resource-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.exp-atlas-resource {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 18px;
+  border: 1px solid #c5d3cd18;
+  border-radius: 9px;
+  background: #101b223b;
+  min-width: 0;
+}
+.exp-atlas-resource > .sprite {
+  width: 36px;
+  height: 39px;
+  flex: 0 0 36px;
+  filter: drop-shadow(0 4px 6px #0004);
+}
+.exp-atlas-resource h4,
+.exp-atlas-creatures h4 {
+  font-size: 13px;
+  margin: 0 0 7px;
+  color: #e0e3d7;
+}
+.exp-atlas-resource p,
+.exp-atlas-creatures p {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #aabdb6;
+}
+.exp-atlas-resource a,
+.exp-atlas-creatures a {
+  display: inline-block;
+  font-size: 9px;
+  color: #bbd3b7;
+  margin-top: 9px;
+}
+.exp-atlas-creatures.enemy-chips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.exp-atlas-creatures > article {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #101b2244;
+  padding: 18px;
+  border: 1px solid #bed2c51c;
+  border-radius: 9px;
+  min-width: 0;
+}
+.exp-atlas-creatures > article > .sprite {
+  width: 45px;
+  height: 50px;
+  object-fit: contain;
+  flex: 0 0 45px;
+}
+.exp-atlas-creatures small {
+  display: block;
+  font-size: 8px;
+  color: #869f99;
+  margin-top: 8px;
+}
+.exp-atlas-creatures button {
+  margin-top: 12px;
+  font-size: 10px;
+  display: inline-flex;
+}
+.exp-atlas-quick-enemies {
+  margin-top: 18px;
+}
+.exp-atlas-future {
+  margin: 19px 0;
+  font-size: 11px;
+  line-height: 1.8;
+  color: #a7b8b3;
+}
+.exp-atlas-future summary {
+  cursor: pointer;
+  color: #c2cbb7;
+  padding: 10px 0;
+}
+.exp-atlas-future p {
+  margin: 8px 0;
+}
+.exp-atlas-dossier .biome-danger {
+  margin: 20px 0 12px;
+}
+.exp-atlas-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+.exp-atlas-actions > a {
+  font-size: 10px;
+  color: #b7cebd;
+}
+.exp-atlas-footnote {
+  display: block;
+  font-size: 10px;
+  line-height: 1.9;
+  color: #849e99;
+  margin-top: 17px;
+}
+.exp-atlas-loot {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.exp-atlas-loot button {
+  padding: 16px;
+  background: #111a2244;
+}
+.exp-atlas-loot small {
+  line-height: 1.8;
+  color: #a6b6b2;
+}
+.exp-atlas-empty {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #a8b8b3;
+  padding: 20px;
+}
+.exp-atlas-invitation {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border: 1px solid #a5c6ae28;
+  padding: 24px;
+  border-radius: 10px;
+  background: #819d8a0a;
+}
+.exp-atlas-invitation > svg {
+  color: #a0c3a3;
+  flex-shrink: 0;
+}
+.exp-atlas-invitation h3 {
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+.exp-atlas-invitation p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #9db2a9;
+}
+.exp-atlas-invitation > span {
+  font-size: 8px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  color: #9bae9c;
+  margin-left: auto;
+}
+.exp-atlas-reference {
+  font-size: 10px;
+  line-height: 1.9;
+  color: #788f89;
+  margin-top: 20px;
+}
+.exp-atlas-planning {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #d7c397;
+  border: 1px solid #d5bc7f38;
+  background: #b78f3410;
+  padding: 14px 17px;
+  border-radius: 7px;
+  margin: 14px 0;
+}
+.exp-atlas-dialog {
+  width: min(1500px, 96vw);
+  max-width: 96vw;
+  max-height: 96vh;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #a2c4ae66;
+  background: #121e25;
+  color: #dce4d5;
+  overflow: auto;
+}
+.exp-atlas-dialog::backdrop {
+  background: #040911ed;
+  backdrop-filter: blur(7px);
+}
+.exp-atlas-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 14px;
+  font-size: 15px;
+}
+.exp-atlas-dialog > header button {
+  display: flex;
+  padding: 7px;
+  border-radius: 5px;
+  background: #ffffff0a;
+}
+.exp-atlas-dialog .exp-atlas-frame {
+  height: min(72vh, 800px);
+  min-height: 280px;
+  aspect-ratio: auto;
+}
+.exp-atlas-dialog-picker {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.exp-atlas-dialog-picker button {
+  padding: 9px;
+  font-size: 10px;
+  background: #24332e;
+  border: 1px solid #9bb89d26;
+  border-radius: 5px;
+}
+.exp-atlas-dialog-picker button[aria-pressed="true"] {
+  border-color: #c7d8b3;
+  color: #e9e6c5;
+}
+@keyframes atlas-pin-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes atlas-torch {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 1000px) {
+  .exp-atlas-toolbar {
+    flex-wrap: wrap;
+  }
+  .exp-atlas-frame {
+    aspect-ratio: 1.5;
+  }
+  .exp-atlas-corner {
+    left: 18px;
+    top: 18px;
+  }
+  .exp-atlas-corner strong {
+    font-size: 22px;
+  }
+  .exp-atlas-under small {
+    display: none;
+  }
+  .exp-atlas-invitation > span {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .atlas-standalone {
+    padding: 12px 0 30px;
+  }
+  .expedition-atlas .tool-heading h2 {
+    font-size: 27px;
+    line-height: 1.3;
+  }
+  .exp-atlas-toolbar {
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .exp-atlas-phase {
+    width: 100%;
+    gap: 2px;
+  }
+  .exp-atlas-phase button {
+    font-size: 9px;
+    padding: 10px 6px;
+    flex: 1;
+  }
+  .exp-atlas-frame {
+    aspect-ratio: 1.5;
+    min-height: 0;
+    border-radius: 9px;
+  }
+  .exp-atlas-frame.is-focused {
+    aspect-ratio: 1;
+  }
+  .exp-atlas-frame:not(.is-focused) .exp-atlas-corner strong,
+  .exp-atlas-frame:not(.is-focused) .exp-atlas-corner small {
+    display: none;
+  }
+  .exp-atlas-corner {
+    top: 12px;
+    left: 12px;
+  }
+  .exp-atlas-corner > span {
+    font-size: 6px;
+    letter-spacing: 1px;
+  }
+  .exp-atlas-corner strong {
+    font-size: 19px;
+  }
+  .exp-atlas-corner small {
+    font-size: 9px;
+  }
+  .is-focused .exp-atlas-corner {
+    padding: 10px 12px;
+    max-width: 60%;
+  }
+  .exp-atlas-back {
+    font-size: 9px;
+    padding: 9px;
+    top: 12px;
+    right: 10px;
+    gap: 4px;
+  }
+  .exp-atlas-back svg {
+    width: 12px;
+  }
+  .exp-atlas-scale {
+    left: 13px;
+    bottom: 14px;
+    max-width: 78%;
+  }
+  .exp-atlas-scale small {
+    font-size: 8px;
+  }
+  .exp-atlas-expand {
+    right: 10px;
+    bottom: 12px;
+    padding: 9px;
+  }
+  .exp-atlas-under {
+    font-size: 9px;
+    line-height: 1.7;
+  }
+  .exp-world-picker > button {
+    font-size: 9px;
+    padding: 9px;
+  }
+  .exp-atlas-dossier {
+    padding: 16px;
+  }
+  .exp-atlas-dossier-head {
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .exp-atlas-dossier .biome-title {
+    gap: 10px;
+  }
+  .exp-atlas-dossier .biome-title h3 {
+    font-size: 22px;
+  }
+  .exp-atlas-dossier .biome-title > .sprite {
+    width: 34px;
+    height: 42px;
+  }
+  .exp-atlas-dossier .biome-title .eyebrow {
+    font-size: 6px;
+  }
+  .exp-atlas-phase-tag {
+    font-size: 8px;
+    max-width: 90px;
+    padding: 7px;
+  }
+  .exp-atlas-tabs {
+    gap: 6px;
+  }
+  .exp-atlas-tabs button {
+    padding: 10px;
+    font-size: 10px;
+    flex: 1;
+    justify-content: center;
+  }
+  .exp-atlas-tabs button svg {
+    display: none;
+  }
+  .exp-atlas-tabs button > span {
+    font-size: 8px;
+  }
+  .exp-atlas-resource-grid,
+  .exp-atlas-creatures.enemy-chips,
+  .exp-atlas-loot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .exp-atlas-resource,
+  .exp-atlas-creatures > article {
+    padding: 15px;
+  }
+  .exp-atlas-invitation {
+    padding: 18px;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .exp-atlas-dialog {
+    padding: 10px;
+  }
+  .exp-atlas-dialog .exp-atlas-frame {
+    height: 65vh;
+  }
+  .exp-atlas-dialog .exp-atlas-corner {
+    max-width: 55%;
+  }
+  .exp-atlas-dialog-picker button {
+    font-size: 9px;
+  }
+  .exp-atlas-dialog > header {
+    font-size: 13px;
+  }
+}
+:root[data-quick="on"] .atlas-camera {
+  transition: none;
+}
+:root[data-ambient="off"] .atlas-torch {
+  animation: none;
+}
+
+.atlas-scene-pin > text.atlas-pin-category {
+  font-size: 10px;
+  fill: #a2bdb2;
+}
+.atlas-scene-pin > text:not(.atlas-pin-category) {
+  font-size: 12px;
+}
