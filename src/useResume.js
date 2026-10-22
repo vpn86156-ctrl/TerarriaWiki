@@ -1,6 +1,6 @@
 import {captureRun,mayWriteRun} from './runKeys';
 import {useEffect,useRef,useState} from 'react';
-export const pages=['home','journey','guides','classes','bosses','lore','treasures','tips','hub','tools','favorites','focus','runs'];
+export const pages=['home','journey','guides','classes','bosses','lore','treasures','tips','hub','tools','favorites','focus','runs','crafting'];
 export const tools=['next','ready','atlas','bestiary','farm','compare','npc','alchemy','calendar','building','hall','quests','secrets','settings'];
 export const resumeValid=v=>!!(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).every(k=>['page','hubTab','scroll'].includes(k))&&pages.includes(v.page)&&tools.includes(v.hubTab)&&Number.isInteger(v.scroll)&&v.scroll>=0&&v.scroll<=1000000);
 export function useResume(page,hubTab){
