@@ -1,0 +1,14 @@
+import React,{useState} from 'react';
+const root=import.meta.env.BASE_URL+'assets/buildings/';
+const source='https://github.com/6414421016/TerrariaHouseIdea/tree/7780a707bb030c39126664cc8d2ba11608bc2b13/assets/images';
+export const buildingScenes=[
+ ['forest','Лесной силуэт','Forest_(1).png','Разные уровни крыши, каменное основание, деревянные выступы и озеленение. Начни с одного жилого объёма, затем добавляй пристройки по рельефу.'],
+ ['greenhouse','Дом с оранжереей','Forest_(2).jpg','Стеклянный объём наверху, дерево в интерьере и открытый берег. Подпись автора сохранена в самом изображении. Стеклянные стены не отменяют условия цветения трав.'],
+ ['desert','Пустынный оазис','Desert_(1).png','Светлая основа, деревянные балки, навесы и вода как акцент. Зелень и разные высоты делают дом интереснее одной плоской коробки.'],
+ ['snow','Зимняя усадьба','Snow_(2).png','Высокая скатная крыша, каменная опора и тёплые окна. Раздели крышу и жилой контур: декоративная форма не должна открывать комнату наружу.'],
+ ['ice','Дом среди снегов','Snow_(4).jpg','Несимметричные крыши и чередование фоновых стен. Изучай сочетание материалов, а не пытайся сразу повторить каждую клетку.'],
+ ['house02','Океанский порт','house02.png','Игровая постройка на изображении-превью: жилые объёмы соединены мостками. Для своего варианта начни с домика рыбака и безопасного причала.'],
+ ['house03','Кухня на террасе','house03.png','Игровой пример с поясняющей стрелкой: открытая кухонная терраса и отдельный жилой этаж. Рабочие станции можно оформить как часть интерьера.'],
+ ['house04','Лесная кузница','house04.png','Игровой пример мастерской: каменный проём, дымоход и зелёная крыша. Размещай станки так, чтобы к ним можно было подойти, а сундуки оставались в радиусе удобного хранения.']
+];
+export function BuildingGallery(){const [selected,setSelected]=useState(0),scene=buildingScenes[selected];return <section className="building-gallery" aria-label="Реальные игровые постройки"><h3>Постройки в Terraria, а не условные квадраты</h3><p className="building-inspiration-note">Восемь игровых референсов из открытого архива: дома, оранжерея, порт и кузница. Это примеры для вдохновения, а не фотографии рассчитанных ниже маленьких комнат.</p><figure className="building-photo"><img src={root+scene[0]+'.webp'} alt={`Постройка в Terraria: ${scene[1]}`}/><figcaption><strong>{scene[1]}.</strong> {scene[3]}<br/><a href={source+'/'+encodeURIComponent(scene[2])} target="_blank" rel="noreferrer">Источник изображения: TerrariaHouseIdea ↗</a> · Игровая графика © Re-Logic. Авторы построек не указаны в архиве; имеющиеся подписи и водяные знаки сохранены.</figcaption></figure><div className="building-scene-grid">{buildingScenes.map(([id,name],i)=><button key={id} className="building-scene-card" aria-pressed={selected===i} onClick={()=>setSelected(i)}><img src={root+id+'.webp'} alt=""/><span>{name}</span></button>)}</div></section>}

@@ -18,7 +18,7 @@ const taskIds=progression.flatMap(s=>s.tasks.map((_,i)=>`${s.id}-${i}`));
 const schema={
  'terraria-notes':v=>safeObject(v)&&Object.keys(v).length<=80&&Object.values(v).every(x=>typeof x==='string')&&Object.values(v).reduce((sum,x)=>sum+x.length,0)<=12000&&Object.entries(v).every(([k,text])=>(k==='general'||bosses.some(b=>k===`boss:${b[0]}`)||progression.some(p=>k===`stage:${p.id}`))&&typeof text==='string'&&text.length<=3000),
  'terraria-focus':v=>v===null||(safeObject(v)&&Object.keys(v).every(k=>['type','id'].includes(k))&&((v.type==='boss'&&bosses.some(b=>b[0]===v.id))||(v.type==='stage'&&progression.some(s=>s.id===v.id)))),
- 'terraria-resume':v=>safeObject(v)&&Object.keys(v).every(k=>['page','hubTab','scroll'].includes(k))&&['home','journey','guides','classes','bosses','lore','treasures','tips','hub','tools','favorites','focus','runs'].includes(v.page)&&['next','ready','atlas','bestiary','farm','compare','npc','alchemy','calendar','building','hall','quests','secrets','settings'].includes(v.hubTab)&&bounded(v.scroll),
+ 'terraria-resume':v=>safeObject(v)&&Object.keys(v).every(k=>['page','hubTab','scroll'].includes(k))&&['home','journey','guides','classes','bosses','lore','treasures','tips','hub','tools','favorites','focus','runs','crafting'].includes(v.page)&&['next','ready','atlas','bestiary','farm','compare','npc','alchemy','calendar','building','hall','quests','secrets','settings'].includes(v.hubTab)&&bounded(v.scroll),
  'terraria-bosses':v=>arr(v,bosses.map(b=>b[0])),
  'terraria-bookmarks':v=>arr(v,guides.map(g=>g.id)),
  'terraria-read':v=>arr(v,guides.map(g=>g.id)),
