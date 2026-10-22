@@ -1,0 +1,10 @@
+import React,{useEffect,useState} from 'react';
+import {NotebookPen,Check} from 'lucide-react';
+import {captureRun,mayWriteRun} from './runKeys';
+export function Notebook({context='general',title='Мои заметки',placeholder='Что важно не забыть в следующей игровой сессии?'}){
+ const [run]=useState(()=>captureRun()),[text,setText]=useState(()=>{try{return JSON.parse(localStorage.getItem('terraria-notes'))?.[context]||''}catch{return ''}}),[status,setStatus]=useState('');
+ useEffect(()=>{try{setText(JSON.parse(localStorage.getItem('terraria-notes'))?.[context]||'');setStatus('')}catch{setText('')}},[context]);
+ useEffect(()=>{const refresh=e=>{if(e.type==='storage'&&e.key!=='terraria-notes')return;if(!mayWriteRun(run))return;try{setText(JSON.parse(localStorage.getItem('terraria-notes'))?.[context]||'')}catch{}};window.addEventListener('terraria-notes-changed',refresh);window.addEventListener('storage',refresh);return()=>{window.removeEventListener('terraria-notes-changed',refresh);window.removeEventListener('storage',refresh)}},[context,run]);
+ function save(value){setText(value);try{if(!mayWriteRun(run))throw new Error();const notes=JSON.parse(localStorage.getItem('terraria-notes'))||{};if(value)notes[context]=value;else delete notes[context];if(Object.values(notes).reduce((sum,n)=>sum+n.length,0)>12000){setStatus('Лимит заметок прохождения — 12 000 символов. Скопируй текст или сократи другие заметки.');return}localStorage.setItem('terraria-notes',JSON.stringify(notes));window.dispatchEvent(new Event('terraria-notes-changed'));setStatus('Сохранено в этом прохождении')}catch{setStatus('Не удалось сохранить. Скопируй текст и проверь хранилище браузера.')}}
+ return <section className="notebook companion-panel"><h2><NotebookPen size={19}/>{title}</h2><label><span className="sr-only">{title}</span><textarea value={text} maxLength={3000} rows={3} placeholder={placeholder} onChange={e=>save(e.target.value)}/></label><div className="notebook-status"><small role="status">{status&&<><Check size={12}/>{status}</>}</small><span>{text.length}/3000</span></div></section>
+}

@@ -15,7 +15,7 @@ test('levitating Zenith opens its guide and animation preference persists',async
 
 test('stage, tasks and class selection survive reload',async({page})=>{
  await page.goto('/');await page.locator('nav button').filter({hasText:'Мой этап'}).click();
- await page.locator('.route-map button').filter({hasText:'Первые шаги хардмода'}).click();
+ await page.getByRole('button',{name:'Список',exact:true}).click();await page.locator('.route-map button').filter({hasText:'Первые шаги хардмода'}).click();
  await expect(page.locator('.route-stage-banner')).toContainText('Незнакомая опасность');
  await page.locator('.stage-tasks input').first().check();
  await expect(page.locator('.route-overview')).toContainText('1 / 44');
