@@ -37,7 +37,7 @@ test('boss progress persists and filters work',async({page})=>{
 });
 test('all pages and tool selectors render without errors',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');
- for(const label of ['Прохождение','Классы и билды','Боссы','История мира','Советы и секреты','Инструменты']){
+ for(const label of ['Прохождение','Классы и билды','Боссы','История мира','Советы и секреты','Конструктор билда']){
   await page.locator('nav button').filter({hasText:label}).click();await expect(page.locator('main')).toBeVisible();
  }
  await page.locator('select').first().selectOption('mage');await page.locator('select').nth(1).selectOption('2');

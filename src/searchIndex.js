@@ -10,6 +10,9 @@ const stops=new Set(['а','и','или','в','во','на','с','со','для',
 function words(q){return normalize(q).split(' ').filter(w=>w.length>1&&!stops.has(w)).map(w=>w.length>5?w.replace(/(ами|ями|ого|ему|ыми|ими|ов|ев|ей|ах|ях|ам|ям|ый|ий|ая|ое|ые|ом|ем|а|я|ы|и|у|ю|е)$/u,''):w)}
 const record=(type,id,title,body,target,answer='')=>({key:`${type}:${id}`,title,category:type,body:text(body),target,answer});
 export const searchRecords=[
+ record('Навигация','runs','Мои прохождения','новый мир отдельный персонаж переключить прохождение назвать биом экспорт заметки',{type:'page',id:'runs'},'Отдельные победы, находки, цели и заметки для каждого прохождения. Прежние записи сохраняются.'),
+ record('Навигация','map','Карта прохождения','маршрут прогрессия этапы путь необязательные ветки карта',{type:'page',id:'journey'},'Наглядная схема всех 11 этапов и дополнительных веток. Это не карта игрового сохранения.'),
+ record('Навигация','notes','Заметки к текущей цели','личные заметки записи напоминание к боссу план',{type:'page',id:'focus'},'Выбери цель и оставь свою запись. Заметки принадлежат текущему прохождению и входят в экспорт.'),
  ...quickAnswers.map(q=>record('Короткий ответ',q.id,q.title,q.aliases,q.target,q.answer)),
  ...guides.map(g=>record('Руководство',g.id,g.title,g,{type:'guide',id:g.id},g.intro)),
  ...treasures.map(t=>record('Находка',t.id,t.name,[t,alternatives[t.id]],{type:'treasure',id:t.id},t.source)),

@@ -54,7 +54,7 @@ test('four armor stages change all class cards and modal images',async({page})=>
 });
 
 test('builder displays the armor for all sixteen stage and class combinations',async({page})=>{
- await page.goto('/');await page.locator('nav button').filter({hasText:'Инструменты'}).click();
+ await page.goto('/');await page.locator('nav button').filter({hasText:'Конструктор билда'}).click();
  const sets={warrior:['Molten_armor','Adamantite_melee','Beetle_shell','Solar_Flare_armor'],ranger:['Necro_armor','Titanium_ranged','Shroomite_bullet','Vortex_armor'],mage:['Meteor_armor','Adamantite_magic','Spectre_mask','Nebula_armor'],summoner:['Bee_armor','Spider_armor','Spooky_armor','Stardust_armor']};
  for(const [c,sprites] of Object.entries(sets)){await page.locator('select').first().selectOption(c);for(let s=0;s<4;s++){await page.locator('select').nth(1).selectOption(String(s));await expect(page.locator('.tool-output .armor-figure')).toHaveAttribute('data-armor',sprites[s])}}
  await expect(page.locator('.tool-output')).not.toContainText('На иллюстрации — финальная');

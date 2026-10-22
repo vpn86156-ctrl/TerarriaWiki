@@ -1,0 +1,6 @@
+// Working keys remain compatible with previous releases. Visual preferences are global.
+export const RUN_KEYS=['terraria-bosses','terraria-treasures','terraria-bookmarks','terraria-read','terraria-route-stage','terraria-route-class','terraria-route-tasks','terraria-armor-stage','terraria-profile','terraria-farm-counts','terraria-readiness','terraria-missions','terraria-pinned','terraria-secrets','terraria-hall-theme','terraria-alchemy','terraria-planner','terraria-focus','terraria-resume','terraria-notes'];
+export function activeRun(storage=localStorage){try{return JSON.parse(storage.getItem('terraria-runs'))?.activeId||'original'}catch{return 'original'}}
+export function mayWriteRun(token,storage=localStorage){try{return !storage.getItem('terraria-run-switch')&&activeRun(storage)===(typeof token==='string'?token:token.id)&&(typeof token==='string'||storage.getItem('terraria-data-revision')===token.revision)}catch{return false}}
+// A successful import can change data without changing the selected run ID.
+export function captureRun(storage=localStorage){try{return {id:activeRun(storage),revision:storage.getItem('terraria-data-revision')}}catch{return {id:'original',revision:null}}}

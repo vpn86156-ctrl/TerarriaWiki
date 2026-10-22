@@ -8,5 +8,6 @@ export default defineConfig({
     react(),
     {name:'offline-snapshot',apply:'build',writeBundle(){buildOffline()}},
   ],
+  build:{rolldownOptions:{output:{codeSplitting:{groups:[{name:'react-vendor',test:/node_modules\/(react|react-dom|scheduler)\//}]}}}},
   server: { host: '0.0.0.0', allowedHosts: true },
 });
