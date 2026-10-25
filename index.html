@@ -12,6 +12,13 @@
       content="Последний факел — браузерное приключение. Три этажа, тайные комнаты и один путь на свободу. Играй на компьютере и телефоне."
     />
     <title>Последний факел — побег из подземелья</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./styles.css" />
     <script type="module" src="./src/app.js"></script>
@@ -323,9 +330,16 @@
         </article>
       </div>
       <p class="help-footnote">
+        Собирай золотые искры: они ускоряют на 4 секунды и дают по 5 монет при
+        выходе. Зажги маяк кнопкой E — стражи замедлятся на 7 секунд. За этаж —
+        60 монет, без ранений — ещё 20, тайник — ещё 25. В коллекции можно
+        открыть кейс за 100 монет и надеть скин с ботинками. Их эффекты
+        применятся со следующего этажа или попытки.
+      </p>
+      <p class="help-footnote">
         Esc — пауза. После поражения можно повторить текущий этаж: его ключи
         сбросятся, время и число попыток останутся. Закрытие вкладки прерывает
-        забег; сохраняется только лучший завершённый результат.
+        забег. Монеты, коллекция и рекорд сохраняются только в этом браузере.
       </p>
       <button id="help-play" class="primary-button">
         Всё понятно <span>→</span>

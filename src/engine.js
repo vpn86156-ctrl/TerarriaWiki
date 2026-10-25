@@ -198,12 +198,18 @@ export function lineOfSight(map, x0, y0, x1, y1) {
   }
 }
 export class Dungeon {
-  constructor({ onChange = () => {}, onEvent = () => {} } = {}) {
+  constructor({
+    onChange = () => {},
+    onEvent = () => {},
+    getLoadout = () => ({}),
+  } = {}) {
+    this.getLoadout = getLoadout;
     this.onChange = onChange;
     this.onEvent = onEvent;
     this.reset(false);
   }
   reset(start = true) {
+    this.runId = (this.runId || 0) + 1;
     this.elapsed = 0;
     this.deaths = 0;
     this.secretFloors = new Set();
@@ -215,6 +221,42 @@ export class Dungeon {
   loadFloor() {
     const { config, map } = makeFloor(this.floorIndex);
     this.config = config;
+    this.bonuses = this.getLoadout() || {};
+    this.dashDuration = 1.8 - (this.bonuses.cooldown || 0);
+    this.shield = this.bonuses.shield || 0;
+    this.floorDamage = 0;
+    this.embers = [
+      [
+        [4, 7],
+        [16, 5],
+        [17, 12],
+        [23, 7],
+      ],
+      [
+        [3, 6],
+        [14, 6],
+        [6, 16],
+        [24, 12],
+      ],
+      [
+        [7, 5],
+        [17, 3],
+        [4, 16],
+        [24, 13],
+      ],
+    ][this.floorIndex].map((p) => ({ ...center(p), taken: false }));
+    this.beacon = {
+      ...center(
+        [
+          [15, 5],
+          [15, 4],
+          [15, 14],
+        ][this.floorIndex],
+      ),
+      used: false,
+    };
+    this.beaconTime = 0;
+    this.hasteTime = 0;
     this.map = map;
     this.player = { ...center(config.spawn), hp: 3, facing: { x: 0, y: 1 } };
     this.keys = config.keys.map((p) => ({ ...center(p), taken: false }));
@@ -270,6 +312,7 @@ export class Dungeon {
     const wall = center(this.config.secret.wall);
     if (!this.secret.open && near(wall)) return "Проверить стену";
     if (!this.fountain.used && near(this.fountain)) return "Выпить воду";
+    if (!this.beacon.used && near(this.beacon)) return "Зажечь маяк";
     return null;
   }
   emit() {
@@ -286,7 +329,7 @@ export class Dungeon {
       secrets: this.secretFloors.size,
       deaths: this.deaths,
       elapsed: this.elapsed,
-      dash: Math.max(0, 1 - this.dashCooldown / 1.8),
+      dash: Math.max(0, 1 - this.dashCooldown / this.dashDuration),
       context: this.context,
       message: this.messageTime > 0 ? this.message : "",
     };
@@ -348,7 +391,7 @@ export class Dungeon {
   dash() {
     if (this.phase !== "playing" || this.dashCooldown > 0) return false;
     this.dashTime = 0.19;
-    this.dashCooldown = 1.8;
+    this.dashCooldown = this.dashDuration;
     this.invulnerable = Math.max(this.invulnerable, 0.22);
     this.onEvent("dash");
     this.emit();
@@ -356,6 +399,13 @@ export class Dungeon {
   }
   hurt() {
     if (this.phase !== "playing" || this.invulnerable > 0) return;
+    if (this.shield > 0) {
+      this.shield--;
+      this.invulnerable = 1.25;
+      this.notify("Солнечный щит поглотил удар!", "shield");
+      return;
+    }
+    this.floorDamage++;
     this.player.hp--;
     this.invulnerable = 1.25;
     this.shake = 0.22;
@@ -374,6 +424,13 @@ export class Dungeon {
   interact() {
     if (this.phase !== "playing") return;
     const context = this.context;
+    if (context === "Зажечь маяк") {
+      this.beacon.used = true;
+      this.beaconTime = 7;
+      this.lastVision = "";
+      this.notify("Свет маяка замедляет стражей на 7 секунд!", "beacon");
+      return;
+    }
     if (context === "Открыть выход") {
       if (this.floorIndex === FLOORS.length - 1) {
         this.phase = "won";
@@ -421,10 +478,13 @@ export class Dungeon {
     if (stamp === this.lastVision) return;
     this.lastVision = stamp;
     this.visible = new Set();
-    for (let j = Math.max(0, y - 6); j <= Math.min(HEIGHT - 1, y + 6); j++)
-      for (let i = Math.max(0, x - 6); i <= Math.min(WIDTH - 1, x + 6); i++) {
+    const radius =
+        6.2 + (this.bonuses.vision || 0) + (this.beaconTime > 0 ? 1 : 0),
+      r = Math.ceil(radius);
+    for (let j = Math.max(0, y - r); j <= Math.min(HEIGHT - 1, y + r); j++)
+      for (let i = Math.max(0, x - r); i <= Math.min(WIDTH - 1, x + r); i++) {
         if (
-          Math.hypot(i - x, j - y) <= 6.2 &&
+          Math.hypot(i - x, j - y) <= radius &&
           lineOfSight(this.map, x, y, i, j)
         ) {
           const k = j * WIDTH + i;
@@ -438,6 +498,9 @@ export class Dungeon {
     const dt = Math.min(Math.max(delta, 0), 0.04);
     this.elapsed += dt;
     this.floorTime += dt;
+    if (this.beaconTime > 0 && this.beaconTime <= dt) this.lastVision = "";
+    this.beaconTime = Math.max(0, this.beaconTime - dt);
+    this.hasteTime = Math.max(0, this.hasteTime - dt);
     this.dashCooldown = Math.max(0, this.dashCooldown - dt);
     this.invulnerable = Math.max(0, this.invulnerable - dt);
     this.shake = Math.max(0, this.shake - dt);
@@ -449,7 +512,11 @@ export class Dungeon {
       y /= length;
       this.player.facing = { x, y };
     }
-    const speed = this.dashTime > 0 ? 360 : 112,
+    const speed =
+        this.dashTime > 0
+          ? 360
+          : 112 *
+            (1 + (this.bonuses.speed || 0) + (this.hasteTime > 0 ? 0.18 : 0)),
       dir = this.dashTime > 0 ? this.player.facing : { x, y };
     // Small movement substeps prevent dashes from tunnelling through thin walls.
     const steps = Math.max(1, Math.ceil((speed * dt) / 5));
@@ -461,6 +528,18 @@ export class Dungeon {
       );
     this.dashTime = Math.max(0, this.dashTime - dt);
     this.updateVision();
+    for (const ember of this.embers)
+      if (
+        !ember.taken &&
+        Math.hypot(ember.x - this.player.x, ember.y - this.player.y) < 17
+      ) {
+        ember.taken = true;
+        this.hasteTime = 4;
+        this.notify(
+          "Искра найдена: ускорение на 4 секунды и +5 монет при выходе.",
+          "ember",
+        );
+      }
     for (const key of this.keys)
       if (
         !key.taken &&
@@ -511,8 +590,14 @@ export class Dungeon {
       else
         this.move(
           enemy,
-          (vx / dist) * (sees ? 62 : 33) * dt,
-          (vy / dist) * (sees ? 62 : 33) * dt,
+          (vx / dist) *
+            (sees ? 62 + this.floorIndex * 4 : 33) *
+            (this.beaconTime > 0 ? 0.4 : 1) *
+            dt,
+          (vy / dist) *
+            (sees ? 62 + this.floorIndex * 4 : 33) *
+            (this.beaconTime > 0 ? 0.4 : 1) *
+            dt,
           7,
         );
       if (d < 19) this.hurt();

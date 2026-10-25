@@ -9,10 +9,42 @@ export class Renderer {
     this.ctx = canvas.getContext("2d", { alpha: false });
     this.game = game;
     this.camera = { x: 0, y: 0 };
+    this.particles = [];
+    this.trails = [];
+    this.lastFx = 0;
+    this.walkPhase = 0;
     this.reduced = matchMedia("(prefers-reduced-motion: reduce)");
     this.size();
     this.observer = new ResizeObserver(() => this.size());
     this.observer.observe(canvas);
+  }
+  burst(type, position = this.game.player) {
+    if (this.reduced.matches) return;
+    const color =
+      {
+        key: "#f6d48b",
+        hurt: "#ec987a",
+        dash: "#8ee1ce",
+        secret: "#bc9cf0",
+        ember: "#ffc978",
+        beacon: "#95e7c6",
+        shield: "#f3d38e",
+        win: "#f3d38e",
+      }[type] || "#afdab3";
+    for (let i = 0; i < (type === "win" ? 40 : 16); i++) {
+      const angle = Math.random() * Math.PI * 2,
+        speed = 20 + Math.random() * 65;
+      this.particles.push({
+        x: position.x,
+        y: position.y - 4,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 12,
+        life: 0.4 + Math.random() * 0.5,
+        max: 0.9,
+        color,
+      });
+    }
+    this.particles = this.particles.slice(-150);
   }
   size() {
     const box = this.canvas.getBoundingClientRect();
@@ -27,8 +59,50 @@ export class Renderer {
     this.ctx.imageSmoothingEnabled = false;
     this.snap = true;
   }
+  cacheTerrain() {
+    const g = this.game;
+    if (this.cachedMap === g.map && this.cachedSecret === g.secret.open) return;
+    const original = this.ctx,
+      layer = document.createElement("canvas");
+    layer.width = WIDTH * TILE;
+    layer.height = HEIGHT * TILE;
+    this.ctx = layer.getContext("2d");
+    this.ctx.imageSmoothingEnabled = false;
+    this.buildingCache = true;
+    for (let y = 0; y < HEIGHT; y++)
+      for (let x = 0; x < WIDTH; x++) this.tile(x, y, g.map[y][x], 0);
+    this.ctx = original;
+    this.buildingCache = false;
+    this.terrain = layer;
+    this.cachedMap = g.map;
+    this.cachedSecret = g.secret.open;
+  }
   render(now) {
     if (!this.zoom) return;
+    this.cacheTerrain();
+    const dt = Math.min(0.05, (now - (this.lastFx || now)) / 1000);
+    this.lastFx = now;
+    if (this.game.phase !== "paused" && !this.reduced.matches) {
+      const p = this.game.player;
+      if (this.previous) {
+        const d = Math.hypot(p.x - this.previous.x, p.y - this.previous.y);
+        if (d < 30) this.walkPhase += d / 14;
+        if (this.game.phase === "playing" && this.game.dashTime > 0) {
+          this.trails.push({ x: p.x, y: p.y, life: 0.25 });
+          this.trails = this.trails.slice(-12);
+        }
+      }
+      this.previous = { x: p.x, y: p.y };
+      for (const p of this.particles) {
+        p.life -= dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 45 * dt;
+      }
+      this.particles = this.particles.filter((p) => p.life > 0);
+      for (const p of this.trails) p.life -= dt;
+      this.trails = this.trails.filter((p) => p.life > 0);
+    }
     const g = this.game,
       c = this.ctx,
       z = this.zoom,
@@ -73,7 +147,24 @@ export class Renderer {
             (y + 0.5) * TILE - g.player.y,
           ) / TILE;
         c.globalAlpha = visible ? Math.max(0.35, 1 - distance * 0.075) : 0.23;
-        this.tile(x, y, g.map[y][x], t);
+        c.drawImage(
+          this.terrain,
+          x * TILE,
+          y * TILE,
+          TILE,
+          TILE,
+          x * TILE,
+          y * TILE,
+          TILE,
+          TILE,
+        );
+        if (
+          visible &&
+          g.map[y][x] === "." &&
+          g.map[y - 1]?.[x] === "#" &&
+          x % 5 === 2
+        )
+          this.wallTorch(x * TILE + 16, y * TILE + 3, t);
       }
     c.globalAlpha = 1;
     const visible = (o) =>
@@ -87,7 +178,54 @@ export class Renderer {
     if (!g.secret.taken && visible(g.secret))
       this.gem(g.secret.x, g.secret.y, t);
     for (const e of g.enemies) if (visible(e)) this.enemy(e, t);
+    if (g.embers)
+      for (const ember of g.embers)
+        if (!ember.taken && visible(ember)) {
+          this.glow(ember.x, ember.y, 24, "rgba(255,181,80,.15)");
+          c.save();
+          c.translate(ember.x, ember.y + Math.sin(t * 3 + ember.x) * 2);
+          c.rotate(Math.PI / 4);
+          c.fillStyle = "#edbd71";
+          c.fillRect(-3, -3, 6, 6);
+          c.fillStyle = "#fff2bb";
+          c.fillRect(-1, -1, 2, 2);
+          c.restore();
+        }
+    if (g.beacon && visible(g.beacon)) {
+      const b = g.beacon;
+      c.fillStyle = "#5b7367";
+      c.fillRect(b.x - 5, b.y - 5, 10, 15);
+      c.fillStyle =
+        g.beaconTime > 0 ? "#baf2c9" : g.beacon.used ? "#395349" : "#d9c089";
+      c.fillRect(b.x - 3, b.y - 10, 6, 9);
+      if (g.beaconTime > 0) {
+        this.glow(b.x, b.y - 8, 100, "rgba(133,236,187,.22)");
+        c.strokeStyle = "#b6e2ae80";
+        c.beginPath();
+        c.arc(b.x, b.y, 20 + Math.sin(t * 3) * 4, 0, Math.PI * 2);
+        c.stroke();
+      }
+    }
+    for (const p of this.trails) {
+      c.globalAlpha = p.life * 0.8;
+      c.fillStyle = g.bonuses?.color || "#66c6b0";
+      c.fillRect(p.x - 8, p.y - 12, 16, 21);
+    }
+    c.globalAlpha = 1;
     this.hero(g.player, t);
+    if (g.shield > 0) {
+      c.strokeStyle = "#e8cc7b88";
+      c.lineWidth = 1;
+      c.beginPath();
+      c.arc(g.player.x, g.player.y - 1, 17, 0, Math.PI * 2);
+      c.stroke();
+    }
+    for (const p of this.particles) {
+      c.globalAlpha = Math.min(1, p.life / 0.3);
+      c.fillStyle = p.color;
+      c.fillRect(p.x, p.y, 2 + p.life * 2, 2 + p.life * 2);
+    }
+    c.globalAlpha = 1;
     c.restore();
     // Light stays local to the adventurer, with quiet amber at the screen edges.
     c.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
@@ -212,7 +350,11 @@ export class Renderer {
           c.fillRect(px + 3 + i * 4, py + 3, 3, 6);
         }
       }
-      if (this.game.map[y - 1]?.[x] === "#" && x % 5 === 2) {
+      if (
+        !this.buildingCache &&
+        this.game.map[y - 1]?.[x] === "#" &&
+        x % 5 === 2
+      ) {
         this.wallTorch(px + 16, py + 3, t);
       }
     }
@@ -388,22 +530,35 @@ export class Renderer {
     this.glow(p.x + 9, p.y - 9, 85, "rgba(246,188,104,.075)");
     c.save();
     c.translate(Math.round(p.x), Math.round(p.y));
+    const step = this.reduced.matches
+      ? 0
+      : Math.round(Math.sin(this.walkPhase) * 2);
+    c.fillStyle = g.bonuses?.color || "#55a89c";
+    c.globalAlpha = 0.65;
+    c.beginPath();
+    c.moveTo(-7, -3);
+    c.lineTo(-10 - step, 9);
+    c.lineTo(8, 9);
+    c.lineTo(7, -3);
+    c.fill();
+    c.globalAlpha = 1;
     if (g.invulnerable > 0 && !this.reduced.matches)
       c.globalAlpha = Math.sin(t * 25) > 0 ? 1 : 0.48;
     c.fillStyle = "#071518";
     c.beginPath();
     c.ellipse(0, 11, 12, 4, 0, 0, Math.PI * 2);
     c.fill();
-    c.fillStyle = "#3a3d39";
-    c.fillRect(-6, 6, 5, 6);
-    c.fillRect(2, 6, 5, 6);
-    c.fillStyle = "#55a89c";
+    c.fillStyle = g.bonuses?.bootsColor || "#3a3d39";
+    c.fillRect(-6, 6 + step, 5, 6);
+    c.fillRect(2, 6 - step, 5, 6);
+    c.translate(0, Math.abs(step) * -0.5);
+    c.fillStyle = g.bonuses?.color || "#55a89c";
     c.fillRect(-8, -4, 16, 13);
     c.fillStyle = "#347a77";
     c.fillRect(-8, 3, 5, 6);
     c.fillStyle = "#a4d2c0";
     c.fillRect(-7, -12, 14, 4);
-    c.fillStyle = "#5ba89c";
+    c.fillStyle = g.bonuses?.color || "#5ba89c";
     c.fillRect(-10, -8, 20, 8);
     c.fillStyle = "#13292e";
     c.fillRect(-6, -6, 12, 6);
