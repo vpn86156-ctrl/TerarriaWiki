@@ -1,5 +1,7 @@
 import { Dungeon, formatTime } from "./engine.js";
 import { Renderer } from "./render.js";
+import { profile } from "./profile.js";
+import { initFeatures } from "./features.js";
 const $ = (id) => document.getElementById(id),
   canvas = $("game"),
   overlay = $("game-overlay");
@@ -157,7 +159,7 @@ function renderOverlay(s) {
     label = "Следующий этаж";
     emblem = "key";
     stroke = true;
-    caption = `Время забега: ${formatTime(s.elapsed)}`;
+    caption = `+${game.lastReward || 0} монет · Время: ${formatTime(s.elapsed)}`;
   }
   if (s.phase === "won") {
     eyebrow = newRecord ? "НОВЫЙ ЛИЧНЫЙ РЕКОРД" : "СВЕТ ПО ТУ СТОРОНУ";
@@ -166,7 +168,7 @@ function renderOverlay(s) {
       "Три этажа позади. Факел всё ещё горит, а у этой истории теперь счастливый конец.";
     action = "reset";
     label = "Ещё одно приключение";
-    caption = "Спасибо, что не сдался.";
+    caption = `+${game.lastReward || 0} монет · Награда получена!`;
     emblem = "gem";
     stroke = true;
     stats = `<div class="overlay-stats"><div><strong>${formatTime(s.elapsed)}</strong><span>время</span></div><div><strong>${s.secrets} / 3</strong><span>тайника</span></div><div><strong>${s.deaths + 1}</strong><span>попыток</span></div></div>`;
@@ -176,8 +178,25 @@ function renderOverlay(s) {
   if (s.phase !== "intro" && !$("help-dialog").open)
     overlay.querySelector(".primary-button").focus({ preventScroll: true });
 }
+const rewarded = new Set();
+let rewardRun = 0;
 function updateUI(s) {
   if (!game) return;
+  if (rewardRun !== game.runId) {
+    rewardRun = game.runId;
+    rewarded.clear();
+  }
+  if (["floor-clear", "won"].includes(s.phase) && !rewarded.has(s.floor)) {
+    rewarded.add(s.floor);
+    game.lastReward =
+      60 +
+      (game.floorDamage === 0 ? 20 : 0) +
+      game.embers.filter((e) => e.taken).length * 5 +
+      (game.secretFloors.has(s.floor) ? 25 : 0) +
+      (s.phase === "won" ? 100 : 0);
+    profile.earn(game.lastReward);
+    window.dispatchEvent(new Event("profile-change"));
+  }
   const playing = s.phase === "playing",
     phaseChanged = lastPhase !== s.phase;
   if (!playing) clearInput();
@@ -267,7 +286,14 @@ function updateUI(s) {
   }
   lastPhase = s.phase;
 }
-game = new Dungeon({ onChange: updateUI, onEvent: sound });
+game = new Dungeon({
+  onChange: updateUI,
+  onEvent: (type) => {
+    sound(type);
+    renderer?.burst(type);
+  },
+  getLoadout: () => profile.stats(),
+});
 renderer = new Renderer(canvas, game);
 updateUI(game.snapshot());
 updateSound();
@@ -347,7 +373,7 @@ const movementCodes = [
   "ArrowRight",
 ];
 window.addEventListener("keydown", (e) => {
-  if ($("help-dialog").open) return;
+  if (document.querySelector("dialog[open]")) return;
   if (e.code === "Escape") {
     if (["playing", "paused"].includes(game.phase)) {
       e.preventDefault();
@@ -417,35 +443,29 @@ function input() {
   }
   return { x, y };
 }
-let last = performance.now();
+let last = performance.now(),
+  lastRender = 0;
 function frame(now) {
   game.tick((now - last) / 1000, input());
   last = now;
   const ready = game.dashCooldown <= 0;
   $("dash-fill").style.transform =
-    `scaleX(${Math.max(0, 1 - game.dashCooldown / 1.8)})`;
+    `scaleX(${Math.max(0, 1 - game.dashCooldown / game.dashDuration)})`;
   setText("dash-state", ready ? "Готов" : `${game.dashCooldown.toFixed(1)} с`);
   $("dash-button").setAttribute(
     "aria-label",
     ready ? "Рывок — готов" : `Рывок перезаряжается`,
   );
-  renderer.render(now);
+  if (
+    !document.hidden &&
+    !document.querySelector("dialog[open]") &&
+    now - lastRender >= 1000 / 30
+  ) {
+    renderer.render(now);
+    lastRender = now;
+  }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-// Retire the old wiki's worker without registering a cache for the new game.
-if ("serviceWorker" in navigator)
-  navigator.serviceWorker
-    .getRegistrations()
-    .then((registrations) => {
-      for (const registration of registrations) {
-        const url = registration.active?.scriptURL;
-        if (
-          url &&
-          new URL(url).origin === location.origin &&
-          new URL(url).pathname === new URL("./sw.js", location.href).pathname
-        )
-          registration.update().catch(() => {});
-      }
-    })
-    .catch(() => {});
+// Installable offline app and collection UI are isolated from the game engine.
+initFeatures({ game, renderer, clearInput, focusGame, input, sound });

@@ -1,4 +1,5 @@
 import http from "node:http";
+import { attachRooms } from "../server/rooms.mjs";
 import { readFile, stat } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 const root = resolve(import.meta.dirname, ".."),
@@ -10,13 +11,34 @@ const mime = {
   ".svg": "image/svg+xml",
   ".png": "image/png",
   ".json": "application/json",
+  ".webmanifest": "application/manifest+json",
 };
-http
+const server = http
   .createServer(async (req, res) => {
     try {
       const pathname = decodeURIComponent(
         new URL(req.url, "http://local").pathname,
       );
+      if (pathname === "/health") {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: true, service: "last-torch-coop" }));
+        return;
+      }
+      if (
+        ![
+          "/",
+          "/index.html",
+          "/styles.css",
+          "/favicon.svg",
+          "/manifest.webmanifest",
+          "/sw.js",
+        ].includes(pathname) &&
+        !/^\/(src|icons)\/[a-zA-Z0-9_.-]+$/.test(pathname)
+      ) {
+        res.writeHead(404);
+        res.end("Not found");
+        return;
+      }
       if (pathname.split("/").some((part) => part.startsWith("."))) {
         res.writeHead(403);
         res.end("Forbidden");
@@ -44,3 +66,5 @@ http
   .listen(port, "0.0.0.0", () =>
     console.log(`Последний факел: http://0.0.0.0:${port}`),
   );
+
+attachRooms(server);
