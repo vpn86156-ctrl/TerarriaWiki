@@ -1,6 +1,21 @@
-<!doctype html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#111115"/><meta name="description" content="Твой путеводитель по Terraria: билды четырёх классов, боссы, прохождение, секреты и история мира."/><link rel="manifest" href="/TerarriaWiki/manifest.webmanifest"/><link rel="icon" type="image/png" href="/TerarriaWiki/icons/app-192.png"/><link rel="apple-touch-icon" href="/TerarriaWiki/icons/app-192.png"/><meta name="apple-mobile-web-app-capable" content="yes"/><title>Terraria Guide — Твоё приключение начинается здесь</title>  <script type="module" crossorigin src="/TerarriaWiki/assets/index-CcW0zrFG.js"></script>
-  <link rel="modulepreload" crossorigin href="/TerarriaWiki/assets/rolldown-runtime-XKyaHtl9.js">
-  <link rel="modulepreload" crossorigin href="/TerarriaWiki/assets/react-vendor-KPuNr9iS.js">
-  <link rel="modulepreload" crossorigin href="/TerarriaWiki/assets/createLucideIcon-AFOIfCWr.js">
-  <link rel="stylesheet" crossorigin href="/TerarriaWiki/assets/index-CMXXntbo.css">
-</head><body><div id="root"></div></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Новый сайт</title>
+</head>
+<body>
+  <script>
+    // Refresh an existing legacy worker, without registering one for a new visitor.
+    // The retirement worker removes only the old site's offline caches.
+    if ('serviceWorker' in navigator) {
+      const scope = new URL('./', location.href).href;
+      navigator.serviceWorker.getRegistrations().then(registrations =>
+        Promise.all(registrations.filter(registration => registration.scope === scope)
+          .map(registration => registration.update()))
+      ).catch(() => {});
+    }
+  </script>
+</body>
+</html>
