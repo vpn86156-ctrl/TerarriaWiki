@@ -2082,3 +2082,61 @@
     font-size: 8px;
   }
 }
+/* Crop artwork is contained in its own game-asset viewport, never the entire atlas. */
+.chapter-art .chapter-item-art {
+  width: 64px !important;
+  height: 64px !important;
+}
+.story-image .chapter-item-art {
+  width: 96px !important;
+  height: 96px !important;
+}
+.reading-illustration .chapter-item-art {
+  width: 104px !important;
+  height: 104px !important;
+}
+.hero-boss .chapter-item-art {
+  width: 104px !important;
+  height: 104px !important;
+}
+.reveal-stages {
+  margin: 0 8px 14px;
+}
+.spoiler-notice {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 13px 16px;
+  margin-bottom: 18px;
+  border: 1px solid #c5e37c33;
+  border-radius: 12px;
+  background: #1a2826;
+  color: var(--muted);
+  font-size: 12px;
+}
+/* Keep the atmosphere behind content rather than visible across paragraphs. */
+.world-atmosphere {
+  opacity: 0.4;
+}
+.world-atmosphere .landscape {
+  opacity: 0.25;
+}
+.story-card,
+.short-path,
+.recent-notes {
+  background: linear-gradient(135deg, #202c31f5, #192329f5);
+}
+@media (max-width: 480px) {
+  .chapter-art .chapter-item-art {
+    width: 32px !important;
+    height: 40px !important;
+  }
+  .reveal-stages {
+    display: flex;
+    margin: 0 auto 14px;
+  }
+  .spoiler-notice {
+    font-size: 11px;
+  }
+}

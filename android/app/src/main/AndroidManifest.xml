@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="io.github.vpn86156.terraletopis" android:versionCode="1" android:versionName="0.1.0">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="io.github.vpn86156.terraletopis" android:versionCode="2" android:versionName="0.1.1">
     <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="35"/>
     <!-- Deliberately no INTERNET, storage, location, camera or contacts permissions. -->
     <application android:label="TERRA Летопись" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:theme="@style/AppTheme" android:allowBackup="false" android:usesCleartextTraffic="false" android:hardwareAccelerated="true" android:supportsRtl="true" android:enableOnBackInvokedCallback="false">

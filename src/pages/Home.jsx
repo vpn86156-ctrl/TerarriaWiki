@@ -12,7 +12,7 @@ import {
 import { useStore } from "../state/Store.jsx";
 import { chapters, roman, quests } from "../data/chapters.js";
 import { byKey, filterCrafts, recipeMap, formatNumber } from "../data/index.js";
-import { Boss, Sprite } from "../components/Sprite.jsx";
+import { ChapterArt, Sprite } from "../components/Sprite.jsx";
 import { Landscape } from "../components/Scenery.jsx";
 import { Eyebrow, LinkButton } from "../components/UI.jsx";
 import { ItemCard } from "./Catalogs.jsx";
@@ -74,7 +74,7 @@ export default function Home() {
           </div>
         </div>
         <div className="hero-boss">
-          <Boss boss={chapter.boss} name={chapter.goal} />
+          <ChapterArt chapter={chapter} />
           <span className="boss-label">
             СЛЕДУЮЩАЯ ЦЕЛЬ<b>{chapter.goal}</b>
           </span>

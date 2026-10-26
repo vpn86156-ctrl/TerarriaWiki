@@ -104,7 +104,7 @@ const initial = {
   ready: false,
 };
 export function Catalog({ type = "craft" }) {
-  const { state } = useStore(),
+  const { state, update } = useStore(),
     [filters, setFilters] = useState(initial),
     [page, setPage] = useState(1),
     [more, setMore] = useState(false),
@@ -122,6 +122,19 @@ export function Catalog({ type = "craft" }) {
         : filterItems({ ...filters, query: deferred }, state),
     [craft, filters, deferred, state],
   );
+  // Diagnose excluded stages without exposing their names or pictures in spoiler-safe mode.
+  const hiddenCount = useMemo(() => {
+    if (!state.spoilers || !deferred.trim()) return 0;
+    const unlocked = { ...state, spoilers: false };
+    const all = craft
+      ? filterCrafts({ ...filters, query: deferred }, unlocked)
+      : filterItems({ ...filters, query: deferred }, unlocked);
+    return Math.max(0, all.length - result.length);
+  }, [craft, filters, deferred, state, result.length]);
+  const revealStages = () => {
+    update({ spoilers: false });
+    setPage(1);
+  };
   const pageCount = Math.max(1, Math.ceil(result.length / 48)),
     actual = Math.min(page, pageCount),
     reduced = useReducedMotion();
@@ -287,6 +300,16 @@ export function Catalog({ type = "craft" }) {
           {data.meta.gameVersion}
         </span>
       </div>
+      {hiddenCount > 0 && result.length > 0 && (
+        <aside className="spoiler-notice" role="status">
+          <span>
+            Ещё {hiddenCount} совпадений скрыто режимом «Без спойлеров».
+          </span>
+          <button className="text-button" onClick={revealStages}>
+            Показать все этапы
+          </button>
+        </aside>
+      )}
       {result.length ? (
         <div className="item-grid">
           {result.slice((actual - 1) * 48, actual * 48).map((item) => (
@@ -300,11 +323,28 @@ export function Catalog({ type = "craft" }) {
         </div>
       ) : (
         <Empty
+          title={
+            hiddenCount ? "Совпадения скрыты режимом без спойлеров" : undefined
+          }
+          text={
+            hiddenCount
+              ? "Поиск нашёл предметы из будущих глав. Можно показать их, не меняя прогресс мира."
+              : undefined
+          }
           reset={() => {
             setFilters(initial);
             setPage(1);
           }}
-        />
+        >
+          {hiddenCount > 0 && (
+            <button
+              className="button primary reveal-stages"
+              onClick={revealStages}
+            >
+              Показать все этапы
+            </button>
+          )}
+        </Empty>
       )}
       <Pagination page={actual} total={result.length} onChange={goto} />
       <p className="data-note">

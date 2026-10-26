@@ -29,7 +29,8 @@ if not key.exists():
  key.parent.mkdir(parents=True,exist_ok=True);password.write_text(secrets.token_urlsafe(32));password.chmod(0o600)
  run(KEYTOOL,'-genkeypair','-keystore',key,'-storepass:file',password,'-keypass:file',password,'-alias','terra','-keyalg','RSA','-keysize','3072','-validity','10000','-dname','CN=TERRA Letopis, OU=Independent Fan Companion')
  key.chmod(0o600)
-apk=ART/'TERRA-Letopis-0.1.0.apk'
+version=json.loads((ROOT/'package.json').read_text())['version']
+apk=ART/f'TERRA-Letopis-{version}.apk'
 run(JAVA,'-jar',SIGNER,'sign','--ks',key,'--ks-key-alias','terra','--ks-pass','file:'+str(password),'--v1-signing-enabled','true','--v2-signing-enabled','true','--out',apk,unsigned)
 run(JAVA,'-jar',SIGNER,'verify','--verbose','--print-certs',apk)
 report=subprocess.check_output([str(AAPT),'dump','badging',str(apk)],text=True,stderr=subprocess.STDOUT);(ART/'apk-info.txt').write_text(report)

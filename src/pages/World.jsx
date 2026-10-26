@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { chapters, roman } from "../data/chapters.js";
 import { useStore } from "../state/Store.jsx";
-import { Boss, Sprite } from "../components/Sprite.jsx";
+import { ChapterArt, Sprite } from "../components/Sprite.jsx";
 import { PageTitle, Empty, Eyebrow } from "../components/UI.jsx";
 import { motion } from "framer-motion";
 export function Path() {
@@ -62,11 +62,7 @@ export function Path() {
                 {i < state.completed ? <Check size={23} /> : roman[i]}
               </div>
               <div className="chapter-art">
-                {hidden ? (
-                  <Lock size={38} />
-                ) : (
-                  <Boss boss={c.boss} name={c.goal} />
-                )}
+                {hidden ? <Lock size={38} /> : <ChapterArt chapter={c} />}
               </div>
               <div className="chapter-content">
                 <Eyebrow>
@@ -120,11 +116,7 @@ export function Stories() {
               key={i}
             >
               <div className="story-image">
-                {locked ? (
-                  <Lock size={33} />
-                ) : (
-                  <Boss boss={c.boss} name={c.goal} />
-                )}
+                {locked ? <Lock size={33} /> : <ChapterArt chapter={c} />}
               </div>
               <div>
                 <Eyebrow>

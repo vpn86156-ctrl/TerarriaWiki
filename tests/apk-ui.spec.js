@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve, extname } from "node:path";
-const apk = resolve("artifacts/TERRA-Letopis-0.1.0.apk"),
+const apk = resolve("artifacts/TERRA-Letopis-0.1.1.apk"),
   folder = resolve("build/apk-test");
 mkdirSync(folder, { recursive: true });
 execFileSync("unzip", ["-q", "-o", apk, "assets/*", "-d", folder]);
@@ -348,4 +348,155 @@ test("Ordinary motion and phone landscape keep shared sprites proportional", asy
     .getByRole("button", { name: "Дерево крафта", exact: true })
     .click();
   await widthOK(page);
+});
+
+test("Screenshot regression: Zenith explains spoiler filtering and opens after consent", async ({
+  page,
+}) => {
+  await navigate(page, "Все крафты");
+  await page.getByRole("searchbox", { name: "Поиск крафтов" }).fill("Зенит");
+  await expect(
+    page.getByRole("heading", {
+      name: "Совпадения скрыты режимом без спойлеров",
+    }),
+  ).toBeVisible();
+  await expect(page.locator('[data-item-key="Zenith"]')).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Показать все этапы", exact: true })
+    .click();
+  await expect(
+    page.getByRole("switch", { name: "Без спойлеров" }),
+  ).toHaveAttribute("aria-checked", "false");
+  await page.locator('[data-item-key="Zenith"] .card-open').click();
+  await expect(page.locator("#modal-title")).toContainText("Зенит");
+  await page
+    .getByRole("button", { name: "Дерево крафта", exact: true })
+    .click();
+  await expect(page.locator(".tree-root")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => JSON.parse(localStorage.getItem("terra:chronicle:v1")).completed,
+    ),
+  ).toBe(2);
+  await widthOK(page);
+  await page.screenshot({ path: "artifacts/fixed-zenith.png", fullPage: true });
+});
+
+test("Screenshot regression: preparation chapters and stories do not reuse King Slime", async ({
+  page,
+}) => {
+  await navigate(page, "Сюжет Terraria");
+  const art = page.locator(".story-card .story-image");
+  await expect(art.nth(0).locator("svg.game-sprite")).toHaveAttribute(
+    "class",
+    /chapter-item-art/,
+  );
+  await expect(art.nth(1).locator("svg.game-sprite")).toHaveAttribute(
+    "class",
+    /chapter-item-art/,
+  );
+  await expect(art.nth(0).locator("img")).toHaveCount(0);
+  await expect(art.nth(1).locator("img")).toHaveCount(0);
+  const first = await art
+      .nth(0)
+      .locator("svg.game-sprite")
+      .getAttribute("viewBox"),
+    second = await art
+      .nth(1)
+      .locator("svg.game-sprite")
+      .getAttribute("viewBox");
+  expect(first).not.toBe(second);
+  await page
+    .getByRole("button", { name: "Читать у костра", exact: true })
+    .first()
+    .click();
+  await expect(
+    page.locator(".reading-illustration svg.game-sprite"),
+  ).toHaveAttribute("viewBox", first);
+  await page.keyboard.press("Escape");
+  await navigate(page, "Путь мира");
+  await expect(
+    page.locator(".chapter-art svg.game-sprite").nth(0),
+  ).toHaveAttribute("viewBox", first);
+  await expect(
+    page.locator(".chapter-art svg.game-sprite").nth(1),
+  ).toHaveAttribute("viewBox", second);
+  await widthOK(page);
+});
+
+test("Screenshot regression: Guide and wide/tall items contain only their own atlas pixels", async ({
+  page,
+}) => {
+  const { PNG } = await import("pngjs");
+  for (const selector of [
+    ".guide-portrait svg.game-sprite",
+    ".quick-links>a:nth-child(1) svg.game-sprite",
+    ".quick-links>a:nth-child(2) svg.game-sprite",
+    ".quick-links>a:nth-child(3) svg.game-sprite",
+  ]) {
+    const expected = await page.locator(selector).evaluate(async (svg) => {
+      const [x, y, w, h] = svg.getAttribute("viewBox").split(" ").map(Number),
+        n = Math.max(w, h) * 4;
+      const image = svg.querySelector("image"),
+        url = new URL(image.getAttribute("href"), location.href).href;
+      const img = new Image();
+      img.src = url;
+      await img.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = n;
+      canvas.height = n;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ff00ff";
+      ctx.fillRect(0, 0, n, n);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(
+        img,
+        x,
+        y,
+        w,
+        h,
+        (n - w * 4) / 2,
+        (n - h * 4) / 2,
+        w * 4,
+        h * 4,
+      );
+      const probe = document.createElement("div");
+      probe.id = "sprite-pixel-probe";
+      Object.assign(probe.style, {
+        position: "fixed",
+        left: "0",
+        top: "0",
+        width: n + "px",
+        height: n + "px",
+        background: "#ff00ff",
+        zIndex: 9999,
+      });
+      const clone = svg.cloneNode(true);
+      clone.style.width = n + "px";
+      clone.style.height = n + "px";
+      probe.appendChild(clone);
+      document.body.appendChild(probe);
+      return canvas.toDataURL("image/png").split(",")[1];
+    });
+    const actual = PNG.sync.read(
+        await page.locator("#sprite-pixel-probe").screenshot(),
+      ),
+      reference = PNG.sync.read(Buffer.from(expected, "base64"));
+    expect(actual.width).toBe(reference.width);
+    expect(actual.height).toBe(reference.height);
+    let wrong = 0;
+    for (let i = 0; i < actual.data.length; i += 4) {
+      if (
+        [0, 1, 2, 3].some(
+          (c) => Math.abs(actual.data[i + c] - reference.data[i + c]) > 3,
+        )
+      )
+        wrong++;
+    }
+    expect(
+      wrong,
+      selector + " contains pixels from outside its atlas crop",
+    ).toBeLessThan(reference.width * reference.height * 0.005);
+    await page.locator("#sprite-pixel-probe").evaluate((e) => e.remove());
+  }
 });

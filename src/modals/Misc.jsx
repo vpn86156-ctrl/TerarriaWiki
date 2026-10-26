@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Check, Feather, Save, ArrowRight, Trash2 } from "lucide-react";
 import { useStore } from "../state/Store.jsx";
 import { chapters, roman } from "../data/chapters.js";
-import { Sprite, Boss } from "../components/Sprite.jsx";
+import { Sprite, ChapterArt } from "../components/Sprite.jsx";
 export function Note({ modal }) {
   const { state, update, back, setToast } = useStore(),
     original = state.diary.find((n) => n.id === modal.key),
@@ -207,7 +207,7 @@ export function Story({ modal }) {
         {c.story}
       </h2>
       <div className="reading-illustration">
-        <Boss boss={c.boss} name={c.goal} />
+        <ChapterArt chapter={c} />
       </div>
       {c.body.split("\n\n").map((t, i) => (
         <p key={i}>{t}</p>
@@ -230,7 +230,7 @@ export function Chapter({ modal }) {
         {c.title}
       </h2>
       <div className="chapter-modal-art">
-        <Boss boss={c.boss} name={c.goal} />
+        <ChapterArt chapter={c} />
       </div>
       <p>{c.text}</p>
       {current ? (
@@ -276,7 +276,7 @@ export function Seal({ modal }) {
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 420, damping: 36, mass: 0.75 }}
       >
-        <Boss boss={c.boss} name={c.goal} />
+        <ChapterArt chapter={c} />
         <span>ГЛАВА {roman[modal.key]} · ПРОЙДЕНО</span>
       </motion.div>
       <p className="eyebrow">НОВАЯ СТРАНИЦА ТВОЕЙ ИСТОРИИ</p>
@@ -302,7 +302,7 @@ export function AppInfo() {
         Мир всегда рядом
       </h2>
       <p>
-        Версия 0.1.0. Неофициальный автономный спутник Terraria. Встроенный
+        Версия 0.1.1. Неофициальный автономный спутник Terraria. Встроенный
         интерфейс Android WebView, все данные, изображения и шрифты находятся
         внутри APK. Сервер и доступ к интернету не нужны.
       </p>

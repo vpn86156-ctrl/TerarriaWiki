@@ -106,7 +106,7 @@ test("APK contains a native entry point, bundled assets and no network permissio
   assert.doesNotMatch(badging, /uses-permission/);
   const listing = execFileSync(
     "unzip",
-    ["-Z1", "artifacts/TERRA-Letopis-0.1.0.apk"],
+    ["-Z1", "artifacts/TERRA-Letopis-0.1.1.apk"],
     { encoding: "utf8" },
   );
   assert.match(listing, /classes.dex/);
@@ -115,7 +115,7 @@ test("APK contains a native entry point, bundled assets and no network permissio
   assert.doesNotMatch(listing, /sw\.js|manifest\.webmanifest|\.zip$/m);
   const html = execFileSync(
     "unzip",
-    ["-p", "artifacts/TERRA-Letopis-0.1.0.apk", "assets/index.html"],
+    ["-p", "artifacts/TERRA-Letopis-0.1.1.apk", "assets/index.html"],
     { maxBuffer: 20 * 1024 * 1024, encoding: "utf8" },
   );
   assert.ok(html.indexOf('<div id="root"') < html.indexOf("<script>"));

@@ -74,14 +74,19 @@ export function Empty({
   text = "Попробуй другой запрос или сбрось фильтры.",
   reset,
   innerRef,
+  children,
 }) {
   return (
     <section ref={innerRef} className="empty-state">
       <PackageOpen size={36} />
       <h2>{title}</h2>
       <p>{text}</p>
+      {children}
       {reset && (
-        <button className="button primary" onClick={reset}>
+        <button
+          className={"button " + (children ? "" : "primary")}
+          onClick={reset}
+        >
           Сбросить поиск
         </button>
       )}

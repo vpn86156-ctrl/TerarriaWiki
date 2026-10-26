@@ -1,9 +1,10 @@
 import { useReducedMotion } from "../state/useReducedMotion.js";
-import React from "react";
+import React, { useId } from "react";
 import { motion } from "framer-motion";
 import { data, byKey } from "../data/index.js";
 import { useStore } from "../state/Store.jsx";
 export function Sprite({ item, icon, name, size = 44, className = "" }) {
+  const clipId = "sprite-crop-" + useId();
   const value = typeof item === "string" ? byKey.get(item) : item,
     source = icon || value?.icon,
     label = name || value?.ru || "Игровой спрайт";
@@ -26,7 +27,13 @@ export function Sprite({ item, icon, name, size = 44, className = "" }) {
       preserveAspectRatio="xMidYMid meet"
     >
       <title>{label}</title>
+      <defs>
+        <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+          <rect x={x} y={y} width={w} height={h} />
+        </clipPath>
+      </defs>
       <image
+        clipPath={`url(#${clipId})`}
         href={"./images/" + sheet.file.split("/").at(-1)}
         width={sheet.w}
         height={sheet.h}
@@ -61,5 +68,14 @@ export function Boss({ boss, name, className = "" }) {
       alt={name || "Босс Terraria"}
       draggable="false"
     />
+  );
+}
+
+// Early chapters are preparations, not boss encounters. Reuse the same semantic art everywhere.
+export function ChapterArt({ chapter, size = 96 }) {
+  return chapter.artItem ? (
+    <Sprite item={chapter.artItem} size={size} className="chapter-item-art" />
+  ) : (
+    <Boss boss={chapter.boss} name={chapter.goal} />
   );
 }
