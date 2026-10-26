@@ -1,3 +1,4 @@
+import { Reveal } from "../components/Reveal.jsx";
 import React, { useMemo, useState } from "react";
 import {
   ArrowRight,
@@ -22,14 +23,23 @@ export default function Home() {
     chapter = chapters[index],
     progress = Math.round((state.completed / 11) * 100),
     [quest, setQuest] = useState(null);
-  const ready = useMemo(() => filterCrafts({ ready: true }, state), [state]);
+  const ready = useMemo(
+    () =>
+      filterCrafts(
+        {
+          ready: true,
+        },
+        state,
+      ),
+    [state],
+  );
   const guide = {
     icon: "https://terraria.wiki.gg/images/Guide.png",
     ru: "Гид",
   };
   return (
     <>
-      <div className="home-greeting">
+      <Reveal className="home-greeting" as="div" order={0}>
         <div>
           <Eyebrow>ТВОЯ ИСТОРИЯ ЕЩЁ НЕ ЗАКОНЧЕНА</Eyebrow>
           <h1>
@@ -53,8 +63,8 @@ export default function Home() {
           </span>
           <Settings2 size={16} />
         </button>
-      </div>
-      <section className="world-hero">
+      </Reveal>
+      <Reveal className="world-hero" as="section" order={1}>
         <Landscape index={index} />
         <div className="hero-orbit" />
         <div className="hero-copy">
@@ -85,15 +95,21 @@ export default function Home() {
             Летопись твоего мира
           </span>
           <div className="progress-line">
-            <span style={{ width: progress + "%" }} />
+            <span
+              style={{
+                width: progress + "%",
+              }}
+            />
           </div>
           <span>{state.completed} / 11 глав</span>
         </div>
-      </section>
+      </Reveal>
       <div className="home-duo">
-        <button
+        <Reveal
           className="guide-teaser panel"
           onClick={() => open("story", index)}
+          as="button"
+          order={2}
         >
           <div className="guide-portrait">
             <Sprite item={guide} size={56} />
@@ -107,8 +123,8 @@ export default function Home() {
             <p>«{chapter.body.split(".")[0]}…»</p>
           </div>
           <ArrowRight size={21} />
-        </button>
-        <section className="quest-card panel">
+        </Reveal>
+        <Reveal className="quest-card panel" as="section" order={3}>
           <div className="quest-heading">
             <Compass size={20} />
             <span>Иногда лучший путь — случайный</span>
@@ -156,9 +172,9 @@ export default function Home() {
               </button>
             </>
           )}
-        </section>
+        </Reveal>
       </div>
-      <div className="quick-links">
+      <Reveal className="quick-links" as="div" order={0}>
         {[
           [
             "crafts",
@@ -185,8 +201,8 @@ export default function Home() {
             <ChevronRight size={17} />
           </a>
         ))}
-      </div>
-      <section className="short-path panel">
+      </Reveal>
+      <Reveal className="short-path panel" as="section" order={1}>
         <div className="section-heading">
           <div>
             <Eyebrow>ОДНО ПРИКЛЮЧЕНИЕ. ОДИННАДЦАТЬ ГЛАВ.</Eyebrow>
@@ -226,7 +242,7 @@ export default function Home() {
             </button>
           ))}
         </div>
-      </section>
+      </Reveal>
       <div className="section-heading resource-heading">
         <div>
           <Eyebrow>ЗАГЛЯНИ В СВОЙ РЮКЗАК</Eyebrow>
@@ -237,7 +253,7 @@ export default function Home() {
           Мои ресурсы <ArrowRight size={16} />
         </a>
       </div>
-      <div className="resource-preview">
+      <Reveal className="resource-preview" as="div" order={2}>
         {Object.entries(state.inventory)
           .filter(([k, v]) => v > 0 && byKey.has(k))
           .slice(0, 5)
@@ -251,10 +267,16 @@ export default function Home() {
               <b>{v}</b>
             </button>
           ))}
-      </div>
+      </Reveal>
       <div className="home-recipes item-grid">
-        {ready.slice(0, 4).map((i) => (
-          <ItemCard item={i} key={i.key} kind="craft" prefix="home-craft" />
+        {ready.slice(0, 4).map((i, cardIndex) => (
+          <ItemCard
+            order={cardIndex}
+            item={i}
+            key={i.key}
+            kind="craft"
+            prefix="home-craft"
+          />
         ))}
       </div>
       {!ready.length && (
@@ -263,7 +285,7 @@ export default function Home() {
         </p>
       )}
       <div className="home-bottom">
-        <section className="weekly panel">
+        <Reveal className="weekly panel" as="section" order={3}>
           <img
             src="./images/treehouse.webp"
             alt="Авторская композиция дома на живом дереве из игровых ресурсов Terraria"
@@ -288,8 +310,8 @@ export default function Home() {
               Записать цель <Feather size={16} />
             </button>
           </div>
-        </section>
-        <section className="recent-notes panel">
+        </Reveal>
+        <Reveal className="recent-notes panel" as="section" order={0}>
           <div className="section-heading">
             <div>
               <Eyebrow>НА ПОЛЯХ ЛЕТОПИСИ</Eyebrow>
@@ -336,7 +358,7 @@ export default function Home() {
           <a href="#/diary" className="text-button">
             Открыть дневник <ArrowRight size={15} />
           </a>
-        </section>
+        </Reveal>
       </div>
     </>
   );

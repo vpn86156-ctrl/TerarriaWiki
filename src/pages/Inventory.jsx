@@ -1,3 +1,4 @@
+import { Reveal } from "../components/Reveal.jsx";
 import React, { useMemo, useState } from "react";
 import { Plus, Trash2, Check, Package } from "lucide-react";
 import { useStore } from "../state/Store.jsx";
@@ -30,7 +31,14 @@ export default function Inventory() {
       norm(byKey.get(k).ru + " " + byKey.get(k).name).includes(norm(query)),
   );
   const result = useMemo(
-    () => filterCrafts({ query, ready }, state),
+    () =>
+      filterCrafts(
+        {
+          query,
+          ready,
+        },
+        state,
+      ),
     [query, ready, state],
   );
   return (
@@ -42,7 +50,11 @@ export default function Inventory() {
       >
         <button
           className="button primary"
-          onClick={() => open("search", null, "", { inventory: true })}
+          onClick={() =>
+            open("search", null, "", {
+              inventory: true,
+            })
+          }
         >
           <Plus size={18} />
           Добавить предмет
@@ -66,8 +78,13 @@ export default function Inventory() {
       </div>
       {inv.length ? (
         <div className="inventory-grid">
-          {inv.map(([key, value]) => (
-            <article className="inventory-row" key={key}>
+          {inv.map(([key, value], cardIndex) => (
+            <Reveal
+              className="inventory-row"
+              key={key}
+              as="article"
+              order={cardIndex}
+            >
               <button
                 className="inventory-item"
                 onClick={() => open("item", key, "inventory:" + key)}
@@ -92,7 +109,7 @@ export default function Inventory() {
               >
                 <Trash2 size={15} />
               </button>
-            </article>
+            </Reveal>
           ))}
         </div>
       ) : (
@@ -125,9 +142,14 @@ export default function Inventory() {
       </div>
       {result.length ? (
         <div className="item-grid">
-          {result.slice((page - 1) * 48, page * 48).map((item) => (
+          {result.slice((page - 1) * 48, page * 48).map((item, cardIndex) => (
             <div key={item.key}>
-              <ItemCard item={item} kind="craft" prefix="ready" />
+              <ItemCard
+                item={item}
+                order={cardIndex}
+                kind="craft"
+                prefix="ready"
+              />
               {!ready && (
                 <p className="missing-line">
                   {availability(chooseRecipe(item.key, state), state.inventory)
@@ -151,7 +173,10 @@ export default function Inventory() {
         total={result.length}
         onChange={(p) => {
           setPage(p);
-          window.scrollTo({ top: 0, behavior: "instant" });
+          window.scrollTo({
+            top: 0,
+            behavior: "instant",
+          });
         }}
       />
     </>

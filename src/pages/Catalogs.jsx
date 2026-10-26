@@ -1,3 +1,4 @@
+import { Reveal } from "../components/Reveal.jsx";
 import { useReducedMotion } from "../state/useReducedMotion.js";
 import React, {
   useState,
@@ -36,19 +37,24 @@ import {
   Empty,
 } from "../components/UI.jsx";
 import { chapters } from "../data/chapters.js";
-export function ItemCard({ item, kind = "item", prefix = "obtain" }) {
+export function ItemCard({
+  item,
+  kind = "item",
+  prefix = "obtain",
+  order = 0,
+}) {
   const { state, open } = useStore(),
     reduced = useReducedMotion(),
     origin = prefix + ":" + item.key,
     variants = recipeMap.get(item.key) || [],
     ready = variants.some((r) => availability(r, state.inventory).enough);
   return (
-    <motion.article
+    <Reveal
       className="item-card"
       layout={reduced ? false : "position"}
-      initial={false}
-      transition={{ duration: 0.18 }}
       data-item-key={item.key}
+      as="article"
+      order={order}
     >
       <StarButton id={"item:" + item.key} />
       <button
@@ -87,7 +93,7 @@ export function ItemCard({ item, kind = "item", prefix = "obtain" }) {
           )}
         </span>
       </button>
-    </motion.article>
+    </Reveal>
   );
 }
 const initial = {
@@ -112,27 +118,59 @@ export function Catalog({ type = "craft" }) {
     top = useRef(),
     craft = type === "craft";
   const change = (key, value) => {
-    setFilters((f) => ({ ...f, [key]: value }));
+    setFilters((f) => ({
+      ...f,
+      [key]: value,
+    }));
     setPage(1);
   };
   const result = useMemo(
     () =>
       craft
-        ? filterCrafts({ ...filters, query: deferred }, state)
-        : filterItems({ ...filters, query: deferred }, state),
+        ? filterCrafts(
+            {
+              ...filters,
+              query: deferred,
+            },
+            state,
+          )
+        : filterItems(
+            {
+              ...filters,
+              query: deferred,
+            },
+            state,
+          ),
     [craft, filters, deferred, state],
   );
   // Diagnose excluded stages without exposing their names or pictures in spoiler-safe mode.
   const hiddenCount = useMemo(() => {
     if (!state.spoilers || !deferred.trim()) return 0;
-    const unlocked = { ...state, spoilers: false };
+    const unlocked = {
+      ...state,
+      spoilers: false,
+    };
     const all = craft
-      ? filterCrafts({ ...filters, query: deferred }, unlocked)
-      : filterItems({ ...filters, query: deferred }, unlocked);
+      ? filterCrafts(
+          {
+            ...filters,
+            query: deferred,
+          },
+          unlocked,
+        )
+      : filterItems(
+          {
+            ...filters,
+            query: deferred,
+          },
+          unlocked,
+        );
     return Math.max(0, all.length - result.length);
   }, [craft, filters, deferred, state, result.length]);
   const revealStages = () => {
-    update({ spoilers: false });
+    update({
+      spoilers: false,
+    });
     setPage(1);
   };
   const pageCount = Math.max(1, Math.ceil(result.length / 48)),
@@ -209,7 +247,10 @@ export function Catalog({ type = "craft" }) {
             onChange={(v) => change("category", v)}
             options={data.categories.map((c) => [
               c.id,
-              categories[c.id] || categoryName({ categories: [c.id] }),
+              categories[c.id] ||
+                categoryName({
+                  categories: [c.id],
+                }),
             ])}
           />
           {craft ? (
@@ -312,14 +353,17 @@ export function Catalog({ type = "craft" }) {
       )}
       {result.length ? (
         <div className="item-grid">
-          {result.slice((actual - 1) * 48, actual * 48).map((item) => (
-            <ItemCard
-              key={item.key}
-              item={item}
-              kind={craft ? "craft" : "item"}
-              prefix={craft ? "craft" : "obtain"}
-            />
-          ))}
+          {result
+            .slice((actual - 1) * 48, actual * 48)
+            .map((item, cardIndex) => (
+              <ItemCard
+                order={cardIndex}
+                key={item.key}
+                item={item}
+                kind={craft ? "craft" : "item"}
+                prefix={craft ? "craft" : "obtain"}
+              />
+            ))}
         </div>
       ) : (
         <Empty

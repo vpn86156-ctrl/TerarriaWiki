@@ -1,3 +1,4 @@
+import { Reveal } from "../components/Reveal.jsx";
 import { useReducedMotion } from "../state/useReducedMotion.js";
 import React, { useState, useRef, useEffect } from "react";
 import { Heart, Star, MapPin } from "lucide-react";
@@ -10,7 +11,7 @@ import {
   Empty,
   StarButton,
 } from "../components/UI.jsx";
-import {} from "framer-motion";
+import "framer-motion";
 const roles = {
   Guide: "Подсказывает рецепты из выбранного материала.",
   Merchant: "Продаёт базовые инструменты и припасы.",
@@ -120,7 +121,7 @@ export default function NPCs() {
       </div>
       {result.length ? (
         <div className="npc-grid">
-          {result.map((n) => {
+          {result.map((n, cardIndex) => {
             const p = n.preferences,
               good = p.neighbors.loved.length ? "loved" : "liked",
               discount = Math.max(
@@ -128,7 +129,12 @@ export default function NPCs() {
                 0.95 * 0.95 * (good === "loved" ? 0.9 : 0.95),
               );
             return (
-              <article className="npc-card" key={n.id}>
+              <Reveal
+                className="npc-card"
+                key={n.id}
+                as="article"
+                order={cardIndex}
+              >
                 <StarButton id={"npc:" + n.id} />
                 <div className="npc-head">
                   <div className="npc-portrait">
@@ -179,7 +185,7 @@ export default function NPCs() {
                 <a className="source-link" href={n.url} rel="noreferrer">
                   Условия заселения на wiki ↗
                 </a>
-              </article>
+              </Reveal>
             );
           })}
         </div>
@@ -209,7 +215,7 @@ export default function NPCs() {
           <div className="extras-grid">
             {data.npcs
               .filter((n) => !n.main)
-              .map((n) => (
+              .map((n, cardIndex) => (
                 <article key={n.id}>
                   <Sprite icon={n.icon} name={n.ru} size={48} />
                   <div>

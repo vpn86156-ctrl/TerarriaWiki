@@ -1,3 +1,4 @@
+import { Reveal } from "../components/Reveal.jsx";
 import { useReducedMotion } from "../state/useReducedMotion.js";
 import React, { useEffect, useRef } from "react";
 import {
@@ -36,7 +37,9 @@ export function Path() {
         <div className="progress-line">
           <motion.span
             initial={false}
-            animate={{ width: (state.completed / 11) * 100 + "%" }}
+            animate={{
+              width: (state.completed / 11) * 100 + "%",
+            }}
           />
         </div>
         <b>{Math.round((state.completed / 11) * 100)}%</b>
@@ -46,7 +49,7 @@ export function Path() {
           const locked = i > state.completed,
             hidden = locked && state.spoilers;
           return (
-            <section
+            <Reveal
               key={i}
               ref={i === state.completed ? current : null}
               className={
@@ -57,6 +60,9 @@ export function Path() {
                     ? "current"
                     : "locked")
               }
+              as="section"
+              order={i}
+              direction={i % 2 === 0 ? "left" : "right"}
             >
               <div className="chapter-number">
                 {i < state.completed ? <Check size={23} /> : roman[i]}
@@ -91,7 +97,7 @@ export function Path() {
                     : "Закрыто"}
                 {locked ? <Lock size={15} /> : <ArrowRight size={16} />}
               </button>
-            </section>
+            </Reveal>
           );
         })}
       </div>
@@ -111,9 +117,12 @@ export function Stories() {
         {chapters.map((c, i) => {
           const locked = i > state.completed;
           return (
-            <article
+            <Reveal
               className={"story-card panel " + (locked ? "locked" : "")}
               key={i}
+              as="article"
+              order={i}
+              direction={i % 2 === 0 ? "left" : "right"}
             >
               <div className="story-image">
                 {locked ? <Lock size={33} /> : <ChapterArt chapter={c} />}
@@ -137,7 +146,7 @@ export function Stories() {
                   {locked ? <Lock size={15} /> : <ArrowRight size={16} />}
                 </button>
               </div>
-            </article>
+            </Reveal>
           );
         })}
       </div>
@@ -163,8 +172,13 @@ export function Diary() {
       </PageTitle>
       {state.diary.length ? (
         <div className="diary-grid">
-          {state.diary.map((n) => (
-            <article className="diary-card panel" key={n.id}>
+          {state.diary.map((n, cardIndex) => (
+            <Reveal
+              className="diary-card panel"
+              key={n.id}
+              as="article"
+              order={cardIndex}
+            >
               <div className="note-meta">
                 <span className="tag">{n.tag}</span>
                 <time>{new Date(n.date).toLocaleDateString("ru-RU")}</time>
@@ -187,7 +201,7 @@ export function Diary() {
                   <Trash2 size={16} />
                 </button>
               </div>
-            </article>
+            </Reveal>
           ))}
         </div>
       ) : (

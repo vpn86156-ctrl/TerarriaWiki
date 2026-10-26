@@ -1,6 +1,6 @@
 {
   "name": "terra-letopis",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,8 @@
     "setup:android": "python3 scripts/setup-android.py",
     "build:apk": "python3 scripts/build-apk.py",
     "test": "node --test tests/*.test.mjs",
-    "test:ui": "playwright test"
+    "test:ui": "playwright test",
+    "build:design": "TERRA_DESIGN_PREVIEW=1 npm run build"
   },
   "dependencies": {
     "@fontsource/manrope": "^5.2.0",

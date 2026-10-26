@@ -6,6 +6,7 @@ import "./tokens.css";
 import "./layout.css";
 import "./pages.css";
 import "./modals.css";
+import "./design.css";
 class ErrorBoundary extends React.Component {
   state = { error: false };
   static getDerivedStateFromError() {

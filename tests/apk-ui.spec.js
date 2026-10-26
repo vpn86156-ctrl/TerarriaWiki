@@ -2,7 +2,9 @@ import { test, expect } from "@playwright/test";
 import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve, extname } from "node:path";
-const apk = resolve("artifacts/TERRA-Letopis-0.1.1.apk"),
+const apk = resolve(
+    process.env.TERRA_TEST_APK || "artifacts/TERRA-Letopis-0.2.0.apk",
+  ),
   folder = resolve("build/apk-test");
 mkdirSync(folder, { recursive: true });
 execFileSync("unzip", ["-q", "-o", apk, "assets/*", "-d", folder]);
@@ -499,4 +501,91 @@ test("Screenshot regression: Guide and wide/tall items contain only their own at
     ).toBeLessThan(reference.width * reference.height * 0.005);
     await page.locator("#sprite-pixel-probe").evaluate((e) => e.remove());
   }
+});
+
+async function replayIntro(page) {
+  await page.getByRole("button", { name: "О приложении", exact: true }).click();
+  await page.getByRole("button", { name: "Повторить вступление" }).click();
+  await expect(page.locator(".intro-cinematic")).toBeVisible();
+  await expect(page.locator("dialog.modal")).not.toBeVisible();
+}
+test("Cinematic Moon Lord: real local art, one flash, visible float, immediate skip and no overflow", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await replayIntro(page);
+  const figure = page.locator(".moon-figure");
+  await expect(figure.locator("img")).toHaveAttribute(
+    "src",
+    "./images/Moon_Lord.gif",
+  );
+  await expect(figure.locator("img")).toHaveJSProperty("complete", true);
+  expect(
+    await figure.locator("img").evaluate((e) => e.naturalWidth),
+  ).toBeGreaterThan(0);
+  await expect(page.locator(".intro-flash")).toHaveCount(1);
+  const samples = [];
+  for (let i = 0; i < 4; i++) {
+    await page.waitForTimeout(250);
+    samples.push(await figure.evaluate((e) => getComputedStyle(e).transform));
+  }
+  expect(new Set(samples).size).toBeGreaterThan(1);
+  await expect(page.locator(".intro-flash")).toHaveCSS("opacity", "0");
+  await page.screenshot({ path: "artifacts/design-intro-mobile.png" });
+  await widthOK(page);
+  for (const size of [
+    { width: 320, height: 568 },
+    { width: 844, height: 390 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(size);
+    const enter = page.getByRole("button", { name: "Войти в мир" });
+    await expect(enter).toBeInViewport();
+    await widthOK(page);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Пропустить вступление" }).click();
+  await expect(page.locator(".intro-cinematic")).toHaveCount(0);
+  await expect(page.locator(".home-greeting")).toHaveCSS("opacity", "1");
+});
+test("Scroll entrances run once; focused cards are revealed and live reduced motion stops effects", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await navigate(page, "Все NPC");
+  const cards = page.locator(".npc-card[data-reveal]"),
+    last = cards.last();
+  await expect(cards.first()).toHaveAttribute("data-reveal", "visible");
+  await expect(last).toHaveAttribute("data-reveal", "pending");
+  await expect(last).toHaveCSS("opacity", "0");
+  await last.scrollIntoViewIfNeeded();
+  await expect(last).toHaveAttribute("data-reveal", "visible");
+  await expect(last).toHaveCSS("opacity", "1");
+  await page.evaluate(() => scrollTo(0, 0));
+  await expect(last).toHaveAttribute("data-reveal", "visible");
+  await expect(last).toHaveCSS("opacity", "1");
+  const hiddenCard = page.locator('.npc-card[data-reveal="pending"]').first();
+  await expect(hiddenCard).toBeAttached();
+  await hiddenCard.locator("button").first().focus();
+  await expect(page.locator(".npc-card:focus-within")).toHaveAttribute(
+    "data-reveal",
+    "visible",
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator('[data-reveal="pending"]')).toHaveCount(0);
+  await page.evaluate(() => scrollTo(0, 0));
+  await replayIntro(page);
+  await expect(page.locator(".intro-flash")).toHaveCount(0);
+  await expect(page.locator(".intro-mote")).toHaveCount(0);
+  await expect(page.locator(".moon-figure img")).toHaveAttribute(
+    "src",
+    "./images/Moon_Lord.png",
+  );
+  await expect(page.locator(".moon-figure")).toHaveCSS("transform", "none");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await expect(page.locator(".intro-flash")).toHaveCount(1);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator(".intro-flash")).toHaveCount(0);
+  await page.getByRole("button", { name: "Войти в мир" }).click();
+  await expect(page.locator(".intro-cinematic")).toHaveCount(0);
 });

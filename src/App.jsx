@@ -35,6 +35,7 @@ import Inventory from "./pages/Inventory.jsx";
 import NPCs from "./pages/NPCs.jsx";
 import { Path, Stories, Diary } from "./pages/World.jsx";
 import Manager from "./modals/Manager.jsx";
+import Intro from "./components/Intro.jsx";
 const nav = [
   ["home", "Главная", HomeIcon],
   ["path", "Путь мира", Map],
@@ -72,52 +73,19 @@ function Navigation({ route, onNavigate }) {
         >
           <Icon size={19} />
           <span>{title}</span>
-          {id === route && <i />}
+          {id === route && (
+            <motion.i
+              layoutId={onNavigate ? "drawer-nav-dot" : "sidebar-nav-dot"}
+              transition={{ type: "spring", stiffness: 420, damping: 36 }}
+            />
+          )}
         </a>
       ))}
     </nav>
   );
 }
-function Intro({ onEnter }) {
-  const reduced = useReducedMotion();
-  return (
-    <motion.section
-      className="intro"
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: reduced ? 0 : 0.45 }}
-      aria-label="Добро пожаловать"
-    >
-      <div className="intro-stars" />
-      <motion.div
-        initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 15 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <img src="./icons/icon-192.png" alt="" />
-        <p className="eyebrow">КАЖДЫЙ МИР ЗАСЛУЖИВАЕТ СВОЕЙ ИСТОРИИ</p>
-        <h1>
-          TERRA<small>Л Е Т О П И С Ь</small>
-        </h1>
-        <p>
-          От первого костра — к последним звёздам.
-          <br />
-          Твой путеводитель по миру Terraria.
-        </p>
-        <button className="button primary" autoFocus onClick={onEnter}>
-          Войти в мир <ArrowRight size={18} />
-        </button>
-        <button className="text-button intro-skip" onClick={onEnter}>
-          Пропустить вступление
-        </button>
-        <small className="intro-footnote">
-          Без регистрации. Без спешки. Всё важное — рядом.
-        </small>
-      </motion.div>
-    </motion.section>
-  );
-}
 export default function App() {
-  const { state, update, open, back, modals, storageWarning, toast } =
+  const { state, update, open, back, close, modals, storageWarning, toast } =
       useStore(),
     [route, setRoute] = useState(getRoute),
     [intro, setIntro] = useState(() => {
@@ -132,6 +100,16 @@ export default function App() {
     drawerRef = useRef(),
     burger = useRef(),
     reduced = useReducedMotion();
+  useEffect(() => {
+    const replay = () => {
+      close();
+      setDrawer(false);
+      setIntro(true);
+      window.scrollTo({ top: 0, behavior: "instant" });
+    };
+    window.addEventListener("terra:replay-intro", replay);
+    return () => window.removeEventListener("terra:replay-intro", replay);
+  }, [close]);
   const current = Math.min(state.completed, 10),
     chapter = chapters[current],
     name = nav.find((n) => n[0] === route)[1];
@@ -205,6 +183,7 @@ export default function App() {
       sessionStorage.setItem("terra:intro:v1", "1");
     } catch {}
     setIntro(false);
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
   let page =
     route === "home" ? (
@@ -337,7 +316,7 @@ export default function App() {
             )}
             <motion.div
               className="page"
-              key={route}
+              key={route + (intro ? ":intro" : ":world")}
               initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.24 }}
