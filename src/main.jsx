@@ -1,6 +1,8 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Store } from "./state/Store.jsx";
+import { SettingsProvider } from "./state/Settings.jsx";
+import Soundscape from "./audio/Soundscape.jsx";
 import App from "./App.jsx";
 import "./tokens.css";
 import "./layout.css";
@@ -28,8 +30,11 @@ class ErrorBoundary extends React.Component {
 }
 createRoot(document.getElementById("root")).render(
   <ErrorBoundary>
-    <Store>
-      <App />
-    </Store>
+    <SettingsProvider>
+      <Store>
+        <Soundscape />
+        <App />
+      </Store>
+    </SettingsProvider>
   </ErrorBoundary>,
 );

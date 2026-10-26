@@ -1,3 +1,4 @@
+import BiomeBackdrop, { biomeNames } from "../components/BiomeBackdrop.jsx";
 import { Reveal } from "../components/Reveal.jsx";
 import { useReducedMotion } from "../state/useReducedMotion.js";
 import React, { useEffect, useRef } from "react";
@@ -111,7 +112,12 @@ export function Stories() {
       <PageTitle
         eyebrow="ЗАПИСКИ, КОТОРЫЕ ПАХНУТ ДЫМОМ КОСТРА"
         title="Сюжет Terraria"
-        description="Одиннадцать авторских историй от лица Гида. Художественный спутник прохождения, не официальный канон Re-Logic."
+        description={
+          "Одиннадцать авторских историй от лица Гида. Художественный спутник прохождения, не официальный канон Re-Logic." +
+          (state.spoilers
+            ? " Фоны будущих глав скрыты режимом без спойлеров."
+            : "")
+        }
       />
       <div className="stories-grid">
         {chapters.map((c, i) => {
@@ -124,6 +130,10 @@ export function Stories() {
               order={i}
               direction={i % 2 === 0 ? "left" : "right"}
             >
+              <BiomeBackdrop index={i} hidden={locked} />
+              {!locked && (
+                <span className="story-biome-label">{biomeNames[i]}</span>
+              )}
               <div className="story-image">
                 {locked ? <Lock size={33} /> : <ChapterArt chapter={c} />}
               </div>

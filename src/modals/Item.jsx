@@ -1,3 +1,4 @@
+import { acquisitionNotes } from "../data/acquisition-notes.js";
 import React from "react";
 import {
   Plus,
@@ -125,10 +126,42 @@ export default function Item({ modal }) {
       <section className="sources-section">
         <h3>Как получить</h3>
         <div className="method-labels">
+          {acquisitionNotes[item.key] && <span>Исследование мира</span>}
           {item.obtain.map((m) => (
             <span key={m}>{methods[m] || "Особый способ"}</span>
           ))}
         </div>
+        {acquisitionNotes[item.key] &&
+          (() => {
+            const source = acquisitionNotes[item.key];
+            return (
+              <article className="source-card exploration-source">
+                <div className="source-title">
+                  <MapPin size={23} />
+                  <div>
+                    <b>{source.title}</b>
+                    <small>{source.location}</small>
+                  </div>
+                </div>
+                <p>{source.text}</p>
+                <p>{source.chance}</p>
+                <aside className="source-clarification">
+                  {source.clarification}
+                </aside>
+                <div className="source-references">
+                  <a className="source-link" href={source.url}>
+                    Официальная wiki: предмет ↗
+                  </a>
+                  <a className="source-link" href={source.biomeUrl}>
+                    Святилище и условия появления ↗
+                  </a>
+                  <a className="source-link" href={source.enemyUrl}>
+                    Одноимённый противник ↗
+                  </a>
+                </div>
+              </article>
+            );
+          })()}
         {variants.length > 0 && (
           <div className="source-card">
             <div className="source-title">

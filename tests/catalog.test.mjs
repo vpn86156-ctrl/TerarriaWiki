@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, unlinkSync } from "node:fs";
 import { build } from "esbuild";
 import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
-const apkPath = process.env.TERRA_TEST_APK || "artifacts/TERRA-Wiki-0.3.0.apk";
+const apkPath = process.env.TERRA_TEST_APK || "artifacts/TERRA-Wiki-0.4.0.apk";
 const output = "/tmp/terra-data-test-" + process.pid + ".mjs";
 const bundle = await build({
   entryPoints: ["src/data/index.js"],
@@ -109,7 +109,7 @@ test("APK contains a native entry point, bundled assets and no network permissio
     badging,
     /package: name='io.github.vpn86156.terraletopis.design'/,
   );
-  assert.match(badging, /versionCode='4' versionName='0.3.0'/);
+  assert.match(badging, /versionCode='5' versionName='0.4.0'/);
   assert.match(badging, /application-label:'TERRA Wiki'/);
   const listing = execFileSync("unzip", ["-Z1", apkPath], { encoding: "utf8" });
   assert.match(listing, /classes.dex/);

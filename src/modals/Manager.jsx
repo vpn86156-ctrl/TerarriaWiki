@@ -3,6 +3,8 @@ import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { X, ArrowLeft } from "lucide-react";
 import { useStore } from "../state/Store.jsx";
+import { chapters } from "../data/chapters.js";
+import Settings from "./Settings.jsx";
 import Recipe from "./Recipe.jsx";
 import Item from "./Item.jsx";
 import Search from "./Search.jsx";
@@ -18,6 +20,7 @@ import {
   Credits,
 } from "./Misc.jsx";
 const bodies = {
+  settings: Settings,
   recipe: Recipe,
   item: Item,
   search: Search,
@@ -65,6 +68,16 @@ export default function Manager() {
     <dialog
       className={"modal " + (modal?.type === "search" ? "search-dialog" : "")}
       ref={ref}
+      data-reader-biome={
+        modal?.type === "story" ? chapters[modal.key]?.scene : undefined
+      }
+      style={
+        modal?.type === "story"
+          ? {
+              background: `linear-gradient(145deg,${["#243a30", "#18362d", "#21283d", "#2d2039", "#18382c", "#1d2c3f", "#401f20", "#24394c", "#163528", "#3b3022", "#142c39"][modal.key] || "#223139"},#111f28)`,
+            }
+          : undefined
+      }
       aria-labelledby="modal-title"
       onCancel={(e) => {
         e.preventDefault();

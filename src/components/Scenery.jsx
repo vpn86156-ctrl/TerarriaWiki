@@ -1,3 +1,4 @@
+import { useSettings } from "../state/Settings.jsx";
 import { useReducedMotion } from "../state/useReducedMotion.js";
 import React, { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -93,7 +94,8 @@ export function Landscape({ index = 2 }) {
   );
 }
 export function Scenery({ index }) {
-  const reduced = useReducedMotion(),
+  const { settings } = useSettings(),
+    reduced = useReducedMotion(),
     ref = useRef();
   useEffect(() => {
     if (reduced || !matchMedia("(pointer:fine)").matches) return;
@@ -142,18 +144,19 @@ export function Scenery({ index }) {
               background: `radial-gradient(ellipse at 75% 30%,${c.color}19,transparent 60%)`,
             }}
           />
-          {[...Array(14)].map((_, i) => (
-            <i
-              className={"atmosphere-particle " + c.weather}
-              key={i}
-              style={{
-                left: ((i * 71) % 100) + "%",
-                top: ((i * 29) % 90) + "%",
-                animationDelay: -(i * 1.3) + "s",
-                animationDuration: 12 + (i % 5) * 3 + "s",
-              }}
-            />
-          ))}
+          {settings.particles &&
+            [...Array(14)].map((_, i) => (
+              <i
+                className={"atmosphere-particle " + c.weather}
+                key={i}
+                style={{
+                  left: ((i * 71) % 100) + "%",
+                  top: ((i * 29) % 90) + "%",
+                  animationDelay: -(i * 1.3) + "s",
+                  animationDuration: 12 + (i % 5) * 3 + "s",
+                }}
+              />
+            ))}
           <div className="scene-fog" />
         </motion.div>
       </AnimatePresence>

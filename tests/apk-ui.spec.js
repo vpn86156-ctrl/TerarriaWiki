@@ -3,7 +3,7 @@ import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve, extname } from "node:path";
 const apk = resolve(
-    process.env.TERRA_TEST_APK || "artifacts/TERRA-Wiki-0.3.0.apk",
+    process.env.TERRA_TEST_APK || "artifacts/TERRA-Wiki-0.4.0.apk",
   ),
   folder = resolve("build/apk-test");
 mkdirSync(folder, { recursive: true });
@@ -794,4 +794,191 @@ test("Existing real progress is retained; unlocked next story needs no spoiler p
   await expect(page.locator(".story-next-confirm")).toHaveCount(0);
   await page.keyboard.press("Escape");
   await expect(page.locator("dialog.modal")).not.toBeVisible();
+});
+
+test("Eleven distinct real biome compositions; hidden future art stays hidden, and Hell reader is red", async ({
+  page,
+}) => {
+  await navigate(page, "Сюжет Terraria");
+  await expect(page.locator('.story-card [data-biome="unknown"]')).toHaveCount(
+    10,
+  );
+  await page.getByRole("switch", { name: "Без спойлеров" }).click();
+  const biomes = await page
+    .locator(".story-card .biome-backdrop")
+    .evaluateAll((nodes) =>
+      nodes.map((n) => ({
+        id: n.dataset.biome,
+        url: getComputedStyle(n).backgroundImage,
+      })),
+    );
+  expect(new Set(biomes.map((b) => b.id)).size).toBe(11);
+  expect(new Set(biomes.map((b) => b.url)).size).toBe(11);
+  await page
+    .locator(".story-card")
+    .nth(6)
+    .getByRole("button", { name: "Читать у костра", exact: true })
+    .click();
+  await expect(page.locator("dialog.modal")).toHaveAttribute(
+    "data-reader-biome",
+    "underworld",
+  );
+  await expect(page.locator(".reading-illustration .biome-backdrop")).toHaveCSS(
+    "background-image",
+    /underworld.webp/,
+  );
+  await page.locator(".reading-illustration").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "artifacts/biome-hell-reader.png" });
+  await widthOK(page);
+  await page.keyboard.press("Escape");
+  for (const size of [
+    { width: 320, height: 700 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(size);
+    await widthOK(page);
+  }
+});
+test("Enchanted Sword lists shrine/sword in stone before crates and does not mislabel the Hallow enemy as loot", async ({
+  page,
+}) => {
+  await page.getByRole("switch", { name: "Без спойлеров" }).click();
+  await navigate(page, "Как получить");
+  await page
+    .getByRole("searchbox", { name: "Поиск предметов" })
+    .fill("Enchanted Sword");
+  await page.locator('[data-item-key="EnchantedSword"] .card-open').click();
+  await expect(page.locator(".exploration-source")).toContainText(
+    "меч в камне",
+  );
+  await expect(page.locator(".exploration-source")).toContainText(
+    "подземного Освящения",
+  );
+  await expect(page.locator(".exploration-source")).toContainText(
+    "Не путай предмет",
+  );
+  await expect(page.locator(".exploration-source a")).toHaveCount(3);
+  await expect(page.locator(".exploration-source")).toContainText("1.4.5");
+  await page.screenshot({ path: "artifacts/enchanted-sword-corrected.png" });
+  await widthOK(page);
+});
+test("Settings persist separately from progress; disabling animations and particles works live", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.getByRole("button", { name: "Настройки", exact: true }).click();
+  await expect(
+    page.getByRole("switch", { name: "Звуковые эффекты" }),
+  ).toHaveAttribute("aria-checked", "false");
+  await page.getByRole("switch", { name: "Анимации", exact: true }).click();
+  await page.getByRole("switch", { name: "Декоративные частицы" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-motion", "reduced");
+  await page.keyboard.press("Escape");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-motion", "reduced");
+  await expect(page.locator(".atmosphere-particle,.biome-speck")).toHaveCount(
+    0,
+  );
+  await expect(page.locator('[data-reveal="pending"]')).toHaveCount(0);
+  await page.getByRole("button", { name: "Настройки", exact: true }).click();
+  await expect(
+    page.getByRole("switch", { name: "Анимации", exact: true }),
+  ).toHaveAttribute("aria-checked", "false");
+  await page.getByRole("switch", { name: "Анимации", exact: true }).click();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator("html")).toHaveAttribute("data-motion", "reduced");
+  await page.screenshot({ path: "artifacts/settings-panel.png" });
+  const state = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("terra:chronicle:v1")),
+  );
+  expect(state.completed).toBe(0);
+});
+test("Web Audio is opt-in, starts on a gesture, changes volume and stops on mute/background", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const Real = window.AudioContext;
+    if (!Real) return;
+    window.__audioContexts = [];
+    window.__started = 0;
+    window.__stopped = 0;
+    window.AudioContext = class extends Real {
+      constructor(...args) {
+        super(...args);
+        window.__audioContexts.push(this);
+      }
+      createOscillator() {
+        const o = super.createOscillator(),
+          start = o.start.bind(o),
+          stop = o.stop.bind(o);
+        o.start = (...a) => {
+          window.__started++;
+          return start(...a);
+        };
+        o.stop = (...a) => {
+          window.__stopped++;
+          return stop(...a);
+        };
+        return o;
+      }
+    };
+  });
+  await page.reload();
+  expect(await page.evaluate(() => window.__audioContexts.length)).toBe(0);
+  await page.getByRole("button", { name: "Настройки", exact: true }).click();
+  await page.getByRole("switch", { name: "Звуковые эффекты" }).click();
+  await page.getByRole("button", { name: "Проверить звук" }).click();
+  await expect
+    .poll(() => page.evaluate(() => window.__audioContexts[0]?.state))
+    .toBe("running");
+  await expect
+    .poll(() => page.evaluate(() => window.__started))
+    .toBeGreaterThan(0);
+  await page.getByRole("switch", { name: "Фоновая атмосфера" }).click();
+  await page.getByRole("slider", { name: "Громкость" }).fill("61");
+  await expect(page.locator(".volume-control")).toContainText("61%");
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      get: () => true,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect
+    .poll(() => page.evaluate(() => window.__audioContexts[0]?.state))
+    .toBe("suspended");
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      get: () => false,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await page.getByRole("button", { name: "Проверить звук" }).click();
+  await expect
+    .poll(() => page.evaluate(() => window.__audioContexts[0]?.state))
+    .toBe("running");
+  // Android Activity pause sends this event even when WebView's visibility does not change.
+  await page.evaluate(() =>
+    window.dispatchEvent(new Event("terra:app-paused")),
+  );
+  await expect
+    .poll(() => page.evaluate(() => window.__audioContexts[0]?.state))
+    .toBe("suspended");
+  await page.getByRole("button", { name: "Проверить звук" }).click();
+  await expect
+    .poll(() => page.evaluate(() => window.__audioContexts[0]?.state))
+    .toBe("running");
+  await page.getByRole("switch", { name: "Звуковые эффекты" }).click();
+  await expect
+    .poll(() => page.evaluate(() => window.__audioContexts[0]?.state))
+    .toBe("suspended");
+  await page.reload();
+  expect(await page.evaluate(() => window.__audioContexts.length)).toBe(0);
+  await page.getByRole("button", { name: "Настройки", exact: true }).click();
+  await expect(
+    page.getByRole("switch", { name: "Звуковые эффекты" }),
+  ).toHaveAttribute("aria-checked", "false");
+  await expect(page.locator(".volume-control")).toContainText("61%");
+  await page.screenshot({ path: "artifacts/audio-settings-verified.png" });
 });

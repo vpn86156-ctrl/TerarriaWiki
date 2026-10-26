@@ -35,6 +35,7 @@ import Inventory from "./pages/Inventory.jsx";
 import NPCs from "./pages/NPCs.jsx";
 import { Path, Stories, Diary } from "./pages/World.jsx";
 import Manager from "./modals/Manager.jsx";
+import { Settings } from "lucide-react";
 import Intro from "./components/Intro.jsx";
 const nav = [
   ["home", "Главная", HomeIcon],
@@ -205,7 +206,7 @@ export default function App() {
     );
   return (
     <MotionConfig
-      reducedMotion="user"
+      reducedMotion={reduced ? "always" : "user"}
       transition={{ type: "spring", stiffness: 420, damping: 36, mass: 0.75 }}
     >
       <LayoutGroup id="terra">
@@ -292,6 +293,13 @@ export default function App() {
               {state.spoilers ? <EyeOff size={17} /> : <Eye size={17} />}
               <span>Без спойлеров</span>
               <i />
+            </button>
+            <button
+              className="icon-button settings-open"
+              aria-label="Настройки"
+              onClick={() => open("settings")}
+            >
+              <Settings size={20} />
             </button>
             <button
               className="download-link"

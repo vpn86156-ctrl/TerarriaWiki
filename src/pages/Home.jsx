@@ -1,3 +1,5 @@
+import BiomeBackdrop, { biomeNames } from "../components/BiomeBackdrop.jsx";
+import { useSettings } from "../state/Settings.jsx";
 import { Reveal } from "../components/Reveal.jsx";
 import React, { useMemo, useState } from "react";
 import {
@@ -18,6 +20,7 @@ import { Landscape } from "../components/Scenery.jsx";
 import { Eyebrow, LinkButton } from "../components/UI.jsx";
 import { ItemCard } from "./Catalogs.jsx";
 export default function Home() {
+  const { settings } = useSettings();
   const { state, open, note } = useStore(),
     index = Math.min(state.completed, 10),
     chapter = chapters[index],
@@ -64,8 +67,19 @@ export default function Home() {
           <Settings2 size={16} />
         </button>
       </Reveal>
+      <div className="world-status-strip">
+        <span>
+          <i />
+          {biomeNames[index]}
+        </span>
+        <button onClick={() => open("settings")}>
+          {settings.sound ? "Звук включён" : "Оживить мир звуком"}{" "}
+          <Settings2 size={14} />
+        </button>
+      </div>
       <Reveal className="world-hero" as="section" order={1}>
-        <Landscape index={index} />
+        <BiomeBackdrop index={index} />
+        <div className="hero-vignette" />
         <div className="hero-orbit" />
         <div className="hero-copy">
           <span className="chapter-label">
@@ -201,6 +215,39 @@ export default function Home() {
             <ChevronRight size={17} />
           </a>
         ))}
+      </Reveal>
+      <Reveal className="expedition-board panel" as="section">
+        <div className="section-heading">
+          <div>
+            <Eyebrow>МАЛЕНЬКИЕ ШАГИ — БОЛЬШОЕ ПРИКЛЮЧЕНИЕ</Eyebrow>
+            <h2>Подготовься к дороге</h2>
+          </div>
+          <Compass size={24} />
+        </div>
+        <div className="expedition-cards">
+          {[
+            ["Torch", "Свет для пещер", "Не теряй дорогу в глубине."],
+            [
+              "WorkBench",
+              "Место для идей",
+              "От первых досок к новым рецептам.",
+            ],
+            ["WoodenSword", "Первое оружие", "Проверь, с чем выйдешь из дома."],
+          ].map(([key, title, text]) => (
+            <button key={key} onClick={() => open("item", key)}>
+              <Sprite item={key} size={38} />
+              <span>
+                <b>{title}</b>
+                <small>{text}</small>
+              </span>
+              <ChevronRight size={17} />
+            </button>
+          ))}
+        </div>
+        <p className="data-note">
+          Это подсказки, а не выполненные задания. Прохождение мира отмечаешь
+          только ты.
+        </p>
       </Reveal>
       <Reveal className="short-path panel" as="section" order={1}>
         <div className="section-heading">

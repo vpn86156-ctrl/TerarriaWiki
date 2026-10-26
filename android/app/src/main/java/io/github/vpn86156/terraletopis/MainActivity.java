@@ -138,8 +138,23 @@ public final class MainActivity extends Activity {
             }
         } });
     }
-    @Override protected void onPause() { if (browser != null) browser.onPause(); super.onPause(); }
-    @Override protected void onResume() { super.onResume(); if (browser != null) browser.onResume(); }
+    @Override protected void onPause() {
+        // WebView keeps JavaScript running while paused. Tell the page to stop every sound
+        // and suspend its AudioContext before the Activity loses focus/visibility.
+        if (browser != null) {
+            browser.onPause();
+            browser.pauseTimers();
+            browser.evaluateJavascript("window.dispatchEvent(new Event('terra:app-paused'))", null);
+        }
+        super.onPause();
+    }
+    @Override protected void onResume() {
+        super.onResume();
+        if (browser != null) {
+            browser.resumeTimers();
+            browser.onResume();
+        }
+    }
     @Override protected void onDestroy() {
         if (browser != null) { ((FrameLayout) browser.getParent()).removeView(browser); browser.destroy(); browser = null; }
         super.onDestroy();

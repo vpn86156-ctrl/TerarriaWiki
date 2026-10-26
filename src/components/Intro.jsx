@@ -1,10 +1,12 @@
+import { useSettings } from "../state/Settings.jsx";
 import React from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Boss } from "./Sprite.jsx";
 import { useReducedMotion } from "../state/useReducedMotion.js";
 export default function Intro({ onEnter }) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotion(),
+    { settings } = useSettings();
   return (
     <motion.section
       className="intro intro-cinematic"
@@ -17,6 +19,7 @@ export default function Intro({ onEnter }) {
         <div className="intro-nebula" />
         <div className="intro-horizon" />
         {!reduced &&
+          settings.particles &&
           Array.from({ length: 16 }, (_, i) => (
             <i
               key={i}

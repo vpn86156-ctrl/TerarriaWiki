@@ -6,8 +6,8 @@ android {
         applicationId 'io.github.vpn86156.terraletopis.design'
         minSdk 26
         targetSdk 35
-        versionCode 4
-        versionName '0.3.0'
+        versionCode 5
+        versionName '0.4.0'
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
     sourceSets { main { assets.srcDirs = ['../../build/ui'] } }

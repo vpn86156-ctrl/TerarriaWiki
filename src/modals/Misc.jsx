@@ -1,3 +1,4 @@
+import BiomeBackdrop, { biomeNames } from "../components/BiomeBackdrop.jsx";
 import { useReducedMotion } from "../state/useReducedMotion.js";
 import React, { useState, useRef, useEffect } from "react";
 import attribution from "../../ATTRIBUTION.md?raw";
@@ -242,7 +243,7 @@ export function Story({ modal }) {
     else setConfirmNext(true);
   };
   return (
-    <article className="reading">
+    <article className="reading" data-story-biome={chapters[index].scene}>
       <div className="reading-guide">
         <Sprite
           icon="https://terraria.wiki.gg/images/Guide.png"
@@ -265,6 +266,8 @@ export function Story({ modal }) {
         </p>
       )}
       <div className="reading-illustration">
+        <BiomeBackdrop index={index} />
+        <span className="reading-biome-label">{biomeNames[index]}</span>
         <ChapterArt chapter={c} />
       </div>
       {c.body.split("\n\n").map((t, i) => (
@@ -428,7 +431,7 @@ export function AppInfo() {
         Мир всегда рядом
       </h2>
       <p>
-        Версия 0.3.0. Неофициальный автономный спутник Terraria. Встроенный
+        Версия 0.4.0. Неофициальный автономный спутник Terraria. Встроенный
         интерфейс Android WebView, все данные, изображения и шрифты находятся
         внутри APK. Сервер и доступ к интернету не нужны.
       </p>
