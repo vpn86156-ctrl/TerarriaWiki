@@ -6,80 +6,19 @@ import React, {
   useCallback,
 } from "react";
 import { byKey } from "../data/index.js";
-export const defaultState = {
-  world: "Зелёная долина",
-  day: 12,
-  mode: "Обычный",
-  completed: 2,
-  spoilers: true,
-  inventory: {
-    Wood: 120,
-    StoneBlock: 80,
-    Gel: 18,
-    IronBar: 12,
-    Torch: 24,
-    IronOre: 36,
-  },
-  favorites: [],
-  diary: [],
-};
-function restore() {
-  try {
-    const s = JSON.parse(localStorage.getItem("terra:chronicle:v1") || "null");
-    if (!s) return defaultState;
-    return {
-      ...defaultState,
-      world:
-        typeof s.world === "string" ? s.world.slice(0, 48) : defaultState.world,
-      day: Number.isInteger(s.day) && s.day > 0 ? Math.min(s.day, 99999) : 12,
-      mode: ["Обычный", "Эксперт", "Мастер", "Путешествие"].includes(s.mode)
-        ? s.mode
-        : "Обычный",
-      completed: Number.isInteger(s.completed)
-        ? Math.max(0, Math.min(11, s.completed))
-        : 2,
-      spoilers: typeof s.spoilers === "boolean" ? s.spoilers : true,
-      inventory: Object.fromEntries(
-        Object.entries(s.inventory || {}).filter(
-          ([k, v]) =>
-            byKey.has(k) && Number.isSafeInteger(v) && v >= 0 && v <= 999999,
-        ),
-      ),
-      favorites: Array.isArray(s.favorites)
-        ? s.favorites.filter(
-            (f) => typeof f === "string" && /^(item|npc):/.test(f),
-          )
-        : [],
-      diary: Array.isArray(s.diary)
-        ? s.diary
-            .filter(
-              (n) =>
-                n &&
-                typeof n.id === "string" &&
-                typeof n.title === "string" &&
-                typeof n.text === "string",
-            )
-            .slice(0, 500)
-            .map((n) => ({
-              ...n,
-              title: n.title.slice(0, 120),
-              text: n.text.slice(0, 10000),
-            }))
-        : [],
-    };
-  } catch {
-    return defaultState;
-  }
-}
+import { readSavedState, STORAGE_KEY } from "./persistence.js";
+export { defaultState } from "./persistence.js";
 const Context = createContext();
 export function Store({ children }) {
-  const [state, setState] = useState(restore),
+  const [state, setState] = useState(() =>
+      readSavedState({ getItem: (key) => localStorage.getItem(key) }),
+    ),
     [storageWarning, setStorageWarning] = useState(""),
     [modals, setModals] = useState([]),
     [toast, setToast] = useState("");
   useEffect(() => {
     try {
-      localStorage.setItem("terra:chronicle:v1", JSON.stringify(state));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       setStorageWarning("");
     } catch {
       setStorageWarning(

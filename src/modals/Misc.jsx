@@ -1,8 +1,15 @@
 import { useReducedMotion } from "../state/useReducedMotion.js";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import attribution from "../../ATTRIBUTION.md?raw";
 import { motion } from "framer-motion";
-import { Check, Feather, Save, ArrowRight, Trash2 } from "lucide-react";
+import {
+  Check,
+  Feather,
+  Save,
+  ArrowRight,
+  ArrowLeft,
+  Trash2,
+} from "lucide-react";
 import { useStore } from "../state/Store.jsx";
 import { chapters, roman } from "../data/chapters.js";
 import { Sprite, ChapterArt } from "../components/Sprite.jsx";
@@ -118,7 +125,7 @@ export function DeleteNote({ modal }) {
   );
 }
 export function World() {
-  const { state, update, back, setToast } = useStore(),
+  const { state, update, back, open, setToast } = useStore(),
     [world, setWorld] = useState(state.world),
     [day, setDay] = useState(state.day),
     [mode, setMode] = useState(state.mode);
@@ -170,24 +177,70 @@ export function World() {
         </select>
       </label>
       <p className="data-note">
-        Это твои записи о мире. Сайт не читает и не изменяет файлы игры.
+        Это твои записи о мире. Приложение не читает и не изменяет файлы игры.
       </p>
       <button className="button primary" type="submit">
         <Save size={17} />
         Сохранить
       </button>
+      <button
+        className="text-button"
+        type="button"
+        onClick={() => open("reset-progress")}
+      >
+        Начать путь с первой главы
+      </button>
     </form>
   );
 }
+export function ResetProgress() {
+  const { update, close, setToast } = useStore();
+  return (
+    <>
+      <p className="eyebrow">ТОЛЬКО ПРОГРЕСС ГЛАВ</p>
+      <h2 id="modal-title" tabIndex={-1}>
+        Начать путь заново?
+      </h2>
+      <p>
+        Все 11 этапов станут непройденными. Дневник, ресурсы, избранное, имя
+        мира и день сохранятся. Отменить сброс прогресса нельзя.
+      </p>
+      <button
+        className="button primary"
+        onClick={() => {
+          update({ completed: 0, progressReviewed: true });
+          close();
+          setToast("Путь начат с первой главы. Записи и ресурсы сохранены.");
+        }}
+      >
+        Начать с первой главы
+      </button>
+    </>
+  );
+}
 export function Story({ modal }) {
-  const { state, open } = useStore(),
-    c = chapters[modal.key];
-  if (modal.key > state.completed)
+  const { state, patchModal, close } = useStore(),
+    index = Number(modal.key),
+    c = chapters[index],
+    [confirmNext, setConfirmNext] = useState(false),
+    nextRef = useRef(),
+    consentRef = useRef();
+  useEffect(() => {
+    if (confirmNext) consentRef.current?.focus();
+  }, [confirmNext]);
+  const canRead = (i) =>
+    i <= state.completed || !state.spoilers || modal.storyPreview === true;
+  const go = (i) => patchModal({ key: i });
+  if (!c || !canRead(index))
     return (
       <h2 id="modal-title" tabIndex={-1}>
         История пока закрыта
       </h2>
     );
+  const next = () => {
+    if (canRead(index + 1)) go(index + 1);
+    else setConfirmNext(true);
+  };
   return (
     <article className="reading">
       <div className="reading-guide">
@@ -206,15 +259,87 @@ export function Story({ modal }) {
       <h2 id="modal-title" tabIndex={-1}>
         {c.story}
       </h2>
+      {index > state.completed && (
+        <p className="story-preview-note">
+          Чтение наперёд · Прогресс мира не изменён
+        </p>
+      )}
       <div className="reading-illustration">
         <ChapterArt chapter={c} />
       </div>
       {c.body.split("\n\n").map((t, i) => (
         <p key={i}>{t}</p>
       ))}
+      <nav className="story-navigation" aria-label="Переход между историями">
+        <span className="story-page">
+          ИСТОРИЯ {index + 1} / {chapters.length}
+        </span>
+        <div className="story-nav-actions">
+          {index > 0 && (
+            <button className="button" onClick={() => go(index - 1)}>
+              <ArrowLeft size={17} />
+              Предыдущая история
+            </button>
+          )}
+          {index < chapters.length - 1 ? (
+            <button className="button primary" ref={nextRef} onClick={next}>
+              Следующая история
+              <ArrowRight size={17} />
+            </button>
+          ) : (
+            <>
+              <p className="data-note">
+                Это последняя история. Но путешествие продолжается.
+              </p>
+              <button
+                className="button primary"
+                onClick={() => {
+                  close();
+                  location.hash = "#/stories";
+                }}
+              >
+                К списку историй
+                <ArrowRight size={17} />
+              </button>
+            </>
+          )}
+        </div>
+      </nav>
+      {confirmNext && (
+        <section
+          className="story-next-confirm panel"
+          aria-label="Чтение следующей истории со спойлерами"
+        >
+          <h3>Заглянуть в следующую главу?</h3>
+          <p>
+            Ты ещё не завершил этот этап мира. Можно прочитать дальше со
+            спойлерами — это не отметит главы пройденными и не изменит режим
+            «Без спойлеров».
+          </p>
+          <div className="modal-actions">
+            <button
+              className="button primary"
+              ref={consentRef}
+              onClick={() => patchModal({ key: index + 1, storyPreview: true })}
+            >
+              Читать со спойлерами
+              <ArrowRight size={17} />
+            </button>
+            <button
+              className="button"
+              onClick={() => {
+                setConfirmNext(false);
+                nextRef.current?.focus();
+              }}
+            >
+              Не сейчас
+            </button>
+          </div>
+        </section>
+      )}
       <footer>
-        Текст «TERRA Летопись». Художественный вымысел на основе мира Terraria,
-        не официальный игровой диалог.
+        Текст «TERRA Wiki». Художественный вымысел на основе мира Terraria, не
+        официальный игровой диалог.
       </footer>
     </article>
   );
@@ -236,9 +361,10 @@ export function Chapter({ modal }) {
       {current ? (
         <>
           <p>
-            Ты завершил приготовления и победил{" "}
-            {c.goal === "Глаз Ктулху" ? "Глаз Ктулху" : c.goal}? Подтверждение
-            откроет следующую главу, историю и атмосферу мира.
+            {c.boss
+              ? `Ты выполнил цель этапа «${c.title}»: ${c.goal}?`
+              : `Ты завершил приготовления этапа «${c.title}»? Цель: ${c.goal}.`}{" "}
+            Подтверждение откроет следующую главу, историю и атмосферу мира.
           </p>
           <div className="modal-actions">
             <button
@@ -297,14 +423,14 @@ export function Seal({ modal }) {
 export function AppInfo() {
   return (
     <>
-      <p className="eyebrow">TERRA ЛЕТОПИСЬ · ANDROID</p>
+      <p className="eyebrow">TERRA WIKI · ANDROID</p>
       <h2 id="modal-title" tabIndex={-1}>
         Мир всегда рядом
       </h2>
       <p>
-        Версия 0.2.0 · новое оформление. Неофициальный автономный спутник
-        Terraria. Встроенный интерфейс Android WebView, все данные, изображения
-        и шрифты находятся внутри APK. Сервер и доступ к интернету не нужны.
+        Версия 0.3.0. Неофициальный автономный спутник Terraria. Встроенный
+        интерфейс Android WebView, все данные, изображения и шрифты находятся
+        внутри APK. Сервер и доступ к интернету не нужны.
       </p>
       <p>
         Прогресс, ресурсы и дневник сохраняются в приложении на этом устройстве.
@@ -316,13 +442,12 @@ export function AppInfo() {
         доступ к файлам игры, камере, контактам или геолокации.
       </p>
       <p>Нужен Android 8.0 или новее и обновлённый Android System WebView.</p>
-      {__TERRA_DESIGN_PREVIEW__ && (
-        <p>
-          Это отдельный дизайн-выпуск «TERRA Дизайн». Он устанавливается рядом с
-          «TERRA Летопись» и не изменяет её сохранения. У каждого приложения
-          свои записи и прогресс.
-        </p>
-      )}
+      <p>
+        TERRA Wiki объединяет все разделы, оформление и анимации в одном
+        приложении. Обновляет «TERRA Дизайн» 0.2.0 с сохранением её записей.
+        Автоматического объединения данных с отдельной «TERRA Летопись» 0.1.1
+        нет.
+      </p>
       <button
         className="button"
         onClick={() => window.dispatchEvent(new Event("terra:replay-intro"))}

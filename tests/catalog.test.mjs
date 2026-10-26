@@ -4,8 +4,7 @@ import { readFileSync, writeFileSync, unlinkSync } from "node:fs";
 import { build } from "esbuild";
 import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
-const apkPath =
-  process.env.TERRA_TEST_APK || "artifacts/TERRA-Letopis-0.2.0.apk";
+const apkPath = process.env.TERRA_TEST_APK || "artifacts/TERRA-Wiki-0.3.0.apk";
 const output = "/tmp/terra-data-test-" + process.pid + ".mjs";
 const bundle = await build({
   entryPoints: ["src/data/index.js"],
@@ -106,15 +105,16 @@ test("APK contains a native entry point, bundled assets and no network permissio
     /launchable-activity: name='io.github.vpn86156.terraletopis.MainActivity'/,
   );
   assert.doesNotMatch(badging, /uses-permission/);
-  if (apkPath.includes("Design-")) {
-    assert.match(
-      badging,
-      /package: name='io.github.vpn86156.terraletopis.design'/,
-    );
-    assert.match(badging, /application-label:'TERRA Дизайн'/);
-  }
+  assert.match(
+    badging,
+    /package: name='io.github.vpn86156.terraletopis.design'/,
+  );
+  assert.match(badging, /versionCode='4' versionName='0.3.0'/);
+  assert.match(badging, /application-label:'TERRA Wiki'/);
   const listing = execFileSync("unzip", ["-Z1", apkPath], { encoding: "utf8" });
   assert.match(listing, /classes.dex/);
+  assert.match(listing, /res\/mipmap-anydpi-v26\/ic_launcher.xml/);
+  assert.match(listing, /res\/drawable-nodpi-v4\/wiki_icon.png/);
   assert.match(listing, /assets\/images\/Eye_of_Cthulhu.gif/);
   assert.match(listing, /assets\/fonts\/manrope-cyrillic-400-normal.woff2/);
   assert.doesNotMatch(listing, /sw\.js|manifest\.webmanifest|\.zip$/m);

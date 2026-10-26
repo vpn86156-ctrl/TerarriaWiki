@@ -9,6 +9,7 @@ import Search from "./Search.jsx";
 import {
   Note,
   World,
+  ResetProgress,
   DeleteNote,
   Story,
   Chapter,
@@ -22,6 +23,7 @@ const bodies = {
   search: Search,
   note: Note,
   world: World,
+  "reset-progress": ResetProgress,
   "delete-note": DeleteNote,
   story: Story,
   chapter: Chapter,
@@ -88,7 +90,7 @@ export default function Manager() {
             Назад
           </button>
         ) : (
-          <span className="modal-brand">TERRA / ЛЕТОПИСЬ</span>
+          <span className="modal-brand">TERRA / WIKI</span>
         )}
         <button
           className="icon-button"

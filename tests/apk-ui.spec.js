@@ -3,7 +3,7 @@ import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve, extname } from "node:path";
 const apk = resolve(
-    process.env.TERRA_TEST_APK || "artifacts/TERRA-Letopis-0.2.0.apk",
+    process.env.TERRA_TEST_APK || "artifacts/TERRA-Wiki-0.3.0.apk",
   ),
   folder = resolve("build/apk-test");
 mkdirSync(folder, { recursive: true });
@@ -52,6 +52,14 @@ async function navigate(page, name) {
     .click();
   await expect(page.locator(".drawer")).not.toBeVisible();
 }
+async function loadSaved(page, patch) {
+  await page.evaluate((patch) => {
+    const key = "terra:chronicle:v1";
+    const state = JSON.parse(localStorage.getItem(key));
+    localStorage.setItem(key, JSON.stringify({ ...state, ...patch }));
+  }, patch);
+  await page.reload();
+}
 async function widthOK(page) {
   const w = await page.evaluate(() => ({
     inner: innerWidth,
@@ -82,8 +90,8 @@ test("APK home: initial world, Android information, offline assets and mobile wi
   page,
 }) => {
   await expect(page.getByText("Зелёная долина", { exact: true })).toBeVisible();
-  await expect(page.locator(".hero-progress b")).toHaveText("18%");
-  await expect(page.locator(".hero-copy h2")).toHaveText("Взгляд из темноты");
+  await expect(page.locator(".hero-progress b")).toHaveText("0%");
+  await expect(page.locator(".hero-copy h2")).toHaveText("Первый огонь");
   await widthOK(page);
   await page.screenshot({ path: "artifacts/android-home.png", fullPage: true });
   await page.getByRole("button", { name: "О приложении", exact: true }).click();
@@ -184,6 +192,16 @@ test("Inventory and favorites survive restart of packaged assets", async ({
 }) => {
   await navigate(page, "Из моих ресурсов");
   await page
+    .getByRole("button", { name: "Добавить предмет", exact: true })
+    .click();
+  await page
+    .getByRole("searchbox", { name: "Поиск для добавления в инвентарь" })
+    .fill("Древесина");
+  await page
+    .getByRole("button", { name: "Добавить Древесина", exact: true })
+    .click();
+  await page.keyboard.press("Escape");
+  await page
     .getByRole("spinbutton", { name: "Количество: Древесина" })
     .fill("321");
   await page
@@ -257,26 +275,27 @@ test("Chapter confirmation changes progress, unlocks story, scenery and persists
   ).toBeVisible();
   await expect(page.locator(".world-atmosphere")).toHaveAttribute(
     "data-scenery",
-    "corruption",
+    "forest",
   );
   await page
     .getByRole("button", { name: "Продолжить путешествие", exact: true })
     .click();
   await page.reload();
-  await expect(page.locator(".path-progress")).toContainText("27%");
+  await expect(page.locator(".path-progress")).toContainText("9%");
   await navigate(page, "Сюжет Terraria");
   await expect(
     page.getByRole("button", { name: "Читать у костра", exact: true }),
-  ).toHaveCount(4);
+  ).toHaveCount(2);
   await page
     .getByRole("button", { name: "Читать у костра", exact: true })
-    .nth(3)
+    .nth(1)
     .click();
-  await expect(page.locator("#modal-title")).toHaveText("Земля помнит");
-  await expect(page.locator(".reading img")).toHaveAttribute(
-    "src",
-    /Eater_of_Worlds\.png/,
+  await expect(page.locator("#modal-title")).toHaveText(
+    "Следы на мягкой земле",
   );
+  await expect(
+    page.locator(".reading-illustration .chapter-item-art"),
+  ).toBeVisible();
   expect(
     await page
       .locator(".atmosphere-particle")
@@ -312,6 +331,7 @@ test("Acquisition, global search, source details, credits", async ({
 test("Ordinary motion and phone landscape keep shared sprites proportional", async ({
   page,
 }) => {
+  await loadSaved(page, { completed: 2, progressReviewed: true });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   const boss = page.locator(".hero-boss img");
   await expect(boss).toHaveAttribute("src", /Eye_of_Cthulhu.gif/);
@@ -379,7 +399,7 @@ test("Screenshot regression: Zenith explains spoiler filtering and opens after c
     await page.evaluate(
       () => JSON.parse(localStorage.getItem("terra:chronicle:v1")).completed,
     ),
-  ).toBe(2);
+  ).toBe(0);
   await widthOK(page);
   await page.screenshot({ path: "artifacts/fixed-zenith.png", fullPage: true });
 });
@@ -387,6 +407,7 @@ test("Screenshot regression: Zenith explains spoiler filtering and opens after c
 test("Screenshot regression: preparation chapters and stories do not reuse King Slime", async ({
   page,
 }) => {
+  await page.getByRole("switch", { name: "Без спойлеров" }).click();
   await navigate(page, "Сюжет Terraria");
   const art = page.locator(".story-card .story-image");
   await expect(art.nth(0).locator("svg.game-sprite")).toHaveAttribute(
@@ -588,4 +609,189 @@ test("Scroll entrances run once; focused cards are revealed and live reduced mot
   await expect(page.locator(".intro-flash")).toHaveCount(0);
   await page.getByRole("button", { name: "Войти в мир" }).click();
   await expect(page.locator(".intro-cinematic")).toHaveCount(0);
+});
+
+test("Fresh TERRA Wiki: day one, zero completed chapters, empty inventory and only the first story unlocked", async ({
+  page,
+}) => {
+  await expect(page.locator(".hero-progress b")).toHaveText("0%");
+  await expect(page.locator(".hero-bottom")).toContainText("0 / 11");
+  await expect(page.locator(".world-tag")).toContainText("День 1");
+  await expect(page).toHaveTitle(/TERRA Wiki/);
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("terra:chronicle:v1")),
+  );
+  expect(saved.completed).toBe(0);
+  expect(saved.inventory).toEqual({});
+  await navigate(page, "Сюжет Terraria");
+  await expect(
+    page.getByRole("button", { name: "Читать у костра", exact: true }),
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole("button", { name: "Пока закрыто", exact: true }),
+  ).toHaveCount(10);
+  await navigate(page, "Путь мира");
+  await expect(page.locator(".path-progress")).toContainText(
+    "Пройдено 0 из 11 глав",
+  );
+  await page.reload();
+  await expect(page.locator(".path-progress")).toContainText(
+    "Пройдено 0 из 11 глав",
+  );
+});
+test("Story next/previous reset scroll without stacking windows; spoiler consent never completes chapters", async ({
+  page,
+}) => {
+  await navigate(page, "Сюжет Terraria");
+  await page
+    .getByRole("button", { name: "Читать у костра", exact: true })
+    .click();
+  await expect(page.locator("#modal-title")).toHaveText(
+    "Дом начинается с двери",
+  );
+  await expect(
+    page.getByRole("button", { name: "Предыдущая история", exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Следующая история", exact: true })
+    .click();
+  await expect(page.locator(".story-next-confirm")).toBeVisible();
+  await page.getByRole("button", { name: "Не сейчас", exact: true }).click();
+  await expect(page.locator("#modal-title")).toHaveText(
+    "Дом начинается с двери",
+  );
+  await page
+    .getByRole("button", { name: "Следующая история", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Читать со спойлерами", exact: true })
+    .click();
+  await expect(page.locator("#modal-title")).toHaveText(
+    "Следы на мягкой земле",
+  );
+  await expect(page.locator("#modal-title")).toBeFocused();
+  await expect(page.locator(".story-preview-note")).toBeVisible();
+  expect(await page.locator("dialog.modal").evaluate((e) => e.scrollTop)).toBe(
+    0,
+  );
+  await page
+    .getByRole("button", { name: "Предыдущая история", exact: true })
+    .click();
+  await expect(page.locator("#modal-title")).toHaveText(
+    "Дом начинается с двери",
+  );
+  for (let i = 1; i <= 10; i++) {
+    await page
+      .getByRole("button", { name: "Следующая история", exact: true })
+      .click();
+    await expect(page.locator(".story-page")).toHaveText(
+      `ИСТОРИЯ ${i + 1} / 11`,
+    );
+    await expect(page.locator(".modal-toolbar .text-button")).toHaveCount(0);
+    await widthOK(page);
+  }
+  await expect(
+    page.getByRole("button", { name: "Следующая история", exact: true }),
+  ).toHaveCount(0);
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("terra:chronicle:v1")),
+  );
+  expect(saved.completed).toBe(0);
+  expect(saved.spoilers).toBe(true);
+  await page.screenshot({ path: "artifacts/wiki-story-next.png" });
+  await page
+    .getByRole("button", { name: "К списку историй", exact: true })
+    .click();
+  await expect(page.locator("dialog.modal")).not.toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Читать у костра", exact: true }),
+  ).toHaveCount(1);
+});
+test("Legacy demo progress reset is explicit, cancellable and preserves diary, inventory and favorites", async ({
+  page,
+}) => {
+  const diary = [
+    {
+      id: "keep",
+      title: "Мой дом",
+      text: "Построить второй этаж",
+      tag: "Цель",
+      date: "2026-10-26",
+    },
+  ];
+  await loadSaved(page, {
+    completed: 2,
+    progressReviewed: undefined,
+    day: 42,
+    world: "Мой мир",
+    inventory: { Wood: 321 },
+    favorites: ["item:Wood"],
+    diary,
+  });
+  await expect(page.locator(".progress-review")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Начать с первой главы", exact: true })
+    .click();
+  await expect(page.locator("#modal-title")).toHaveText("Начать путь заново?");
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".hero-progress b")).toHaveText("18%");
+  await page
+    .getByRole("button", { name: "Начать с первой главы", exact: true })
+    .click();
+  await page
+    .locator("dialog.modal")
+    .getByRole("button", { name: "Начать с первой главы", exact: true })
+    .click();
+  await expect(page.locator(".hero-progress b")).toHaveText("0%");
+  await expect(page.locator(".progress-review")).toHaveCount(0);
+  await page.reload();
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("terra:chronicle:v1")),
+  );
+  expect(saved.completed).toBe(0);
+  expect(saved.progressReviewed).toBe(true);
+  expect(saved.inventory).toEqual({ Wood: 321 });
+  expect(saved.diary).toEqual(diary);
+  expect(saved.favorites).toEqual(["item:Wood"]);
+  expect(saved.world).toBe("Мой мир");
+  expect(saved.day).toBe(42);
+  await page
+    .getByRole("button", { name: "Изменить мир и день", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Начать путь с первой главы", exact: true })
+    .click();
+  await expect(page.locator("#modal-title")).toHaveText("Начать путь заново?");
+});
+test("Existing real progress is retained; unlocked next story needs no spoiler prompt", async ({
+  page,
+}) => {
+  await loadSaved(page, { completed: 2, progressReviewed: undefined });
+  await page
+    .getByRole("button", { name: "Оставить мой прогресс", exact: true })
+    .click();
+  await page.reload();
+  await expect(page.locator(".progress-review")).toHaveCount(0);
+  await expect(page.locator(".hero-progress b")).toHaveText("18%");
+  await navigate(page, "Сюжет Terraria");
+  await page
+    .getByRole("button", { name: "Читать у костра", exact: true })
+    .first()
+    .click();
+  await page
+    .getByRole("button", { name: "Следующая история", exact: true })
+    .click();
+  await expect(page.locator("#modal-title")).toHaveText(
+    "Следы на мягкой земле",
+  );
+  await expect(page.locator(".story-next-confirm")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Следующая история", exact: true })
+    .click();
+  await expect(page.locator("#modal-title")).toHaveText(
+    "Тот, кто смотрит в ответ",
+  );
+  await expect(page.locator(".story-next-confirm")).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("dialog.modal")).not.toBeVisible();
 });

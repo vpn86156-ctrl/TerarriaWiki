@@ -8,11 +8,6 @@ const root = process.cwd(),
 await rm(dest, { recursive: true, force: true });
 await mkdir(dest, { recursive: true });
 await build({
-  define: {
-    __TERRA_DESIGN_PREVIEW__: JSON.stringify(
-      process.env.TERRA_DESIGN_PREVIEW === "1",
-    ),
-  },
   publicDir: "public",
   build: {
     copyPublicDir: false,

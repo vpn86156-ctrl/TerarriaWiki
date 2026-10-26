@@ -52,10 +52,10 @@ const getRoute = () => {
 };
 function Brand() {
   return (
-    <a className="brand" href="#/home" aria-label="TERRA Летопись — главная">
+    <a className="brand" href="#/home" aria-label="TERRA Wiki — главная">
       <img src="./icons/icon-192.png" alt="" />
       <span>
-        TERRA<small>Л Е Т О П И С Ь</small>
+        TERRA<small>W I K I</small>
       </span>
     </a>
   );
@@ -132,7 +132,7 @@ export default function App() {
     };
   }, [intro, open]);
   useEffect(() => {
-    document.title = `${name} — TERRA Летопись`;
+    document.title = `${name} — TERRA Wiki`;
     document.documentElement.dataset.scenery = chapter.scene;
     document.documentElement.dataset.weather = chapter.weather;
     document.documentElement.style.setProperty(
@@ -308,6 +308,35 @@ export default function App() {
                 {storageWarning}
               </div>
             )}
+            {!state.progressReviewed && (
+              <section
+                className="progress-review panel"
+                aria-labelledby="progress-review-title"
+              >
+                <h2 id="progress-review-title">
+                  Начать историю с чистого листа?
+                </h2>
+                <p>
+                  В старой версии первые два этапа были отмечены заранее.
+                  Выбери: оставить сохранённый прогресс или начать с первой
+                  главы. Дневник и ресурсы не удалятся.
+                </p>
+                <div className="modal-actions">
+                  <button
+                    className="button primary"
+                    onClick={() => open("reset-progress")}
+                  >
+                    Начать с первой главы
+                  </button>
+                  <button
+                    className="button"
+                    onClick={() => update({ progressReviewed: true })}
+                  >
+                    Оставить мой прогресс
+                  </button>
+                </div>
+              </section>
+            )}
             {!online && (
               <div className="offline-banner">
                 <WifiOff size={15} />
@@ -325,7 +354,7 @@ export default function App() {
             </motion.div>
             <footer className="site-footer">
               <span>
-                <b>TERRA</b> Летопись <i>·</i> Создавай. Исследуй. Помни.
+                <b>TERRA</b> Wiki <i>·</i> Создавай. Исследуй. Помни.
               </span>
               <p>
                 Неофициальное некоммерческое Android-приложение. Terraria и

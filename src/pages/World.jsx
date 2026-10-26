@@ -115,7 +115,7 @@ export function Stories() {
       />
       <div className="stories-grid">
         {chapters.map((c, i) => {
-          const locked = i > state.completed;
+          const locked = state.spoilers && i > state.completed;
           return (
             <Reveal
               className={"story-card panel " + (locked ? "locked" : "")}

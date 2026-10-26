@@ -98,7 +98,7 @@ export default function Intro({ onEnter }) {
             <span />
           </p>
           <h1>
-            TERRA<small>Л Е Т О П И С Ь</small>
+            TERRA<small>W I K I</small>
           </h1>
           <p className="intro-description">
             Каждый мир заслуживает своей истории.

@@ -1071,3 +1071,76 @@ body {
     display: none !important;
   }
 }
+
+/* TERRA Wiki: the reader is a journey, not a stack of nested windows. */
+.story-navigation {
+  border-top: 1px solid var(--border-bright);
+  padding-top: 24px;
+  margin: 30px 0 18px;
+}
+.story-page {
+  display: block;
+  color: #a8c3b4;
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  margin-bottom: 14px;
+}
+.story-nav-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.story-nav-actions .button {
+  flex: 1 1 190px;
+  justify-content: center;
+  min-height: 48px;
+}
+.story-nav-actions .data-note {
+  flex-basis: 100%;
+  margin: 0 0 8px;
+}
+.story-next-confirm {
+  padding: 22px;
+  border-color: #d5f96f42;
+}
+.story-next-confirm h3 {
+  font-size: 19px;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+.story-next-confirm p {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.story-preview-note {
+  padding: 10px 14px;
+  border-left: 2px solid var(--accent);
+  background: #d5f96f08;
+  font-size: 12px !important;
+}
+.progress-review {
+  padding: 22px;
+  margin: 0 0 22px;
+  border-color: #d5f96f42;
+}
+.progress-review h2 {
+  font-size: 21px;
+  line-height: 1.4;
+  margin: 0 0 10px;
+}
+.progress-review p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+@media (max-width: 440px) {
+  .story-next-confirm {
+    padding: 16px;
+  }
+  .story-next-confirm .modal-actions .button,
+  .progress-review .modal-actions .button {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+  }
+}
