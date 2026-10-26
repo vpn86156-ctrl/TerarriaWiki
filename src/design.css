@@ -1526,3 +1526,114 @@ html[data-particles="off"] .biome-speck {
 .preference-row [aria-checked="true"] span {
   transform: translateX(20px);
 }
+
+/* Location panels: where to look for a drop. */
+.place-thumb {
+  display: block;
+  position: relative;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 14px;
+  border: 1px solid #b9d3bb2b;
+  border-radius: 12px;
+  overflow: clip;
+  background: #0d1a1d;
+  cursor: pointer;
+  text-align: left;
+}
+.place-thumb img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  transition:
+    transform 0.35s ease,
+    filter 0.35s ease;
+  filter: saturate(0.92);
+}
+.place-thumb:hover img {
+  transform: scale(1.025);
+  filter: saturate(1.05);
+}
+.place-thumb > span {
+  position: absolute;
+  left: 10px;
+  bottom: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border-radius: 99px;
+  background: #081214cc;
+  border: 1px solid #cfe3bb33;
+  color: #e6f0d6;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  backdrop-filter: blur(6px);
+}
+.place-thumb.place-large {
+  margin: 16px 0;
+}
+.place-thumb > small {
+  position: absolute;
+  right: 10px;
+  top: 9px;
+  padding: 4px 8px;
+  border-radius: 99px;
+  background: #081214d9;
+  border: 1px solid #cfe3bb33;
+  color: #dceac9;
+  font-size: 9px;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+.place-thumb:hover > small,
+.place-thumb:focus-visible > small {
+  opacity: 1;
+  transform: none;
+}
+.place-thumb.place-large > small {
+  opacity: 1;
+  transform: none;
+}
+@media (hover: none) {
+  .place-thumb > small {
+    display: none;
+  }
+  .place-thumb.place-large > small {
+    display: block;
+    opacity: 0.85;
+  }
+}
+.place-figure {
+  margin: 18px 0;
+  border: 1px solid #b9d3bb2b;
+  border-radius: 14px;
+  overflow: clip;
+  background: #0b171a;
+}
+.place-figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+.place-figure figcaption {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 11px 13px;
+  font-size: 10px;
+  line-height: 1.7;
+  color: #a9c0ae;
+  border-top: 1px solid #b9d3bb1f;
+}
+@media (max-width: 480px) {
+  .place-thumb > span {
+    font-size: 9px;
+    padding: 4px 8px;
+  }
+}

@@ -1,4 +1,6 @@
 import { acquisitionNotes } from "../data/acquisition-notes.js";
+import PlaceImage from "../components/PlaceImage.jsx";
+import { placeForSource } from "../data/places.js";
 import React from "react";
 import {
   Plus,
@@ -143,6 +145,19 @@ export default function Item({ modal }) {
                     <small>{source.location}</small>
                   </div>
                 </div>
+                <PlaceImage
+                  place={{
+                    key: "shrine",
+                    image: "shrine",
+                    label: "Святилище зачарованного меча",
+                  }}
+                  large
+                  returnTo={{
+                    type: "item",
+                    key: item.key,
+                    origin: "item-place:" + item.key,
+                  }}
+                />
                 <p>{source.text}</p>
                 <p>{source.chance}</p>
                 <aside className="source-clarification">
@@ -201,6 +216,14 @@ export default function Item({ modal }) {
             quantity = d.quantities?.[mode] || d.quantity;
           return (
             <article className="source-card" key={i}>
+              <PlaceImage
+                place={placeForSource({ ...source, id: d.source })}
+                returnTo={{
+                  type: "item",
+                  key: item.key,
+                  origin: "item-place:" + item.key,
+                }}
+              />
               <div className="source-title">
                 {source?.icon && (
                   <Sprite

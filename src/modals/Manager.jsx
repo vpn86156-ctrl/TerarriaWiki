@@ -5,6 +5,7 @@ import { X, ArrowLeft } from "lucide-react";
 import { useStore } from "../state/Store.jsx";
 import { chapters } from "../data/chapters.js";
 import Settings from "./Settings.jsx";
+import Place from "./Place.jsx";
 import Recipe from "./Recipe.jsx";
 import Item from "./Item.jsx";
 import Search from "./Search.jsx";
@@ -21,6 +22,7 @@ import {
 } from "./Misc.jsx";
 const bodies = {
   settings: Settings,
+  place: Place,
   recipe: Recipe,
   item: Item,
   search: Search,

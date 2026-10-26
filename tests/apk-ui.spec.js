@@ -3,7 +3,7 @@ import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve, extname } from "node:path";
 const apk = resolve(
-    process.env.TERRA_TEST_APK || "artifacts/TERRA-Wiki-0.4.0.apk",
+    process.env.TERRA_TEST_APK || "artifacts/TERRA-Wiki-0.5.0.apk",
   ),
   folder = resolve("build/apk-test");
 mkdirSync(folder, { recursive: true });
@@ -981,4 +981,85 @@ test("Web Audio is opt-in, starts on a gesture, changes volume and stops on mute
   ).toHaveAttribute("aria-checked", "false");
   await expect(page.locator(".volume-control")).toContainText("61%");
   await page.screenshot({ path: "artifacts/audio-settings-verified.png" });
+});
+
+test("Location panels show where a drop or shrine is, with an honest schematic caption", async ({
+  page,
+}) => {
+  await page.getByRole("switch", { name: "Без спойлеров" }).click();
+  await navigate(page, "Как получить");
+  await page
+    .getByRole("searchbox", { name: "Поиск предметов" })
+    .fill("Enchanted Sword");
+  await page.locator('[data-item-key="EnchantedSword"] .card-open').click();
+  const shrine = page.locator(".exploration-source .place-thumb");
+  await expect(shrine).toBeVisible();
+  await expect(shrine).toContainText("Святилище");
+  await shrine.click();
+  await expect(page.locator("#modal-title")).toHaveText("Святилище меча");
+  await expect(page.locator(".place-figure img")).toHaveAttribute(
+    "src",
+    /places\/shrine\.webp/,
+  );
+  await expect(page.locator(".place-figure figcaption")).toContainText(
+    "не скриншот",
+  );
+  await page.screenshot({ path: "artifacts/place-shrine.png" });
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#modal-title")).toHaveText("Зачарованный меч");
+  await page.getByRole("button", { name: "Закрыть" }).click();
+  await expect(page.locator("#modal-title")).toHaveCount(0);
+
+  await page
+    .getByRole("searchbox", { name: "Поиск предметов" })
+    .fill("Muramasa");
+  await page.locator('[data-item-key="Muramasa"] .card-open').click();
+  const dungeon = page.locator(".sources-section .place-thumb").first();
+  await expect(dungeon).toContainText("Темница");
+  await dungeon.click();
+  await expect(page.locator(".place-figure img")).toHaveAttribute(
+    "src",
+    /places\/dungeon\.webp/,
+  );
+  // Every bundled locator card must be a real, non-empty packaged asset.
+  const places = [
+    "forest",
+    "desert",
+    "snow",
+    "ocean",
+    "mushroom",
+    "graveyard",
+    "space",
+    "underground",
+    "dungeon",
+    "jungle",
+    "hallow",
+    "crimson",
+    "corruption",
+    "underworld",
+    "spider",
+    "temple",
+    "shrine",
+  ];
+  const loaded = await page.evaluate(async (names) => {
+    const out = [];
+    for (const name of names) {
+      const r = await fetch(`./images/places/${name}.webp`);
+      out.push([name, r.status, (await r.arrayBuffer()).byteLength]);
+    }
+    return out;
+  }, places);
+  for (const [name, status, bytes] of loaded) {
+    expect(status, name).toBe(200);
+    expect(bytes, name).toBeGreaterThan(4000);
+  }
+  await page.keyboard.press("Escape");
+  await widthOK(page);
+  for (const size of [
+    { width: 320, height: 720 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(size);
+    await widthOK(page);
+  }
 });
