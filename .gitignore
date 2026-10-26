@@ -1,0 +1,13 @@
+node_modules/
+build/
+.local/
+artifacts/
+playwright-report/
+test-results/
+*.log
+__pycache__/
+android/.gradle/
+android/local.properties
+android/app/build/
+
+.android-signing/

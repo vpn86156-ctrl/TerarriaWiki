@@ -1,0 +1,14 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'io.github.vpn86156.terraletopis'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'io.github.vpn86156.terraletopis'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
+    sourceSets { main { assets.srcDirs = ['../../build/ui'] } }
+}
