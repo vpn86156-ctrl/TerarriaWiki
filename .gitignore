@@ -1,0 +1,9 @@
+node_modules/
+.local/
+.android-signing/
+build/
+dist/
+artifacts/
+playwright-report/
+test-results/
+*.log
