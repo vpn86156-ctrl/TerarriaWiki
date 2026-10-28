@@ -1,6 +1,0 @@
-src/data/catalog.json
-node_modules
-build
-.local
-artifacts
-package-lock.json
