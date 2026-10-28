@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, updateGame, useWave, SECTOR_FLIGHT_TIME, MAX_HEALTH } from '../src/engine.js';
+import { createGame, updateGame, useWave, BOSS_WARNING, SECTOR_FLIGHT_TIME, MAX_HEALTH } from '../src/engine.js';
 import { SECTORS } from '../src/content.js';
 
 function seeded(seed = 7) {
@@ -29,12 +29,48 @@ test('a campaign flight spawns the sector boss and ends with a victory', () => {
   game.bullets.push({ x: game.boss.x - 40, y: game.boss.y, radius: 5, vx: 560, damage: 3, removed: false });
   const kills = updateGame(game, 1 / 60);
   assert.ok(kills.includes('boss-defeated'));
-  assert.ok(kills.includes('victory'));
+  assert.equal(game.gameOver, false, 'the shatter plays out before the flight ends');
+  assert.ok(game.debris.length >= 20, 'the boss breaks into flying debris');
+  assert.ok(game.timeScale < 1, 'the kill blow slows time down');
+  assert.ok(game.shake > 0 && game.flash > 0);
+  const finale = run(game, 3);
+  assert.ok(finale.includes('boss-blast'), 'a chain of explosions follows');
+  assert.ok(finale.includes('victory'));
   assert.equal(game.gameOver, true);
   assert.equal(game.victory, true);
   assert.equal(game.bossesDefeated, 1);
+  assert.equal(game.finale, null);
+  assert.equal(game.timeScale, 1);
   const frozen = updateGame(game, 1);
   assert.deepEqual(frozen, [], 'a finished flight stops simulating');
+});
+
+test('a boss becomes enraged below half health and fires more', () => {
+  const game = createGame({ width: 900, random: seeded(21), mode: 'campaign', sectorIndex: 2 });
+  run(game, SECTOR_FLIGHT_TIME + .5);
+  assert.equal(game.boss.phase, 1);
+  game.boss.health = Math.floor(game.boss.maxHealth * .5);
+  game.bullets.push({ x: game.boss.x - 40, y: game.boss.y, radius: 5, vx: 560, damage: 1, removed: false });
+  const events = updateGame(game, 1 / 60);
+  assert.ok(events.includes('boss-rage'));
+  assert.equal(game.boss.phase, 2);
+  assert.ok(game.shake > .5);
+  const shots = game.hostileBullets.length;
+  run(game, 5);
+  assert.ok(game.hostileBullets.length + shots >= 10, 'an enraged boss fills the screen with fire');
+});
+
+test('the boss telegraph warns before the arrival and clears the field', () => {
+  const game = createGame({ width: 900, random: seeded(31), mode: 'campaign', sectorIndex: 0 });
+  const early = run(game, SECTOR_FLIGHT_TIME - BOSS_WARNING - 2);
+  assert.equal(early.includes('boss-warning'), false);
+  const warned = run(game, 2.2);
+  assert.ok(warned.includes('boss-warning'));
+  assert.ok(game.warning > 0 && game.warning <= BOSS_WARNING);
+  run(game, 3);
+  assert.ok(game.boss, 'the boss arrives right after the warning');
+  assert.equal(game.warning, 0);
+  assert.equal(game.rocks.length + game.drones.length, 0, 'nothing hides behind the boss');
 });
 
 test('bosses get tougher per sector and their spread attacks travel toward the ship', () => {
@@ -59,9 +95,11 @@ test('endless flights rotate sectors instead of ending after a boss', () => {
   game.bullets.push({ x: game.boss.x - 40, y: game.boss.y, radius: 5, vx: 560, damage: 3, removed: false });
   const events = updateGame(game, 1 / 60);
   assert.ok(events.includes('boss-defeated'));
-  assert.ok(events.includes('sector-change'));
-  assert.equal(game.sectorIndex, 1);
   assert.equal(game.gameOver, false);
+  assert.ok(game.finale, 'the shatter runs before the sector rotates');
+  const finale = run(game, 3);
+  assert.ok(finale.includes('sector-change'));
+  assert.equal(game.sectorIndex, 1);
   assert.equal(game.sectorCycle, 1);
   assert.ok(game.timers.boss > SECTOR_FLIGHT_TIME, 'the next boss takes longer to arrive');
   const second = createGame({ width: 900, random: seeded(5), mode: 'endless', sectorIndex: SECTORS.length - 1 });
@@ -69,6 +107,7 @@ test('endless flights rotate sectors instead of ending after a boss', () => {
   second.boss.health = 1;
   second.bullets.push({ x: second.boss.x - 40, y: second.boss.y, radius: 5, vx: 560, damage: 3, removed: false });
   updateGame(second, 1 / 60);
+  run(second, 3);
   assert.equal(second.sectorIndex, 0, 'sector rotation wraps around');
 });
 

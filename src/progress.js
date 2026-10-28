@@ -6,7 +6,7 @@ const bounded = (value, fallback, max = 999999) => Number.isFinite(value) ? Math
 
 export function newProgress() {
   return {
-    version: 2, best: 0, sound: true, tutorialSeen: false,
+    version: 2, best: 0, sound: true, music: true, tutorialSeen: false,
     credits: 200, parts: 2,
     upgrades: { weapon: 0, hull: 0, engine: 0, wave: 0 },
     ownedSkins: ['classic'], selectedSkin: 'classic', unlockedSectors: 1, completedSectors: [],
@@ -26,7 +26,7 @@ export function normalizeProgress(raw) {
   const upgrades = Object.fromEntries(UPGRADES.map((upgrade) => [upgrade.id, bounded(raw.upgrades?.[upgrade.id], 0, MAX_UPGRADE)]));
   const metrics = Object.fromEntries(['distance', 'stars', 'rocks', 'bosses', 'flights'].map((id) => [id, bounded(raw.metrics?.[id], 0, 99999999)]));
   return {
-    version: 2, best: bounded(raw.best, 0, 99999999), sound: raw.sound !== false, tutorialSeen: raw.tutorialSeen === true,
+    version: 2, best: bounded(raw.best, 0, 99999999), sound: raw.sound !== false, music: raw.music !== false, tutorialSeen: raw.tutorialSeen === true,
     credits: bounded(raw.credits, initial.credits), parts: bounded(raw.parts, initial.parts, 99999), upgrades,
     ownedSkins: uniqueSkins, selectedSkin: uniqueSkins.includes(raw.selectedSkin) ? raw.selectedSkin : 'classic',
     unlockedSectors: Math.max(1, bounded(raw.unlockedSectors, 1, SECTORS.length)), completedSectors, metrics,

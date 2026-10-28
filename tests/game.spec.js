@@ -2,8 +2,15 @@ import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-async function start(page) {
+// The launch cinematic covers the screen for a few seconds; tests skip it like a player would.
+async function open(page) {
   await page.goto('/');
+  const intro = page.locator('#intro');
+  if (await intro.isVisible()) await page.locator('#intro-skip').click();
+  await expect(intro).toBeHidden();
+}
+async function start(page) {
+  await open(page);
   await page.getByRole('button', { name: 'В ПОЛЁТ', exact: true }).click();
   if (await page.locator('#tutorial-overlay').isVisible()) await page.getByRole('button', { name: 'НАЧАТЬ ПОЛЁТ' }).click();
   await page.locator('#launch-button').click();
@@ -27,7 +34,7 @@ async function shipCentroid(page) {
 test('home screen and first-flight instructions are clear and usable', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await open(page);
   await expect(page.getByRole('heading', { name: 'КОСМО ПИЛОТ' })).toBeVisible();
   await expect(page.getByText('ИГРАЙ БЕЗ ИНТЕРНЕТА')).toBeVisible();
   await page.getByRole('button', { name: 'В ПОЛЁТ', exact: true }).click();
@@ -126,7 +133,7 @@ test('results and record survive reload; tutorial is not repeated', async ({ pag
 });
 
 test('sound setting is shared by menus and persists locally', async ({ page }) => {
-  await page.goto('/');
+  await open(page);
   await page.getByRole('button', { name: 'Выключить звук' }).click();
   await expect(page.getByRole('button', { name: 'Включить звук' })).toBeVisible();
   await page.reload();
@@ -166,7 +173,7 @@ test('portrait preview asks to rotate and pauses an active flight', async ({ pag
 test('menu and tutorial fit compact phones, wide phones and tablets', async ({ page }) => {
   for (const size of [{ width: 568, height: 320 }, { width: 780, height: 360 }, { width: 915, height: 412 }, { width: 1280, height: 720 }]) {
     await page.setViewportSize(size);
-    await page.goto('/');
+    await open(page);
     const startButton = page.getByRole('button', { name: 'В ПОЛЁТ', exact: true });
     await expect(startButton).toBeVisible();
     const homeBox = await startButton.boundingBox();
@@ -228,20 +235,43 @@ test('production bundle loads and plays offline through the same synthetic HTTPS
   await context.close();
 });
 
-test('the intro plays for a new pilot and can be skipped', async ({ page }) => {
+test('the launch cinematic flies a ship across the screen and can be skipped', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('#intro')).toBeVisible();
+  const intro = page.locator('#intro');
+  await expect(intro).toBeVisible();
   await expect(page.locator('#intro-skip')).toHaveText(/ПРОПУСТИТЬ/);
+  const first = await page.locator('.intro-rocket').boundingBox();
+  await page.waitForTimeout(900);
+  const later = await page.locator('.intro-rocket').boundingBox();
+  expect(later.x).toBeGreaterThan(first.x + 40);
+  expect(later.width).toBeGreaterThan(first.width);
   await page.locator('#intro-skip').click();
-  await expect(page.locator('#intro')).toBeHidden();
+  await expect(intro).toBeHidden();
+  // It plays again on the next launch and any tap skips it.
   await page.reload();
-  await page.evaluate(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true })));
+  await expect(intro).toBeVisible();
+  await intro.click({ position: { x: 40, y: 40 } });
+  await expect(intro).toBeHidden();
+});
+
+test('music and sound can be switched independently and both persist', async ({ page }) => {
+  await open(page);
+  await page.getByRole('button', { name: 'Выключить музыку' }).click();
+  await expect(page.getByRole('button', { name: 'Включить музыку' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Выключить звук' })).toBeVisible();
   await page.reload();
-  await expect(page.locator('#intro')).toBeHidden();
+  await open(page);
+  await expect(page.getByRole('button', { name: 'Включить музыку' })).toBeVisible();
+  await page.getByRole('button', { name: 'Включить музыку' }).click();
+  await expect(page.getByRole('button', { name: 'Выключить музыку' })).toBeVisible();
+  await page.getByRole('button', { name: 'Выключить звук' }).click();
+  await page.reload();
+  await open(page);
+  await expect(page.getByRole('button', { name: 'Включить звук' })).toBeVisible();
 });
 
 test('campaign map locks sectors until their boss is defeated', async ({ page }) => {
-  await page.goto('/');
+  await open(page);
   await page.evaluate(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, credits: 500, parts: 5 })));
   await page.reload();
   await page.getByRole('button', { name: 'В ПОЛЁТ', exact: true }).click();
@@ -263,11 +293,11 @@ test('campaign map locks sectors until their boss is defeated', async ({ page })
 });
 
 test('the hangar spends credits on upgrades and applies them to the next flight', async ({ page }) => {
-  await page.goto('/');
+  await open(page);
   await page.evaluate(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, credits: 900, parts: 9 })));
   await page.reload();
   await expect(page.locator('#home-credits')).toHaveText('900');
-  await page.getByRole('button', { name: /^⬡ АНГАР$/ }).click();
+  await page.getByRole('button', { name: /^⬡ АНГАР/ }).click();
   await expect(page.getByRole('dialog', { name: 'АНГАР' })).toBeVisible();
   const hull = page.locator('.upgrade-card').filter({ hasText: 'КОРПУС' });
   await hull.locator('.card-buy').click();
@@ -281,10 +311,10 @@ test('the hangar spends credits on upgrades and applies them to the next flight'
 });
 
 test('case rewards are granted once per purchase and cannot be bought without credits', async ({ page }) => {
-  await page.goto('/');
+  await open(page);
   await page.evaluate(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, credits: 1000 })));
   await page.reload();
-  await page.getByRole('button', { name: /^\u25c8 \u041c\u0410\u0413\u0410\u0417\u0418\u041d$/ }).click();
+  await page.getByRole('button', { name: /^\u25c8 \u041c\u0410\u0413\u0410\u0417\u0418\u041d/ }).click();
   const stellar = page.locator('.case-card').filter({ hasText: 'ЗВЁЗДНЫЙ КЕЙС' });
   await stellar.locator('.card-buy').click();
   await expect(page.locator('#case-overlay')).toBeVisible();
@@ -305,16 +335,16 @@ test('case rewards are granted once per purchase and cannot be bought without cr
     localStorage.setItem('kosmopilot.v2', JSON.stringify(data));
   });
   await page.reload();
-  await page.getByRole('button', { name: /^\u25c8 \u041c\u0410\u0413\u0410\u0417\u0418\u041d$/ }).click();
+  await page.getByRole('button', { name: /^\u25c8 \u041c\u0410\u0413\u0410\u0417\u0418\u041d/ }).click();
   await expect(stellar.locator('.card-buy')).toBeDisabled();
   await expect(page.locator('#hub-credits')).toHaveText('30');
 });
 
 test('missions pay out only when completed and the backup code restores progress', async ({ page }) => {
-  await page.goto('/');
+  await open(page);
   await page.evaluate(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, credits: 100, parts: 1, metrics: { stars: 3 } })));
   await page.reload();
-  await page.getByRole('button', { name: /^✦ ИСПЫТАНИЯ$/ }).click();
+  await page.getByRole('button', { name: /^✦ ИСПЫТАНИЯ/ }).click();
   const mission = page.locator('.mission-card').filter({ hasText: 'ЛОВЕЦ ЗВЁЗД' });
   await expect(mission.locator('.card-buy')).toHaveText('ЗАБРАТЬ');
   await mission.locator('.card-buy').click();
@@ -328,7 +358,7 @@ test('missions pay out only when completed and the backup code restores progress
     window.__savedCode = saved;
   }, code);
   await page.reload();
-  await page.getByRole('button', { name: /^⬡ АНГАР$/ }).click();
+  await page.getByRole('button', { name: /^⬡ АНГАР/ }).click();
   await page.locator('[data-hub-tab="backup"]').click();
   await page.getByRole('button', { name: 'ВОССТАНОВИТЬ' }).click();
   await page.locator('#restore-input').fill(code);
@@ -358,7 +388,7 @@ test('a campaign flight reaches the sector boss and a victory unlocks the next s
   test.setTimeout(240000);
   await page.addInitScript(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, upgrades: { weapon: 5, hull: 2, engine: 3, wave: 2 } })));
   await page.clock.install();
-  await page.goto('/');
+  await open(page);
   await page.getByRole('button', { name: 'В ПОЛЁТ', exact: true }).click();
   await page.locator('#launch-button').click();
   await expect(page.locator('#boss-status')).toBeHidden();
@@ -386,7 +416,7 @@ test('a campaign flight reaches the sector boss and a victory unlocks the next s
 test('new screens fit compact phones, wide phones and tablets without overflow', async ({ page }) => {
   for (const size of [{ width: 568, height: 320 }, { width: 780, height: 360 }, { width: 915, height: 412 }, { width: 1280, height: 720 }]) {
     await page.setViewportSize(size);
-    await page.goto('/');
+    await open(page);
     await page.evaluate(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, credits: 900, parts: 8, ownedSkins: ['classic', 'ice'] })));
     await page.reload();
     for (const [name, dialog] of [['В ПОЛЁТ', '#flight-overlay'], ['АНГАР', '#hub-overlay']]) {
@@ -408,4 +438,34 @@ test('new screens fit compact phones, wide phones and tablets without overflow',
       await page.locator(`${dialog} .close-button`).click();
     }
   }
+});
+
+test('the boss telegraph warns the pilot and the shatter plays before the results', async ({ page }) => {
+  test.setTimeout(240000);
+  await page.addInitScript(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, upgrades: { weapon: 5, hull: 5, engine: 3, wave: 3 } })));
+  await page.clock.install();
+  await page.goto('/');
+  await page.locator('#intro-skip').click();
+  await page.getByRole('button', { name: 'В ПОЛЁТ', exact: true }).click();
+  await page.locator('#launch-button').click();
+  await page.clock.runFor(21200);
+  await expect(page.locator('#announcement')).toContainText(/СТРАЖ/);
+  await expect(page.locator('#boss-status')).toBeHidden();
+  await page.clock.runFor(3400);
+  await expect(page.locator('#boss-status')).toBeVisible();
+  await expect(page.locator('#announcement')).toContainText(/СТРАЖ СЕКТОРА/);
+  // Wear the guardian down and watch it break apart before the result screen appears.
+  let key = 'ArrowDown';
+  await page.keyboard.down(key);
+  let defeated = false;
+  for (let i = 0; i < 60 && !defeated; i += 1) {
+    await page.clock.runFor(500);
+    await page.keyboard.up(key);
+    key = key === 'ArrowDown' ? 'ArrowUp' : 'ArrowDown';
+    await page.keyboard.down(key);
+    defeated = (await page.locator('#announcement').innerText()).includes('РАСПАДАЕТСЯ') || await page.locator('#result-overlay').isVisible();
+  }
+  await page.keyboard.up(key);
+  await expect(page.locator('#result-overlay')).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('#result-title')).toHaveText(/СТРАЖ/);
 });

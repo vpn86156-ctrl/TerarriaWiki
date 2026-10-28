@@ -4,7 +4,10 @@ export const WORLD_HEIGHT = 540;
 export const MAX_HEALTH = 3;
 export const WAVE_COOLDOWN = 9;
 export const SECTOR_FLIGHT_TIME = 24;
+export const BOSS_WARNING = 2.6;
+export const BOSS_DEATH_TIME = 2.4;
 const PLAYER_RADIUS = 22;
+const BOSS_COLORS = [['#b9f9f0', '#487d99', '#1d2f53'], ['#d4f4ff', '#79bdea', '#25466f'], ['#ffd49a', '#e47755', '#602c44']];
 const TAU = Math.PI * 2;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const randomBetween = (game, min, max) => min + game.random() * (max - min);
@@ -12,6 +15,7 @@ const overlaps = (a, b, extra = 0) => {
   const dx = a.x - b.x, dy = a.y - b.y, r = a.radius + b.radius + extra;
   return dx * dx + dy * dy < r * r;
 };
+export const bossPalette = (sector) => BOSS_COLORS[clamp(Math.floor(sector), 0, BOSS_COLORS.length - 1)];
 
 export function createGame({ width = 960, random = Math.random, mode = 'endless', sectorIndex = 0, upgrades = {}, skin = 'classic' } = {}) {
   width = Math.max(540, width);
@@ -22,11 +26,12 @@ export function createGame({ width = 960, random = Math.random, mode = 'endless'
     sectorIndex: clamp(Math.floor(sectorIndex), 0, SECTORS.length - 1), sectorElapsed: 0, sectorCycle: 0,
     upgrades: levels, skin, elapsed: 0, distance: 0, score: 0, stars: 0, destroyed: 0, dronesDestroyed: 0,
     bossesDefeated: 0, creditsCollected: 0, partsCollected: 0, bonus: 0,
-    gameOver: false, victory: false, settled: false, boss: null,
+    gameOver: false, victory: false, settled: false, boss: null, finale: null,
+    warning: 0, warningFired: false, shake: 0, flash: 0, timeScale: 1,
     player: { x: width * .22, y: 270, targetX: width * .22, targetY: 270, radius: PLAYER_RADIUS, health: maxHealth, maxHealth, invulnerable: 0 },
     waveCooldown: 0, waveMax: WAVE_COOLDOWN - levels.wave * .6,
     timers: { rock: 1.2, star: 2.6, repair: 19, drone: 14, shot: .15, boss: SECTOR_FLIGHT_TIME, credits: 9, part: 17 },
-    rocks: [], drones: [], bullets: [], hostileBullets: [], pickups: [], particles: [], rings: [], events: [],
+    rocks: [], drones: [], bullets: [], hostileBullets: [], pickups: [], particles: [], rings: [], debris: [], events: [],
   };
 }
 
@@ -35,10 +40,11 @@ export function resizeGame(game, width) {
   const ratio = width / game.width;
   game.width = width;
   game.player.x *= ratio; game.player.targetX *= ratio;
-  for (const list of [game.rocks, game.drones, game.bullets, game.hostileBullets, game.pickups, game.particles, game.rings]) {
+  for (const list of [game.rocks, game.drones, game.bullets, game.hostileBullets, game.pickups, game.particles, game.rings, game.debris]) {
     for (const object of list) object.x *= ratio;
   }
   if (game.boss) game.boss.x *= ratio;
+  if (game.finale) game.finale.x *= ratio;
   setTarget(game, game.player.targetX, game.player.targetY);
   game.player.x = clamp(game.player.x, 52, Math.max(52, width * .64));
 }
@@ -55,17 +61,17 @@ function emit(game, x, y, color, amount = 9, strength = 1) {
 }
 function spawnRock(game) {
   const radius = randomBetween(game, 20, 39);
-  const comet = game.sectorElapsed > 7 && game.random() < .27;
+  const comet = game.sectorElapsed > 7 && game.random() < .3;
   game.rocks.push({
     x: game.width + radius + 12, y: randomBetween(game, 70 + radius * .3, WORLD_HEIGHT - 45 - radius * .3), radius,
     vx: (-randomBetween(game, 150, 215) - Math.min(game.elapsed * .65, 75)) * (comet ? 1.3 : 1),
-    vy: randomBetween(game, -14, 14), rotation: randomBetween(game, 0, TAU), spin: randomBetween(game, -.8, .8),
+    vy: randomBetween(game, -14, 14), rotation: randomBetween(game, 0, TAU), spin: randomBetween(game, -.9, .9),
     shape: randomBetween(game, 0, 100), health: radius > 32 ? 3 : radius > 26 ? 2 : 1,
     comet, sector: game.sectorIndex, removed: false,
   });
 }
 function spawnPickup(game, kind) {
-  game.pickups.push({ kind, x: game.width + 25, y: randomBetween(game, 90, WORLD_HEIGHT - 75), radius: kind === 'star' ? 16 : 18, vx: -145, phase: randomBetween(game, 0, TAU), removed: false });
+  game.pickups.push({ kind, x: game.width + 25, y: randomBetween(game, 90, WORLD_HEIGHT - 75), radius: kind === 'star' ? 17 : 19, vx: -145, phase: randomBetween(game, 0, TAU), spin: randomBetween(game, 0, TAU), removed: false });
 }
 function spawnDrone(game) {
   const y = randomBetween(game, 95, WORLD_HEIGHT - 85);
@@ -73,9 +79,13 @@ function spawnDrone(game) {
 }
 function spawnBoss(game) {
   const maxHealth = 28 + game.sectorIndex * 9 + Math.min(game.sectorCycle * 5, 30);
-  game.boss = { x: game.width + 105, y: 270, radius: 63, health: maxHealth, maxHealth, age: 0, fire: 1.8, hitFlash: 0, sector: game.sectorIndex };
+  game.boss = {
+    x: game.width + 120, y: 270, radius: 70, health: maxHealth, maxHealth, age: 0, fire: 2.1,
+    hitFlash: 0, sector: game.sectorIndex, phase: 1, burst: 3.4, entering: 1.6, breath: 0,
+  };
   // No surprise asteroid can strike the player during the boss introduction.
   game.rocks = []; game.drones = []; game.hostileBullets = [];
+  game.shake = .75; game.flash = .35; game.warning = 0;
   game.events.push('boss-arrives');
 }
 function destroyRock(game, rock) {
@@ -83,6 +93,7 @@ function destroyRock(game, rock) {
   rock.removed = true; game.destroyed += 1;
   emit(game, rock.x, rock.y, '#ffa17c', 11, 1.05);
   game.rings.push({ x: rock.x, y: rock.y, age: 0, duration: .35, maxRadius: rock.radius * 1.7, color: '255,166,128' });
+  game.shake = Math.max(game.shake, .18);
   game.events.push('break');
 }
 function destroyDrone(game, drone) {
@@ -90,29 +101,69 @@ function destroyDrone(game, drone) {
   drone.removed = true; game.dronesDestroyed += 1;
   emit(game, drone.x, drone.y, '#eaa4ff', 14, 1.2);
   game.rings.push({ x: drone.x, y: drone.y, age: 0, duration: .45, maxRadius: 65, color: '205,157,255' });
-  game.events.push('break');
+  game.shake = Math.max(game.shake, .22);
+  game.events.push('drone-break');
+}
+// The killing blow starts a slow-motion shatter: debris, a chain of blasts and a screen shake.
+function beginBossDeath(game, boss) {
+  const palette = bossPalette(boss.sector);
+  game.debris = [];
+  const pieces = 30;
+  for (let i = 0; i < pieces; i += 1) {
+    const angle = (i / pieces) * TAU + randomBetween(game, -.12, .12);
+    const distance = boss.radius * randomBetween(game, .2, .85);
+    const speed = 60 + game.random() * 230;
+    game.debris.push({
+      x: boss.x + Math.cos(angle) * distance, y: boss.y + Math.sin(angle) * distance,
+      vx: Math.cos(angle) * speed + 55, vy: Math.sin(angle) * speed,
+      rotation: randomBetween(game, 0, TAU), spin: randomBetween(game, -6, 6),
+      size: randomBetween(game, 7, 21), life: BOSS_DEATH_TIME, maxLife: BOSS_DEATH_TIME,
+      color: palette[Math.min(palette.length - 1, Math.floor(game.random() * palette.length))],
+      shape: Math.floor(game.random() * 3),
+    });
+  }
+  game.finale = { x: boss.x, y: boss.y, sector: boss.sector, radius: boss.radius, timer: BOSS_DEATH_TIME, next: .1, blast: 0 };
+  game.shake = 1; game.flash = .85; game.timeScale = .35;
+  game.hostileBullets = [];
+  emit(game, boss.x, boss.y, '#fff2c9', 40, 1.9);
+  game.rings.push({ x: boss.x, y: boss.y, age: 0, duration: .9, maxRadius: 190, color: '255,214,158' });
 }
 function damageBoss(game, damage) {
   const boss = game.boss;
   if (!boss || boss.health <= 0) return;
   boss.health = Math.max(0, boss.health - damage); boss.hitFlash = .09;
-  if (boss.health > 0) return;
+  if (boss.health > 0) {
+    if (boss.phase === 1 && boss.health <= boss.maxHealth * .5) {
+      boss.phase = 2; boss.burst = 1.2;
+      game.shake = Math.max(game.shake, .7); game.flash = Math.max(game.flash, .3);
+      emit(game, boss.x, boss.y, '#ffb27a', 24, 1.5);
+      game.rings.push({ x: boss.x, y: boss.y, age: 0, duration: .7, maxRadius: 150, color: '255,150,110' });
+      game.events.push('boss-rage');
+    }
+    return;
+  }
   game.bossesDefeated += 1;
-  emit(game, boss.x, boss.y, '#ffe2a2', 35, 1.7);
-  game.rings.push({ x: boss.x, y: boss.y, age: 0, duration: .8, maxRadius: 150, color: '255,205,158' });
-  game.hostileBullets = [];
-  game.events.push('boss-defeated');
+  beginBossDeath(game, boss);
   game.boss = null;
+  game.events.push('boss-defeated');
+}
+function finishFinale(game) {
+  const finale = game.finale;
+  game.finale = null;
+  game.timeScale = 1;
   if (game.mode === 'campaign') {
-    game.victory = true; game.gameOver = true; game.events.push('victory');
+    game.victory = true; game.gameOver = true;
+    game.events.push('victory');
   } else {
     game.sectorIndex = (game.sectorIndex + 1) % SECTORS.length;
     game.sectorCycle += 1; game.sectorElapsed = 0;
     game.timers.boss = SECTOR_FLIGHT_TIME + Math.min(game.sectorCycle * 2, 10);
     game.timers.rock = 2.5; game.timers.drone = 6;
+    game.warningFired = false;
     game.player.health = Math.min(game.player.maxHealth, game.player.health + 1);
     game.events.push('sector-change');
   }
+  return finale;
 }
 export function useWave(game) {
   if (game.gameOver || game.waveCooldown > 0) return false;
@@ -134,64 +185,115 @@ function damagePlayer(game, source) {
   game.player.health = Math.max(0, game.player.health - 1); game.player.invulnerable = 1.6;
   emit(game, game.player.x, game.player.y, '#ffa38b', 18, 1.2);
   game.rings.push({ x: game.player.x, y: game.player.y, age: 0, duration: .4, maxRadius: 65, color: '255,150,139' });
+  game.shake = Math.max(game.shake, .6); game.flash = Math.max(game.flash, .18);
   game.events.push('hit');
-  if (game.player.health === 0) { game.gameOver = true; game.events.push('gameover'); }
+  if (game.player.health === 0) { game.gameOver = true; game.shake = 1; game.events.push('gameover'); }
 }
 function calculateScore(game) {
   return Math.floor(game.distance) + game.stars * 50 + game.destroyed * 20 + game.dronesDestroyed * 60 + game.bossesDefeated * 250 + game.bonus;
+}
+function bossFire(game, boss, angle, speed, radius) {
+  game.hostileBullets.push({ x: boss.x - 48, y: boss.y, radius, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, removed: false, sector: boss.sector });
 }
 function updateBoss(game, dt) {
   const boss = game.boss;
   if (!boss) return;
   boss.age += dt; boss.hitFlash = Math.max(0, boss.hitFlash - dt);
-  const desiredX = Math.max(game.width * .76, game.width - 155);
-  boss.x = Math.max(desiredX, boss.x - 150 * dt);
-  boss.y = 270 + Math.sin(boss.age * (.72 + boss.sector * .12)) * (110 - boss.sector * 10);
+  boss.entering = Math.max(0, boss.entering - dt);
+  const desiredX = Math.max(game.width * .76, game.width - 165);
+  boss.x = Math.max(desiredX, boss.x - 170 * dt);
+  const drift = .72 + boss.sector * .12 + (boss.phase === 2 ? .3 : 0);
+  boss.y = 270 + Math.sin(boss.age * drift) * (110 - boss.sector * 10);
+  boss.breath = Math.max(0, boss.breath - dt);
+  if (boss.entering > 0 || boss.x >= game.width - 40) return;
   boss.fire -= dt;
-  if (boss.fire <= 0 && boss.x < game.width - 40) {
-    const dx = game.player.x - boss.x, dy = game.player.y - boss.y;
-    const aimed = Math.atan2(dy, dx);
-    const count = boss.sector === 0 ? 3 : boss.sector === 1 ? 4 : 5;
+  if (boss.fire <= 0) {
+    const aimed = Math.atan2(game.player.y - boss.y, game.player.x - boss.x);
+    const count = boss.sector + 3;
     const spacing = boss.sector === 0 ? .18 : .15;
-    for (let i = 0; i < count; i += 1) {
-      const angle = aimed + (i - (count - 1) / 2) * spacing;
-      const speed = 190 + boss.sector * 12;
-      game.hostileBullets.push({ x: boss.x - 45, y: boss.y, radius: 7 + boss.sector, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, removed: false, sector: boss.sector });
-    }
-    boss.fire = Math.max(1.1, 2.15 - boss.sector * .18 - (boss.health < boss.maxHealth * .5 ? .25 : 0));
+    for (let i = 0; i < count; i += 1) bossFire(game, boss, aimed + (i - (count - 1) / 2) * spacing, 190 + boss.sector * 12, 7 + boss.sector);
+    boss.fire = Math.max(.85, 2.15 - boss.sector * .18 - (boss.phase === 2 ? .55 : 0));
+  }
+  boss.burst -= dt;
+  if (boss.phase === 2 && boss.burst <= 0) {
+    for (let i = 0; i < 10; i += 1) bossFire(game, boss, (i / 10) * TAU + boss.age, 165, 8);
+    boss.burst = 3.6;
+    game.shake = Math.max(game.shake, .35);
+  }
+}
+function updateFinale(game, raw) {
+  const finale = game.finale;
+  finale.timer -= raw;
+  game.timeScale = Math.min(1, game.timeScale + raw * .75);
+  finale.next -= raw;
+  if (finale.next <= 0 && finale.blast < 6) {
+    finale.blast += 1;
+    const angle = game.random() * TAU;
+    const distance = game.random() * finale.radius * 1.15;
+    const x = finale.x + Math.cos(angle) * distance;
+    const y = finale.y + Math.sin(angle) * distance;
+    const palette = bossPalette(finale.sector);
+    emit(game, x, y, finale.blast % 2 ? '#fff0c4' : palette[0], 16, 1.4);
+    game.rings.push({ x, y, age: 0, duration: .55, maxRadius: 55 + finale.blast * 16, color: '255,196,128' });
+    game.shake = Math.max(game.shake, .5);
+    game.flash = Math.max(game.flash, .3);
+    finale.next = .1 + finale.blast * .07;
+    game.events.push('boss-blast');
+  }
+  if (finale.timer <= 0) {
+    const palette = bossPalette(finale.sector);
+    emit(game, finale.x, finale.y, palette[0], 46, 2.2);
+    game.rings.push({ x: finale.x, y: finale.y, age: 0, duration: 1.1, maxRadius: 320, color: '255,226,176' });
+    game.flash = 1; game.shake = 1;
+    finishFinale(game);
   }
 }
 
 export function updateGame(game, seconds) {
   game.events = [];
   if (game.gameOver || !Number.isFinite(seconds) || seconds <= 0) return game.events;
-  const dt = Math.min(seconds, .05);
+  const raw = Math.min(seconds, .05);
+  const dt = raw * (game.finale ? game.timeScale : 1);
   game.elapsed += dt; game.sectorElapsed += dt;
   game.distance += dt * (20 + Math.min(game.elapsed * .12, 16));
   game.waveCooldown = Math.max(0, game.waveCooldown - dt);
+  game.shake = Math.max(0, game.shake - raw * 2.4);
+  game.flash = Math.max(0, game.flash - raw * 2.8);
   const player = game.player;
   player.invulnerable = Math.max(0, player.invulnerable - dt);
   const smoothing = 1 - Math.exp(-(11 + game.upgrades.engine * 1.5) * dt);
   player.x += (player.targetX - player.x) * smoothing; player.y += (player.targetY - player.y) * smoothing;
 
-  if (!game.boss) {
+  if (!game.boss && !game.finale) {
     game.timers.boss -= dt;
+    game.warning = clamp(game.timers.boss, 0, BOSS_WARNING);
+    if (game.timers.boss <= BOSS_WARNING && !game.warningFired) {
+      game.warningFired = true;
+      game.shake = Math.max(game.shake, .3);
+      game.events.push('boss-warning');
+    }
     if (game.timers.boss <= 0) spawnBoss(game);
   }
-  if (!game.boss) {
+  if (!game.boss && !game.finale) {
     game.timers.rock -= dt;
-    if (game.timers.rock <= 0) { spawnRock(game); game.timers.rock += Math.max(.55, 1.3 - game.elapsed * .006) * randomBetween(game, .85, 1.18); }
+    if (game.timers.rock <= 0 && game.timers.boss > 1.8) {
+      spawnRock(game);
+      game.timers.rock += Math.max(.55, 1.3 - game.elapsed * .006) * randomBetween(game, .85, 1.18);
+    }
     game.timers.drone -= dt;
-    if (game.timers.drone <= 0) { spawnDrone(game); game.timers.drone += randomBetween(game, 7, 11); }
+    if (game.timers.drone <= 0 && game.timers.boss > 3.4) { spawnDrone(game); game.timers.drone += randomBetween(game, 7, 11); }
   }
-  for (const [timer, kind, lo, hi] of [['star','star',3.4,5], ['repair','repair',20,26], ['credits','credit',10,15], ['part','part',18,24]]) {
-    game.timers[timer] -= dt;
-    if (game.timers[timer] <= 0) { spawnPickup(game, kind); game.timers[timer] += randomBetween(game, lo, hi); }
+  if (!game.finale) {
+    for (const [timer, kind, lo, hi] of [['star','star',3.4,5], ['repair','repair',20,26], ['credits','credit',10,15], ['part','part',18,24]]) {
+      game.timers[timer] -= dt;
+      if (game.timers[timer] <= 0) { spawnPickup(game, kind); game.timers[timer] += randomBetween(game, lo, hi); }
+    }
   }
   game.timers.shot -= dt;
-  if (game.timers.shot <= 0) {
+  if (game.timers.shot <= 0 && !game.finale) {
     game.bullets.push({ x: player.x + 34, y: player.y, radius: 5, vx: 560, damage: 1 + game.upgrades.weapon * .25, removed: false });
     game.timers.shot += Math.max(.16, .26 - game.upgrades.weapon * .018);
+    game.events.push('shot');
   }
 
   for (const rock of game.rocks) { rock.x += rock.vx * dt; rock.y += rock.vy * dt; rock.rotation += rock.spin * dt; if (rock.x < -rock.radius - 40) rock.removed = true; }
@@ -210,7 +312,12 @@ export function updateGame(game, seconds) {
     bullet.x += bullet.vx * dt; bullet.y += bullet.vy * dt;
     if (bullet.x < -30 || bullet.x > game.width + 30 || bullet.y < -30 || bullet.y > WORLD_HEIGHT + 30) bullet.removed = true;
   }
-  for (const pickup of game.pickups) { pickup.x += pickup.vx * dt; pickup.phase += dt * 3; if (pickup.x < -40) pickup.removed = true; }
+  for (const pickup of game.pickups) { pickup.x += pickup.vx * dt; pickup.phase += dt * 3; pickup.spin += dt * 1.6; if (pickup.x < -40) pickup.removed = true; }
+  for (const piece of game.debris) {
+    piece.x += piece.vx * dt; piece.y += piece.vy * dt; piece.vy += 42 * dt;
+    piece.vx *= Math.pow(.55, dt); piece.vy *= Math.pow(.65, dt);
+    piece.rotation += piece.spin * dt; piece.life -= raw;
+  }
 
   for (const bullet of game.bullets) {
     if (bullet.removed) continue;
@@ -225,10 +332,14 @@ export function updateGame(game, seconds) {
       bullet.removed = true; emit(game, bullet.x, bullet.y, '#fff1c7', 3, .4); damageBoss(game, bullet.damage || 1);
     }
   }
-  for (const rock of game.rocks) if (!rock.removed && overlaps(player, rock, -4)) damagePlayer(game, rock);
-  for (const drone of game.drones) if (!drone.removed && overlaps(player, drone, -4)) damagePlayer(game, drone);
-  for (const bullet of game.hostileBullets) if (!bullet.removed && overlaps(player, bullet, -3)) damagePlayer(game, bullet);
-  if (game.boss && overlaps(player, game.boss, -8)) damagePlayer(game, { removed: false });
+  if (!game.finale) {
+    for (const rock of game.rocks) if (!rock.removed && overlaps(player, rock, -4)) damagePlayer(game, rock);
+    for (const drone of game.drones) if (!drone.removed && overlaps(player, drone, -4)) damagePlayer(game, drone);
+    for (const bullet of game.hostileBullets) if (!bullet.removed && overlaps(player, bullet, -3)) damagePlayer(game, bullet);
+    if (game.boss && overlaps(player, game.boss, -8)) damagePlayer(game, { removed: false });
+  } else {
+    player.invulnerable = Math.max(player.invulnerable, .4);
+  }
   for (const pickup of game.pickups) {
     if (pickup.removed || !overlaps(player, pickup, 5) || game.gameOver) continue;
     pickup.removed = true;
@@ -242,10 +353,11 @@ export function updateGame(game, seconds) {
   }
   for (const particle of game.particles) { particle.x += particle.vx * dt; particle.y += particle.vy * dt; particle.vx *= Math.pow(.12, dt); particle.vy *= Math.pow(.12, dt); particle.life -= dt; }
   for (const ring of game.rings) ring.age += dt;
+  if (game.finale) updateFinale(game, raw);
   game.rocks = game.rocks.filter((item) => !item.removed); game.drones = game.drones.filter((item) => !item.removed);
   game.bullets = game.bullets.filter((item) => !item.removed); game.hostileBullets = game.hostileBullets.filter((item) => !item.removed);
   game.pickups = game.pickups.filter((item) => !item.removed); game.particles = game.particles.filter((item) => item.life > 0);
-  game.rings = game.rings.filter((item) => item.age < item.duration);
+  game.rings = game.rings.filter((item) => item.age < item.duration); game.debris = game.debris.filter((item) => item.life > 0);
   game.score = calculateScore(game);
   return game.events;
 }

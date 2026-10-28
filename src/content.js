@@ -12,10 +12,22 @@ export const SKINS = [
 ];
 
 export const UPGRADES = [
-  { id: 'weapon', name: 'ПУШКА', icon: '✦', description: 'Скорость и сила выстрелов', base: 90, step: 60, color: 'cyan' },
-  { id: 'hull', name: 'КОРПУС', icon: '⬡', description: '+1 деление прочности', base: 110, step: 70, color: 'coral' },
-  { id: 'engine', name: 'ДВИГАТЕЛЬ', icon: '➤', description: 'Быстрее реагирует на движение', base: 80, step: 55, color: 'ice' },
-  { id: 'wave', name: 'ВОЛНА', icon: 'ϟ', description: 'Больше радиус, меньше перезарядка', base: 100, step: 65, color: 'gold' },
+  {
+    id: 'weapon', name: 'ПУШКА', description: 'Скорость и сила выстрелов', base: 90, step: 60, color: 'cyan',
+    icon: '<svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M4 13h11" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M20 3 9 18h6l-2 11 12-17h-7l3-9Z" fill="currentColor"/></svg>',
+  },
+  {
+    id: 'hull', name: 'КОРПУС', description: '+1 деление прочности', base: 110, step: 70, color: 'coral',
+    icon: '<svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 3l11 4.5v9c0 7-5 11.5-11 13C10 27.5 5 23.5 5 16.5v-9L16 3Z" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/><path d="M16 11.5v9M11.5 16h9" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg>',
+  },
+  {
+    id: 'engine', name: 'ДВИГАТЕЛЬ', description: 'Быстрее реагирует на движение', base: 80, step: 55, color: 'ice',
+    icon: '<svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M3 16h17M14 8.5 21 16l-7 7.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 6v20" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  },
+  {
+    id: 'wave', name: 'ВОЛНА', description: 'Больше радиус, меньше перезарядка', base: 100, step: 65, color: 'gold',
+    icon: '<svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="14" cy="16" r="4.5" fill="currentColor"/><path d="M21 9a10 10 0 0 1 0 14M25.5 5.5a16 16 0 0 1 0 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  },
 ];
 export const MAX_UPGRADE = 5;
 

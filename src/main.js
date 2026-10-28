@@ -36,9 +36,10 @@ let progress;
 try { progress = normalizeProgress(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')); } catch { progress = newProgress(); }
 if (progress === null) progress = newProgress();
 const save = () => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch { /* Storage unavailable: the game keeps working for this session. */ } };
-const audio = new GameAudio(progress.sound);
+const audio = new GameAudio(progress.sound, progress.music);
 const number = new Intl.NumberFormat('ru-RU');
 const sounds = [...document.querySelectorAll('.sound-button')];
+const musicButtons = [...document.querySelectorAll('.music-button')];
 
 let mode = 'home';
 let game = null;
@@ -58,6 +59,11 @@ function soundUI() {
     button.dataset.muted = String(!progress.sound);
     button.setAttribute('aria-label', progress.sound ? 'Выключить звук' : 'Включить звук');
     button.setAttribute('aria-pressed', String(progress.sound));
+  }
+  for (const button of musicButtons) {
+    button.dataset.muted = String(!progress.music);
+    button.setAttribute('aria-label', progress.music ? 'Выключить музыку' : 'Включить музыку');
+    button.setAttribute('aria-pressed', String(progress.music));
   }
 }
 function homeUI() {
@@ -104,6 +110,8 @@ function updateHUD() {
   $('score-value').textContent = number.format(game.score);
   $('stars-value').textContent = number.format(game.stars);
   $('sector-name').textContent = sector.short;
+  const cycle = SECTOR_FLIGHT_TIME + Math.min(game.sectorCycle * 2, 10);
+  $('sector-fill').style.width = `${Math.max(0, Math.min(1, 1 - game.timers.boss / cycle)) * 100}%`;
   $('sector-progress').textContent = game.boss ? 'БОЙ СО СТРАЖЕМ' : `ДО БОССА ${Math.max(0, Math.ceil(game.timers.boss))} СЕК`;
   const health = $('health-indicator');
   const maxHealth = game.player.maxHealth;
@@ -124,6 +132,7 @@ function updateHUD() {
   if (game.boss) {
     $('boss-name').textContent = sector.boss;
     $('boss-health').style.width = `${Math.max(0, (game.boss.health / game.boss.maxHealth) * 100)}%`;
+    $('boss-phase').hidden = game.boss.phase !== 2;
   }
   $('first-flight-tip').classList.toggle('fade', game.elapsed > 6 || dragging !== null);
   $('control-hint').classList.toggle('dimmed', game.elapsed > 10 || dragging !== null);
@@ -174,6 +183,7 @@ function renderHub() {
       const level = document.createElement('div');
       level.className = 'card-level';
       for (let i = 0; i < MAX_UPGRADE; i += 1) level.append(Object.assign(document.createElement('i'), { className: i < cost.level ? 'on' : '' }));
+      level.append(Object.assign(document.createElement('b'), { textContent: cost.maxed ? 'МАКС' : `${cost.level}/${MAX_UPGRADE}` }));
       const info = document.createElement('div');
       info.className = 'card-info';
       info.innerHTML = `<span class="card-icon">${upgrade.icon}</span><div><h3>${upgrade.name}</h3><p>${upgrade.description}</p></div>`;
@@ -308,7 +318,7 @@ function startGame() {
     width: viewportWidth / worldScale, mode: planned.mode, sectorIndex: planned.sectorIndex,
     upgrades: progress.upgrades, skin: progress.selectedSkin,
   });
-  showMode('playing'); updateHUD();
+  showMode('playing'); updateHUD(); audio.setMode('calm'); audio.startMusic();
   if (planned.mode === 'campaign') announce(`${SECTORS[game.sectorIndex].name} · страж: ${SECTORS[game.sectorIndex].boss}`, 3);
   renderGame(ctx, game, sectorImage(SECTORS[game.sectorIndex].image));
   lastTime = performance.now(); cancelAnimationFrame(frame); frame = requestAnimationFrame(loop);
@@ -322,11 +332,14 @@ function keyboardMovement(dt) {
   }
 }
 const ANNOUNCEMENTS = {
-  'boss-arrives': 'ВНИМАНИЕ: СТРАЖ СЕКТОРА',
-  'boss-defeated': 'СТРАЖ ПОВЕРЖЕН!',
-  victory: 'СЕКТОР ЗАЧИЩЕН!',
-  'sector-change': 'НОВЫЙ СЕКТОР ВПЕРЕДИ',
+  'boss-warning': () => 'ОПАСНОСТЬ: СТРАЖ БЛИЗКО',
+  'boss-arrives': (game) => `СТРАЖ СЕКТОРА: ${SECTORS[game.sectorIndex].boss}`,
+  'boss-rage': () => 'СТРАЖ В ЯРОСТИ!',
+  'boss-defeated': () => 'СТРАЖ РАСПАДАЕТСЯ!',
+  victory: () => 'СЕКТОР ЗАЧИЩЕН!',
+  'sector-change': (game) => `КУРС: ${SECTORS[game.sectorIndex].name}`,
 };
+const MUSIC_SWITCH = { 'boss-warning': 'boss', 'boss-arrives': 'boss', 'boss-defeated': 'calm', 'sector-change': 'calm' };
 function loop(now) {
   if (mode !== 'playing' || !game) return;
   const dt = Math.min(.05, Math.max(0, (now - lastTime) / 1000));
@@ -335,7 +348,8 @@ function loop(now) {
   const events = updateGame(game, dt);
   for (const event of events) {
     audio.play(event);
-    if (ANNOUNCEMENTS[event]) announce(ANNOUNCEMENTS[event], 2.2);
+    if (ANNOUNCEMENTS[event]) announce(ANNOUNCEMENTS[event](game), 2.2);
+    if (MUSIC_SWITCH[event]) audio.setMode(MUSIC_SWITCH[event]);
   }
   updateHUD(); renderGame(ctx, game, sectorImage(SECTORS[game.sectorIndex].image));
   if (game.gameOver) { finishGame(); return; }
@@ -343,16 +357,16 @@ function loop(now) {
 }
 function pauseGame() {
   if (mode !== 'playing') return;
-  cancelAnimationFrame(frame); keys.clear(); dragging = null; audio.suspend();
+  cancelAnimationFrame(frame); keys.clear(); dragging = null; audio.stopMusic(); audio.suspend();
   showMode('pause');
 }
 function resumeGame() {
   if (mode !== 'pause' || isPortrait()) return;
-  audio.unlock(); showMode('playing'); lastTime = performance.now(); frame = requestAnimationFrame(loop);
+  audio.unlock(); audio.startMusic(); showMode('playing'); lastTime = performance.now(); frame = requestAnimationFrame(loop);
 }
 function finishGame() {
   if (!game) return;
-  cancelAnimationFrame(frame); keys.clear(); dragging = null; audio.suspend();
+  cancelAnimationFrame(frame); keys.clear(); dragging = null; audio.stopMusic(); audio.suspend();
   const outcome = settleFlight(progress, game) || { credits: 0, parts: 0, newRecord: false, isFirstClear: false };
   save();
   const title = $('result-title');
@@ -361,6 +375,7 @@ function finishGame() {
   $('result-score').textContent = number.format(game.score);
   $('result-distance').textContent = `${number.format(Math.floor(game.distance))} м`;
   $('result-stars').textContent = number.format(game.stars);
+  $('result-bosses').textContent = number.format(game.bossesDefeated);
   $('result-best').textContent = number.format(progress.best);
   $('result-credits').textContent = number.format(outcome.credits);
   $('result-parts').textContent = number.format(outcome.parts);
@@ -370,7 +385,7 @@ function finishGame() {
   if (game.victory) audio.play('victory');
 }
 function returnHome() {
-  cancelAnimationFrame(frame); keys.clear(); dragging = null; game = null; audio.suspend();
+  cancelAnimationFrame(frame); keys.clear(); dragging = null; game = null; audio.stopMusic(); audio.suspend();
   showMode('home');
 }
 function activateWave() {
@@ -379,13 +394,22 @@ function activateWave() {
 }
 
 /* ---------- intro ---------- */
+// The launch cinematic plays every time the game is opened; any tap skips it.
 function playIntro() {
   const intro = $('intro');
-  if (progress.tutorialSeen) return;
   intro.hidden = false;
-  const finish = () => { intro.classList.add('skip'); setTimeout(() => { intro.hidden = true; intro.classList.remove('skip'); }, 380); };
-  $('intro-skip').onclick = finish;
-  setTimeout(finish, 3400);
+  let closed = false;
+  const finish = () => {
+    if (closed) return;
+    closed = true;
+    clearTimeout(timer);
+    intro.classList.add('skip');
+    setTimeout(() => { intro.hidden = true; intro.classList.remove('skip'); }, 420);
+  };
+  const timer = setTimeout(finish, 3600);
+  intro.addEventListener('click', finish, { once: true });
+  $('intro-skip').addEventListener('click', finish, { once: true });
+  window.__cosmoSkipIntro = finish;
 }
 
 /* ---------- wiring ---------- */
@@ -416,7 +440,15 @@ $('menu-button').addEventListener('click', returnHome);
 // Mobile browsers do not always synthesize a click for a second finger: activate on touch/pen down.
 $('pulse-button').addEventListener('pointerdown', (event) => { if (event.pointerType !== 'mouse') { event.preventDefault(); activateWave(); } });
 $('pulse-button').addEventListener('click', activateWave);
-for (const button of sounds) button.addEventListener('click', () => { progress.sound = !progress.sound; audio.setEnabled(progress.sound); save(); soundUI(); });
+for (const button of sounds) button.addEventListener('click', () => { progress.sound = !progress.sound; audio.setEnabled(progress.sound); save(); soundUI(); if (progress.sound) audio.play('ui'); });
+for (const button of musicButtons) button.addEventListener('click', () => {
+  progress.music = !progress.music; audio.setMusicEnabled(progress.music); save(); soundUI();
+  if (progress.music && mode === 'playing') { audio.unlock(); audio.startMusic(); }
+});
+for (const button of document.querySelectorAll('.button, .home-nav button, .card-buy, .mode-tabs button, .hub-tabs button, .sector-card')) {
+  button.addEventListener('click', () => audio.play('ui'));
+}
+for (const button of document.querySelectorAll('.card-buy')) button.addEventListener('click', () => audio.play('buy'));
 
 canvas.addEventListener('pointerdown', (event) => {
   if (mode !== 'playing' || dragging || event.clientX > viewportWidth * .72) return;
@@ -451,6 +483,7 @@ window.addEventListener('blur', () => { if (mode === 'playing') pauseGame(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && mode === 'playing') pauseGame(); });
 window.addEventListener('cosmopilot:background', () => { if (mode === 'playing') pauseGame(); else audio.suspend(); });
 window.__cosmoBack = () => {
+  if (!$('intro').hidden) { window.__cosmoSkipIntro?.(); return true; }
   if (!screens.case.hidden) { screens.case.hidden = true; return true; }
   if (!screens.import.hidden) { pendingRestore = null; screens.import.hidden = true; return true; }
   if (mode === 'playing') { pauseGame(); return true; }
