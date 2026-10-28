@@ -20,7 +20,7 @@
             <span><strong>КОСМОПИЛОТ</strong><small>КОСМИЧЕСКАЯ АРКАДА</small></span>
           </div>
           <div class="header-actions">
-            <div class="home-record"><span>ВАШ РЕКОРД</span><strong id="home-best">0</strong></div>
+            <div class="home-record"><span>РЕКОРД <b id="home-best">0</b></span><strong><span class="coin-symbol">◈</span> <span id="home-credits">200</span></strong></div>
             <button type="button" class="icon-button sound-button" aria-label="Выключить звук" title="Звук">
               <svg class="sound-on" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 9a4.5 4.5 0 0 1 0 6m2-9a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
               <svg class="sound-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -36,9 +36,14 @@
             <button id="start-button" type="button" class="button button-primary"><span class="button-play" aria-hidden="true">▶</span><span>В ПОЛЁТ</span><span class="button-arrow" aria-hidden="true">↗</span></button>
             <button id="help-button" type="button" class="button button-quiet"><span class="help-mark" aria-hidden="true">?</span> КАК ИГРАТЬ</button>
           </div>
+          <div class="home-nav" aria-label="Разделы игры">
+            <button type="button" id="hangar-button"><span>⬡</span> АНГАР</button>
+            <button type="button" id="shop-button"><span>◈</span> МАГАЗИН</button>
+            <button type="button" id="missions-button"><span>✦</span> ИСПЫТАНИЯ</button>
+          </div>
         </div>
 
-        <footer class="home-footer"><span><i></i> ИГРАЙ БЕЗ ИНТЕРНЕТА</span><span class="footer-right">БЕСКОНЕЧНЫЙ ПОЛЁТ <b>✦</b> 01</span></footer>
+        <footer class="home-footer"><span><i></i> ИГРАЙ БЕЗ ИНТЕРНЕТА</span><span class="footer-right">КАМПАНИЯ И БЕСКОНЕЧНЫЙ ПОЛЁТ <b>✦</b> 02</span></footer>
       </section>
 
       <section id="game-hud" class="hud" aria-label="Управление игрой" hidden>
@@ -51,6 +56,9 @@
           <div class="hud-stat hud-stars"><span class="hud-label">ЗВЁЗДЫ</span><strong><span class="star-glyph">✦</span> <span id="stars-value">0</span></strong></div>
           <button id="pause-button" type="button" class="icon-button pause-button" aria-label="Пауза"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6v12M15 6v12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
         </div>
+        <div class="sector-status"><span id="sector-name">ТУМАННОСТЬ</span><small id="sector-progress">ДО БОССА</small></div>
+        <div id="boss-status" class="boss-status" hidden><div><span>БОСС</span><strong id="boss-name">СТРАЖ ПУСТОТЫ</strong></div><div class="boss-track"><i id="boss-health"></i></div></div>
+        <div id="announcement" class="announcement" aria-live="polite" hidden></div>
         <div id="control-hint" class="control-hint" aria-hidden="true"><div class="control-rings"><span></span></div><div><strong>УПРАВЛЕНИЕ</strong><small>Веди пальцем</small></div></div>
         <div id="first-flight-tip" class="first-flight-tip">ВЕДИ КОРАБЛЬ ПАЛЬЦЕМ <span>↗</span></div>
         <div class="pulse-control">
@@ -91,8 +99,45 @@
             <div class="result-score"><span class="hud-label">ВАШ РЕЗУЛЬТАТ</span><strong id="result-score">0</strong><span id="new-record" class="new-record" hidden>✦ НОВЫЙ РЕКОРД</span></div>
           </div>
           <div class="result-stats"><span>ПУТЬ <b id="result-distance">0 м</b></span><span>ЗВЁЗДЫ <b id="result-stars">0</b></span><span>РЕКОРД <b id="result-best">0</b></span></div>
+          <div class="result-rewards"><span>НАГРАДА ЗА ПОЛЁТ</span><strong>◈ +<b id="result-credits">0</b></strong><strong>⬡ +<b id="result-parts">0</b></strong><span id="result-unlock" hidden>✦ НОВЫЙ СЕКТОР ОТКРЫТ</span></div>
           <div class="result-actions"><button id="retry-button" class="button button-primary compact" type="button">ЕЩЁ РАЗ <span class="button-arrow">↗</span></button><button id="menu-button" class="button button-quiet" type="button">В ГЛАВНОЕ МЕНЮ</button></div>
         </section>
+      </div>
+
+
+      <div id="flight-overlay" class="overlay" hidden>
+        <section class="dialog flight-dialog" role="dialog" aria-modal="true" aria-labelledby="flight-title">
+          <div class="dialog-top"><span class="dialog-kicker"><i></i> КАРТА ПОЛЁТОВ</span><button id="flight-close" class="close-button" type="button" aria-label="Закрыть выбор полёта">×</button></div>
+          <div class="flight-heading"><div><h2 id="flight-title">КУДА ЛЕТИМ?</h2><p class="dialog-intro">Выбирай маршрут и отправляйся навстречу звёздам.</p></div><div class="mode-tabs" role="group" aria-label="Режим игры"><button id="mode-campaign" class="active" type="button">КАМПАНИЯ</button><button id="mode-endless" type="button">БЕСКОНЕЧНЫЙ</button></div></div>
+          <div id="sector-grid" class="sector-grid"></div>
+          <div class="flight-bottom"><span id="flight-note">Победи стража, чтобы открыть следующий сектор.</span><button id="launch-button" class="button button-primary compact" type="button">НАЧАТЬ ПОЛЁТ <span class="button-arrow">↗</span></button></div>
+        </section>
+      </div>
+
+      <div id="hub-overlay" class="overlay" hidden>
+        <section class="dialog hub-dialog" role="dialog" aria-modal="true" aria-labelledby="hub-title">
+          <div class="hub-head"><div><span class="dialog-kicker"><i></i> ТВОЯ КОСМИЧЕСКАЯ БАЗА</span><h2 id="hub-title">АНГАР</h2></div><div class="hub-wallet"><span title="Кредиты">◈ <b id="hub-credits">0</b></span><span title="Детали">⬡ <b id="hub-parts">0</b></span><button id="hub-close" class="close-button" type="button" aria-label="Закрыть базу">×</button></div></div>
+          <nav class="hub-tabs" aria-label="Разделы базы"><button data-hub-tab="upgrades" type="button">УЛУЧШЕНИЯ</button><button data-hub-tab="ships" type="button">КОРАБЛИ</button><button data-hub-tab="shop" type="button">КЕЙСЫ</button><button data-hub-tab="missions" type="button">ИСПЫТАНИЯ</button><button data-hub-tab="backup" type="button">ПРОГРЕСС</button></nav>
+          <div id="hub-message" class="hub-message" role="status" hidden></div>
+          <div id="hub-content" class="hub-content"></div>
+        </section>
+      </div>
+
+      <div id="case-overlay" class="overlay case-overlay" hidden>
+        <section class="dialog case-dialog" role="dialog" aria-modal="true" aria-labelledby="case-title">
+          <span class="dialog-kicker"><i></i> КЕЙС ОТКРЫТ</span><div class="case-open-art" aria-hidden="true"><span>✦</span></div><h2 id="case-title">ТВОЯ НАГРАДА</h2><p id="case-reward" class="case-reward"></p><button id="case-close" class="button button-primary compact" type="button">ОТЛИЧНО <span class="button-arrow">↗</span></button>
+        </section>
+      </div>
+
+      <div id="import-overlay" class="overlay" hidden>
+        <section class="dialog pause-dialog" role="dialog" aria-modal="true" aria-labelledby="import-title"><span class="dialog-kicker"><i></i> РЕЗЕРВНАЯ КОПИЯ</span><h2 id="import-title">ВОССТАНОВИТЬ?</h2><p class="dialog-intro">Текущий прогресс будет заменён данными из кода.</p><div class="pause-actions"><button id="import-confirm" class="button button-primary compact" type="button">ВОССТАНОВИТЬ</button><button id="import-cancel" class="button button-quiet" type="button">ОТМЕНА</button></div></section>
+      </div>
+
+      <div id="intro" class="intro" aria-label="Заставка игры" hidden>
+        <div class="intro-field" aria-hidden="true"></div><div class="intro-flare" aria-hidden="true"></div>
+        <svg class="intro-rocket" viewBox="0 0 180 90" aria-hidden="true"><defs><linearGradient id="introFlame"><stop stop-color="#a7ffff"/><stop offset="1" stop-color="#32dfff" stop-opacity="0"/></linearGradient></defs><path d="M65 40 4 45l61 5Z" fill="url(#introFlame)"/><path d="m75 36-8-18 27 16v23L67 72l8-19Z" fill="#f5967c" stroke="#ffd5b6" stroke-width="2"/><path d="M67 31q58-8 91 14-33 22-91 14Z" fill="#eefaf5" stroke="#a8f7f2" stroke-width="2"/><path d="M137 36q14 4 21 9-7 6-21 9Z" fill="#f18b74"/><ellipse cx="105" cy="45" rx="18" ry="10" fill="#183c5a" stroke="#9adce7" stroke-width="2"/></svg>
+        <div class="intro-copy"><span>ПРИСТЕГНИ РЕМНИ</span><strong>КОСМО<span>ПИЛОТ</span></strong><small>ТВОЁ ПУТЕШЕСТВИЕ НАЧИНАЕТСЯ</small></div>
+        <button id="intro-skip" type="button">ПРОПУСТИТЬ <span>↗</span></button>
       </div>
 
       <div class="rotate-overlay" role="status"><div class="rotate-icon" aria-hidden="true">↻</div><strong>ПОВЕРНИ ЭКРАН</strong><span>Космопилот летает горизонтально.</span></div>

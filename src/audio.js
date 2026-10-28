@@ -48,6 +48,20 @@ export class GameAudio {
     } else if (name === 'wave') {
       this.tone(380, 80, now, .42, 'sine', .7);
       this.tone(650, 170, now, .26, 'triangle', .2);
+    } else if (name === 'credit') {
+      this.tone(880, 990, now, .09, 'square', .18);
+      this.tone(1320, 1480, now + .05, .1, 'square', .12);
+    } else if (name === 'part') {
+      this.tone(620, 700, now, .1, 'triangle', .3);
+    } else if (name === 'boss-arrives') {
+      this.tone(120, 60, now, .8, 'triangle', .7);
+      this.tone(240, 120, now, .6, 'sawtooth', .12);
+    } else if (name === 'boss-defeated') {
+      for (let i = 0; i < 4; i += 1) this.tone(320 + i * 180, 180 + i * 90, now + i * .11, .3, 'triangle', .35);
+    } else if (name === 'victory') {
+      [523, 659, 784, 1047].forEach((frequency, index) => this.tone(frequency, frequency * 1.02, now + index * .13, .4, 'sine', .35));
+    } else if (name === 'sector-change') {
+      [392, 494, 587].forEach((frequency, index) => this.tone(frequency, frequency * 1.5, now + index * .08, .28, 'sine', .25));
     } else if (name === 'break' && now - this.lastBreak > .22) {
       this.lastBreak = now; this.tone(260, 100, now, .09, 'triangle', .18);
     }

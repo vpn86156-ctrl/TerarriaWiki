@@ -1,6 +1,6 @@
 {
   "name": "kosmopilot",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Офлайн-аркада для Android в горизонтальном режиме",
@@ -11,7 +11,7 @@
     "setup:signing": "python3 scripts/setup-signing.py",
     "build:apk": "npm run build:web && python3 scripts/build-apk.py",
     "test": "node --test tests/*.test.js",
-    "test:ui": "playwright test",
+    "test:ui": "npm run build:web && playwright test",
     "test:apk": "python3 scripts/check-apk.py",
     "preview": "vite preview --host 0.0.0.0"
   },

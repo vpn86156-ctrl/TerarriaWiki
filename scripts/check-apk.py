@@ -7,7 +7,11 @@ import subprocess
 import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-version = json.loads((ROOT / 'package.json').read_text())['version']
+package_json = json.loads((ROOT / 'package.json').read_text())
+version = package_json['version']
+manifest_xml = (ROOT / 'android/app/src/main/AndroidManifest.xml').read_text()
+android_version = re.search(r'android:versionCode="(\d+)" android:versionName="([^"]+)"', manifest_xml)
+assert android_version and android_version.group(2) == version, (version, manifest_xml)
 apk = ROOT / 'downloads' / f'Kosmopilot-{version}.apk'
 java = ROOT / '.local/android/python/jdk4py/java-runtime/bin/java'
 signer = ROOT / 'node_modules/@postar/apktool-node/lib/apksigner.jar'
@@ -19,14 +23,15 @@ badging = subprocess.check_output([str(aapt), 'dump', 'badging', str(apk)], text
 permissions = subprocess.check_output([str(aapt), 'dump', 'permissions', str(apk)], text=True)
 manifest = subprocess.check_output([str(aapt), 'dump', 'xmltree', str(apk), '--file', 'AndroidManifest.xml'], text=True)
 assert "name='io.github.vpn86156.kosmopilot'" in badging, badging
-assert "versionCode='1'" in badging and f"versionName='{version}'" in badging
+expected_code = android_version.group(1)
+assert f"versionCode='{expected_code}'" in badging and f"versionName='{version}'" in badging, badging
 assert "minSdkVersion:'26'" in badging and "targetSdkVersion:'35'" in badging
 assert 'uses-permission' not in permissions, permissions
 assert re.search(r'screenOrientation\(0x[0-9a-f]+\)=6\b', manifest), manifest  # sensorLandscape
 with zipfile.ZipFile(apk) as archive:
     assert archive.testzip() is None
     names = set(archive.namelist())
-    for required in ['classes.dex', 'assets/index.html', 'assets/images/cosmos-cover.webp', 'assets/images/space-background.webp', 'assets/licenses/Manrope-OFL.txt', 'assets/licenses/Russo-One-OFL.txt']:
+    for required in ['classes.dex', 'assets/index.html', 'assets/images/cosmos-cover.webp', 'assets/images/space-background.webp', 'assets/images/ice-sector.webp', 'assets/images/fire-sector.webp', 'assets/licenses/Manrope-OFL.txt', 'assets/licenses/Russo-One-OFL.txt']:
         assert required in names, required
     # The signed APK must contain the exact production bundle that was tested.
     dist = ROOT / 'dist'

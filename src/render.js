@@ -1,4 +1,5 @@
 import { WORLD_HEIGHT } from './engine.js';
+import { SKINS } from './content.js';
 
 const TAU = Math.PI * 2;
 let seed = 68342;
@@ -37,6 +38,12 @@ function drawSpace(ctx, game, image) {
 function drawRock(ctx, rock) {
   ctx.save();
   ctx.translate(rock.x, rock.y);
+  if (rock.comet) {
+    const trail = ctx.createLinearGradient(0, 0, rock.radius * 3.2, 0);
+    const color = rock.sector === 1 ? '130,210,255' : rock.sector === 2 ? '255,135,83' : '143,236,247';
+    trail.addColorStop(0, `rgba(${color},.6)`); trail.addColorStop(1, `rgba(${color},0)`);
+    ctx.fillStyle = trail; ctx.beginPath(); ctx.moveTo(0, -rock.radius * .6); ctx.lineTo(rock.radius * 3.2, 0); ctx.lineTo(0, rock.radius * .6); ctx.fill();
+  }
   ctx.rotate(rock.rotation);
   const r = rock.radius;
   const outline = () => {
@@ -52,7 +59,9 @@ function drawRock(ctx, rock) {
   };
   ctx.shadowColor = 'rgba(245,125,120,.18)'; ctx.shadowBlur = 12;
   const fill = ctx.createRadialGradient(-r * .38, -r * .43, 1, 0, 0, r * 1.1);
-  fill.addColorStop(0, '#d2a38e'); fill.addColorStop(.4, '#9c6f79'); fill.addColorStop(.75, '#624b67'); fill.addColorStop(1, '#33334e');
+  if (rock.sector === 1) { fill.addColorStop(0, '#d7f4fa'); fill.addColorStop(.4, '#7caec7'); fill.addColorStop(.75, '#4b6e93'); fill.addColorStop(1, '#283854'); }
+  else if (rock.sector === 2) { fill.addColorStop(0, '#eeb69b'); fill.addColorStop(.4, '#a65e58'); fill.addColorStop(.75, '#613d4b'); fill.addColorStop(1, '#332935'); }
+  else { fill.addColorStop(0, '#d2a38e'); fill.addColorStop(.4, '#9c6f79'); fill.addColorStop(.75, '#624b67'); fill.addColorStop(1, '#33334e'); }
   ctx.fillStyle = fill; outline(); ctx.fill(); ctx.shadowBlur = 0;
   ctx.strokeStyle = 'rgba(245,190,170,.48)'; ctx.lineWidth = 1.3; ctx.stroke();
   ctx.save(); outline(); ctx.clip();
@@ -89,14 +98,46 @@ function drawPickup(ctx, pickup) {
     ctx.shadowColor = '#ffcd68'; ctx.shadowBlur = 20; ctx.fillStyle = '#ffe6a1';
     ctx.beginPath(); ctx.moveTo(0,-19); ctx.quadraticCurveTo(3,-5,14,0); ctx.quadraticCurveTo(3,5,0,19); ctx.quadraticCurveTo(-3,5,-14,0); ctx.quadraticCurveTo(-3,-5,0,-19); ctx.fill();
     ctx.shadowBlur = 0; ctx.fillStyle = '#fff8d8'; ctx.beginPath(); ctx.arc(0,0,3,0,TAU); ctx.fill();
-  } else {
+  } else if (pickup.kind === 'repair') {
     ctx.shadowColor = '#89ffd2'; ctx.shadowBlur = 18; ctx.fillStyle = '#b0ffd8'; ctx.beginPath(); ctx.arc(0,0,15,0,TAU); ctx.fill();
     ctx.shadowBlur = 0; ctx.fillStyle = '#17483f'; ctx.fillRect(-3,-9,6,18); ctx.fillRect(-9,-3,18,6);
+  } else if (pickup.kind === 'credit') {
+    ctx.shadowColor = '#ffcc71'; ctx.shadowBlur = 16; ctx.fillStyle = '#ffdb8a'; ctx.beginPath(); ctx.arc(0,0,14,0,TAU); ctx.fill();
+    ctx.shadowBlur = 0; ctx.strokeStyle = '#96652f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0,0,9,0,TAU); ctx.stroke();
+    ctx.fillStyle = '#85582d'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('К',0,1);
+  } else {
+    ctx.shadowColor = '#90e8ff'; ctx.shadowBlur = 16; ctx.fillStyle = '#b3efff'; ctx.beginPath();
+    for (let i=0;i<6;i++) { const a=i*TAU/6; const x=Math.cos(a)*15, y=Math.sin(a)*15; if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y); } ctx.closePath(); ctx.fill();
+    ctx.shadowBlur = 0; ctx.fillStyle='#205070'; ctx.beginPath();ctx.arc(0,0,5,0,TAU);ctx.fill();
   }
   ctx.restore();
 }
 
-function drawShip(ctx, player, time) {
+function drawBoss(ctx, boss) {
+  ctx.save(); ctx.translate(boss.x, boss.y);
+  const colors = [ ['#b9f9f0','#487d99','#1d2f53'], ['#d4f4ff','#79bdea','#25466f'], ['#ffd49a','#e47755','#602c44'] ][boss.sector];
+  const glow = colors[0];
+  ctx.shadowColor = glow; ctx.shadowBlur = 22;
+  ctx.save(); ctx.rotate(boss.age * .22);
+  ctx.strokeStyle = colors[1]; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0,0,66,0,TAU); ctx.stroke();
+  for (let i=0;i<8;i++) {
+    const a=i*TAU/8; ctx.save();ctx.rotate(a);ctx.fillStyle=colors[1];
+    ctx.beginPath();ctx.moveTo(49,-8);ctx.lineTo(78,0);ctx.lineTo(49,8);ctx.closePath();ctx.fill();ctx.restore();
+  }
+  ctx.restore();
+  const armor = ctx.createLinearGradient(-70,-50,60,55); armor.addColorStop(0,colors[0]); armor.addColorStop(.34,colors[1]); armor.addColorStop(1,colors[2]);
+  ctx.fillStyle=armor;ctx.strokeStyle=colors[0];ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(-72,0);ctx.lineTo(-45,-37);ctx.lineTo(-12,-53);ctx.lineTo(35,-47);ctx.lineTo(64,-25);ctx.lineTo(64,25);ctx.lineTo(35,47);ctx.lineTo(-12,53);ctx.lineTo(-45,37);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.shadowBlur=0;ctx.fillStyle=colors[2];ctx.beginPath();ctx.ellipse(-4,0,35,27,0,0,TAU);ctx.fill();
+  ctx.strokeStyle=colors[0];ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(-4,0,27,20,0,0,TAU);ctx.stroke();
+  ctx.shadowColor=glow;ctx.shadowBlur=18;ctx.fillStyle=boss.hitFlash>0?'#fff':colors[0];ctx.beginPath();ctx.ellipse(-7,0,13,13,0,0,TAU);ctx.fill();
+  ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,.45)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(-47,-27);ctx.lineTo(-26,-19);ctx.moveTo(-47,27);ctx.lineTo(-26,19);ctx.moveTo(36,-34);ctx.lineTo(26,-19);ctx.moveTo(36,34);ctx.lineTo(26,19);ctx.stroke();
+  ctx.restore();
+}
+
+function drawShip(ctx, player, time, skinId) {
+  const skin = SKINS.find((item) => item.id === skinId) || SKINS[0];
   ctx.save();
   ctx.translate(player.x, player.y + Math.sin(time * 5) * 1.3);
   ctx.rotate(Math.max(-.15, Math.min(.15, (player.targetY - player.y) * .002)));
@@ -108,20 +149,20 @@ function drawShip(ctx, player, time) {
   ctx.fillStyle = flame; ctx.shadowColor = '#65f8ff'; ctx.shadowBlur = 15;
   ctx.beginPath(); ctx.moveTo(-23,-8); ctx.quadraticCurveTo(-43,-12,-flameLength-30,0); ctx.quadraticCurveTo(-43,12,-23,8); ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0;
   // Fins behind the hull.
-  const fin = ctx.createLinearGradient(0,-26,0,26); fin.addColorStop(0,'#ffbe9c'); fin.addColorStop(.5,'#f47b6f'); fin.addColorStop(1,'#b95870');
-  ctx.fillStyle = fin; ctx.strokeStyle = '#ffc6a8'; ctx.lineWidth = 1.3;
+  const fin = ctx.createLinearGradient(0,-26,0,26); fin.addColorStop(0,skin.light); fin.addColorStop(.5,skin.fin); fin.addColorStop(1,'#52436c');
+  ctx.fillStyle = fin; ctx.strokeStyle = skin.light; ctx.lineWidth = 1.3;
   ctx.beginPath(); ctx.moveTo(-13,-10); ctx.lineTo(-21,-25); ctx.quadraticCurveTo(-22,-29,-16,-27); ctx.lineTo(11,-13); ctx.lineTo(12,13); ctx.lineTo(-16,27); ctx.quadraticCurveTo(-22,29,-21,25); ctx.lineTo(-13,10); ctx.closePath(); ctx.fill(); ctx.stroke();
   // Engine ring and main fuselage.
   ctx.fillStyle = '#465575'; ctx.strokeStyle = '#a7e4ed'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(-29,-12); ctx.lineTo(-25,-12); ctx.quadraticCurveTo(-21,-12,-21,-8); ctx.lineTo(-21,8); ctx.quadraticCurveTo(-21,12,-25,12); ctx.lineTo(-29,12); ctx.quadraticCurveTo(-33,12,-33,8); ctx.lineTo(-33,-8); ctx.quadraticCurveTo(-33,-12,-29,-12); ctx.closePath(); ctx.fill(); ctx.stroke();
-  const body = ctx.createLinearGradient(0,-17,0,18); body.addColorStop(0,'#fff4eb'); body.addColorStop(.43,'#e9f7f7'); body.addColorStop(.8,'#a5bacb'); body.addColorStop(1,'#778b9e');
+  const body = ctx.createLinearGradient(0,-17,0,18); body.addColorStop(0,skin.hull); body.addColorStop(.43,'#e9f7f7'); body.addColorStop(.8,'#a5bacb'); body.addColorStop(1,'#778b9e');
   ctx.fillStyle = body; ctx.strokeStyle = '#d6f5f2'; ctx.lineWidth = 1.3;
   ctx.beginPath(); ctx.moveTo(-27,-13); ctx.quadraticCurveTo(-1,-17,13,-13); ctx.quadraticCurveTo(27,-11,39,0); ctx.quadraticCurveTo(27,11,13,13); ctx.quadraticCurveTo(-1,17,-27,13); ctx.closePath(); ctx.fill(); ctx.stroke();
   // Coral nose, dark glass and small ship details.
-  ctx.fillStyle = '#f48d76'; ctx.beginPath(); ctx.moveTo(25,-8); ctx.quadraticCurveTo(34,-5,39,0); ctx.quadraticCurveTo(34,5,25,8); ctx.quadraticCurveTo(27,0,25,-8); ctx.fill();
-  const glass = ctx.createLinearGradient(-5,-10,11,8); glass.addColorStop(0,'#68d9e8'); glass.addColorStop(.35,'#274b69'); glass.addColorStop(1,'#0d1a36');
+  ctx.fillStyle = skin.fin; ctx.beginPath(); ctx.moveTo(25,-8); ctx.quadraticCurveTo(34,-5,39,0); ctx.quadraticCurveTo(34,5,25,8); ctx.quadraticCurveTo(27,0,25,-8); ctx.fill();
+  const glass = ctx.createLinearGradient(-5,-10,11,8); glass.addColorStop(0,'#68d9e8'); glass.addColorStop(.35,skin.glass); glass.addColorStop(1,'#0d1a36');
   ctx.fillStyle = glass; ctx.strokeStyle = '#9cd7df'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(1,0,13,7.5,0,0,TAU); ctx.fill(); ctx.stroke();
   ctx.strokeStyle = 'rgba(245,255,255,.7)'; ctx.beginPath(); ctx.arc(-1,-2,5,Math.PI*1.1,Math.PI*1.65); ctx.stroke();
-  ctx.fillStyle = '#f3907b'; ctx.fillRect(-22,-9,7,2); ctx.fillRect(-22,7,7,2);
+  ctx.fillStyle = skin.fin; ctx.fillRect(-22,-9,7,2); ctx.fillRect(-22,7,7,2);
   ctx.restore();
 }
 
@@ -139,13 +180,14 @@ export function renderGame(ctx, game, image) {
   for (const pickup of game.pickups) if (!pickup.removed) drawPickup(ctx, pickup);
   for (const rock of game.rocks) if (!rock.removed) drawRock(ctx, rock);
   for (const drone of game.drones) if (!drone.removed) drawDrone(ctx, drone, game.elapsed);
+  if (game.boss) drawBoss(ctx, game.boss);
   ctx.save();
   ctx.shadowColor = '#62f3ff'; ctx.shadowBlur = 12; ctx.fillStyle = '#b7ffff';
   for (const bullet of game.bullets) if (!bullet.removed) { ctx.beginPath(); ctx.ellipse(bullet.x, bullet.y, 10, 2.5, 0, 0, TAU); ctx.fill(); }
   ctx.shadowColor = '#ff917c'; ctx.fillStyle = '#ffc0a1';
   for (const bullet of game.hostileBullets) if (!bullet.removed) { ctx.beginPath(); ctx.arc(bullet.x, bullet.y, bullet.radius, 0, TAU); ctx.fill(); }
   ctx.restore();
-  drawShip(ctx, game.player, game.elapsed);
+  drawShip(ctx, game.player, game.elapsed, game.skin);
   for (const particle of game.particles) {
     ctx.globalAlpha = Math.max(0, particle.life / particle.maxLife);
     ctx.fillStyle = particle.color; ctx.beginPath(); ctx.arc(particle.x, particle.y, particle.radius, 0, TAU); ctx.fill();
