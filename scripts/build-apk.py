@@ -50,11 +50,15 @@ classes = sorted((OUT / 'classes').rglob('*.class'))
 run(JAVA, '-cp', R8, 'com.android.tools.r8.D8', '--release', '--min-api', '26', '--lib', PLATFORM,
     '--output', OUT / 'dex', *classes)
 
+# A fixed timestamp keeps the archive byte-for-byte reproducible, so a published
+# checksum always matches a rebuild from the same sources.
+ZIP_DATE = (1980, 1, 1, 0, 0, 0)
+
 # Align stored entries to four bytes before signing. resources.arsc must remain uncompressed.
 unsigned = OUT / 'unsigned-aligned.apk'
 with zipfile.ZipFile(OUT / 'resource.apk') as src, zipfile.ZipFile(unsigned, 'w') as dst:
     for old in src.infolist():
-        info = zipfile.ZipInfo(old.filename, old.date_time)
+        info = zipfile.ZipInfo(old.filename, ZIP_DATE)
         info.compress_type = old.compress_type
         info.external_attr = old.external_attr
         if info.compress_type == zipfile.ZIP_STORED:
@@ -64,7 +68,10 @@ with zipfile.ZipFile(OUT / 'resource.apk') as src, zipfile.ZipFile(unsigned, 'w'
                 info.extra = struct.pack('<HH', 0xd935, padding) + b'\0' * padding
         dst.writestr(info, src.read(old))
     for dex in sorted((OUT / 'dex').glob('*.dex')):
-        dst.write(dex, dex.name, compress_type=zipfile.ZIP_DEFLATED)
+        info = zipfile.ZipInfo(dex.name, ZIP_DATE)
+        info.compress_type = zipfile.ZIP_DEFLATED
+        info.external_attr = 0o644 << 16
+        dst.writestr(info, dex.read_bytes())
 
 version = json.loads((ROOT / 'package.json').read_text())['version']
 apk = DOWNLOADS / f'Kosmopilot-{version}.apk'
