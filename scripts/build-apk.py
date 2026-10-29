@@ -19,9 +19,9 @@ JAVAC = ROOT / 'node_modules/dataslope-tools-jar/tools.jar'
 SIGNER = ROOT / 'node_modules/@postar/apktool-node/lib/apksigner.jar'
 R8 = TOOLS / 'r8.jar'
 SOURCE = ROOT / 'android/app/src/main'
-KEY = pathlib.Path(os.environ.get('KOSMO_KEYSTORE', str(ROOT / '.android-signing/kosmopilot.p12')))
-PASSWORD = pathlib.Path(os.environ.get('KOSMO_KEYPASS_FILE', str(ROOT / '.android-signing/password.txt')))
-ALIAS = os.environ.get('KOSMO_KEY_ALIAS', 'kosmopilot')
+KEY = pathlib.Path(os.environ.get('ZABROSHKA_KEYSTORE', str(ROOT / '.android-signing/zabroshka.p12')))
+PASSWORD = pathlib.Path(os.environ.get('ZABROSHKA_KEYPASS_FILE', str(ROOT / '.android-signing/zabroshka-password.txt')))
+ALIAS = os.environ.get('ZABROSHKA_KEY_ALIAS', 'zabroshka')
 
 def run(*args):
     subprocess.run([str(arg) for arg in args], check=True, cwd=ROOT)
@@ -74,7 +74,7 @@ with zipfile.ZipFile(OUT / 'resource.apk') as src, zipfile.ZipFile(unsigned, 'w'
         dst.writestr(info, dex.read_bytes())
 
 version = json.loads((ROOT / 'package.json').read_text())['version']
-apk = DOWNLOADS / f'Kosmopilot-{version}.apk'
+apk = DOWNLOADS / f'Zabroshka-{version}.apk'
 run(JAVA, '-jar', SIGNER, 'sign', '--ks', KEY, '--ks-key-alias', ALIAS,
     '--ks-pass', 'file:' + str(PASSWORD), '--v1-signing-enabled', 'true',
     '--v2-signing-enabled', 'true', '--v4-signing-enabled', 'false', '--out', apk, unsigned)

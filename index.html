@@ -1,189 +1,198 @@
 <!doctype html>
 <html lang="ru">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#080c23" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; media-src 'self'; object-src 'none'; base-uri 'none'; frame-src 'none'" />
-    <title>Космопилот</title>
+    <meta name="theme-color" content="#0a0a0d" />
+    <meta name="color-scheme" content="dark" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; frame-src 'none'" />
+    <title>Заброшка</title>
+    <link rel="stylesheet" href="./src/style.css" />
   </head>
   <body>
     <div id="app">
-      <canvas id="game-canvas" aria-hidden="true"></canvas>
+      <canvas id="game"></canvas>
 
-      <section id="home-screen" class="screen home" aria-label="Главное меню">
-        <div class="home-art" aria-hidden="true"></div>
-        <div class="home-shade" aria-hidden="true"></div>
-        <header class="home-header">
-          <div class="brand-mark">
-            <span class="brand-icon" aria-hidden="true">✦</span>
-            <span><strong>КОСМОПИЛОТ</strong><small>КОСМИЧЕСКАЯ АРКАДА</small></span>
-          </div>
-          <div class="header-actions">
-            <div class="home-record"><span>РЕКОРД <b id="home-best">0</b></span><span>ЗВЁЗДЫ <b id="home-stars">0/72</b></span><strong><span class="coin-symbol">◈</span> <span id="home-credits">200</span></strong></div>
-            <button type="button" class="icon-button sound-button" aria-label="Выключить звук" title="Звук">
-              <svg class="sound-on" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 9a4.5 4.5 0 0 1 0 6m2-9a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              <svg class="sound-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            </button>
-            <button type="button" class="icon-button music-button" aria-label="Выключить музыку" title="Музыка" aria-pressed="true">
-              <svg class="music-on" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18V6l10-2v12" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.6" stroke="currentColor" stroke-width="1.8"/><circle cx="16.5" cy="16" r="2.6" stroke="currentColor" stroke-width="1.8"/></svg>
-              <svg class="music-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18V6l10-2v12" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.6" stroke="currentColor" stroke-width="1.8"/><circle cx="16.5" cy="16" r="2.6" stroke="currentColor" stroke-width="1.8"/><path d="m4 20 16-16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            </button>
-          </div>
-        </header>
-
-        <div class="hero">
-          <div class="eyebrow"><span class="eyebrow-line"></span> ТВОЁ КОСМИЧЕСКОЕ ПРИКЛЮЧЕНИЕ <span class="tiny-star">✦</span></div>
-          <h1><span>КОСМО</span><span>ПИЛОТ<span class="title-star" aria-hidden="true">✦</span></span></h1>
-          <p class="hero-description">Собирай звёзды, уворачивайся от астероидов и лети навстречу рекорду.</p>
-          <div class="hero-actions">
-            <button id="start-button" type="button" class="button button-primary"><span class="button-play" aria-hidden="true">▶</span><span>В ПОЛЁТ</span><span class="button-arrow" aria-hidden="true">↗</span></button>
-            <button id="help-button" type="button" class="button button-quiet"><span class="help-mark" aria-hidden="true">?</span> КАК ИГРАТЬ</button>
-          </div>
-          <div class="home-nav" aria-label="Разделы игры">
-            <button type="button" id="hangar-button"><span>⬡</span> АНГАР<small>Улучшения и корабли</small></button>
-            <button type="button" id="shop-button"><span>◈</span> МАГАЗИН<small>Кейсы с наградами</small></button>
-            <button type="button" id="missions-button"><span>✦</span> ИСПЫТАНИЯ<small>Задания и награды</small></button>
-          </div>
-        </div>
-
-        <footer class="home-footer"><span><i></i> ИГРАЙ БЕЗ ИНТЕРНЕТА</span><span class="footer-right">8 БИОМОВ · 24 УРОВНЯ <b>✦</b> 03</span></footer>
-      </section>
-
-      <section id="game-hud" class="hud" aria-label="Управление игрой" hidden>
+      <!-- ===== HUD ===== -->
+      <div id="hud" class="hidden">
         <div class="hud-top">
-          <div class="hud-health">
-            <span class="hud-label">КОРПУС</span>
-            <div id="health-indicator" class="health-pips" aria-label="Корпус: 3 из 3"><span></span><span></span><span></span></div>
+          <div class="hud-block hud-left">
+            <div id="hearts" class="hearts"></div>
+            <div class="hud-line"><span id="weapon-name">ЛОМ</span></div>
+            <div class="hud-line dim"><span id="ammo-text">БЕЗ ПАТРОНОВ</span></div>
           </div>
-          <div class="hud-stat hud-score"><span class="hud-label">ОЧКИ</span><strong id="score-value">0</strong></div>
-          <div class="hud-stat hud-stars"><span class="hud-label">ЗВЁЗДЫ</span><strong><span class="star-glyph">✦</span> <span id="stars-value">0</span></strong></div>
-          <button id="pause-button" type="button" class="icon-button pause-button" aria-label="Пауза"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6v12M15 6v12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
-        </div>
-        <div class="sector-status">
-          <span id="sector-name">ТУМАННОСТЬ</span>
-          <div class="sector-track" aria-hidden="true"><i id="sector-fill"></i></div>
-          <small id="sector-progress">ДО БОССА 24 СЕК</small>
-        </div>
-        <div id="boss-status" class="boss-status" hidden>
-          <div><span>СТРАЖ СЕКТОРА</span><strong id="boss-name">СТРАЖ ПУСТОТЫ</strong><em id="boss-phase" hidden>ФАЗА II</em></div>
-          <div class="boss-track"><i id="boss-health"></i><span class="boss-mark" data-mark="0"></span><span class="boss-mark" data-mark="1"></span></div>
-        </div>
-        <div id="announcement" class="announcement" aria-live="polite" hidden></div>
-        <div id="control-hint" class="control-hint" aria-hidden="true"><div class="control-rings"><span></span></div><div><strong>УПРАВЛЕНИЕ</strong><small>Веди пальцем</small></div></div>
-        <div id="first-flight-tip" class="first-flight-tip">ВЕДИ КОРАБЛЬ ПАЛЬЦЕМ <span>↗</span></div>
-        <div class="pulse-control">
-          <button id="pulse-button" type="button" class="pulse-button" aria-label="Волна готова" title="Волна"><span class="pulse-inner"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M18.5 3 8 18h7l-1.5 11L24 14h-7l1.5-11Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span></button>
-          <strong>ВОЛНА</strong><small id="pulse-label">ГОТОВА</small>
-        </div>
-      </section>
-
-      <div id="tutorial-overlay" class="overlay" hidden>
-        <section class="dialog tutorial-dialog" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
-          <div class="dialog-top"><span class="dialog-kicker"><i></i> ПЕРЕД СТАРТОМ</span><button id="tutorial-close" class="close-button" type="button" aria-label="Закрыть обучение">×</button></div>
-          <h2 id="tutorial-title">ГОТОВ К ПОЛЁТУ?</h2>
-          <p class="dialog-intro">Три простых правила настоящего космопилота.</p>
-          <div class="lesson-grid">
-            <article class="lesson"><div class="lesson-icon cyan"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="1.7" stroke-dasharray="3 3"/><circle cx="16" cy="16" r="4" fill="currentColor"/><path d="M16 2v3m0 22v3M2 16h3m22 0h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div><div><h3>УПРАВЛЯЙ</h3><p>Зажми левую часть экрана и веди корабль пальцем. Пушка стреляет сама.</p></div></article>
-            <article class="lesson"><div class="lesson-icon gold"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2c1 8 3 11 13 14-10 3-12 6-13 14-1-8-3-11-13-14C13 13 15 10 16 2Z" fill="currentColor"/></svg></div><div><h3>СОБИРАЙ</h3><p>Звёзды дают очки. Монеты <b>◈</b> и детали <b>⬡</b> идут на прокачку. Крест лечит корпус.</p></div></article>
-            <article class="lesson"><div class="lesson-icon coral"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="m19 3-11 15h7l-2 11 11-15h-7l2-11Z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div><div><h3>ЗАЩИЩАЙСЯ</h3><p>Кнопка «Волна» очищает пространство и бьёт по стражу. Её можно жать вторым пальцем.</p></div></article>
-            <article class="lesson"><div class="lesson-icon violet"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M6 16h20M16 6v20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M16 4c4 4 9 3 12 0-1 6-5 9-12 12C9 13 5 10 4 4c3 3 8 4 12 0Z" fill="currentColor" opacity=".85"/></svg></div><div><h3>ПОБЕЖДАЙ СТРАЖА</h3><p>В каждом биоме три уровня, в третьем выходит страж. До трёх звёзд за уровень.</p></div></article>
-          </div>
-          <div class="dialog-footer"><span class="dialog-footnote"><span>✦</span> ЗА ПОЛЁТ ПЛАТЯТ КРЕДИТАМИ</span><button id="tutorial-start" class="button button-primary compact" type="button"><span>НАЧАТЬ ПОЛЁТ</span><span class="button-arrow" aria-hidden="true">↗</span></button></div>
-        </section>
-      </div>
-
-      <div id="pause-overlay" class="overlay" hidden>
-        <section class="dialog pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title">
-          <div class="dialog-top"><span class="dialog-kicker"><i></i> ПОЛЁТ ПРИОСТАНОВЛЕН</span><button type="button" class="icon-button sound-button small" aria-label="Выключить звук" title="Звук"><svg class="sound-on" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 9a4.5 4.5 0 0 1 0 6m2-9a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><svg class="sound-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-            <button type="button" class="icon-button music-button small" aria-label="Выключить музыку" title="Музыка" aria-pressed="true"><svg class="music-on" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18V6l10-2v12" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.6" stroke="currentColor" stroke-width="1.8"/><circle cx="16.5" cy="16" r="2.6" stroke="currentColor" stroke-width="1.8"/></svg><svg class="music-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18V6l10-2v12" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.6" stroke="currentColor" stroke-width="1.8"/><circle cx="16.5" cy="16" r="2.6" stroke="currentColor" stroke-width="1.8"/><path d="m4 20 16-16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
-          <div class="pause-symbol" aria-hidden="true">Ⅱ</div>
-          <h2 id="pause-title">ПАУЗА</h2>
-          <p class="dialog-intro">Космос подождёт. Продолжим, когда будешь готов.</p>
-          <div class="pause-actions"><button id="resume-button" class="button button-primary compact" type="button">ПРОДОЛЖИТЬ <span class="button-arrow">↗</span></button><button id="end-button" class="button button-quiet" type="button">ЗАВЕРШИТЬ ПОЛЁТ</button></div>
-        </section>
-      </div>
-
-      <div id="result-overlay" class="overlay" hidden>
-        <section class="dialog result-dialog" role="dialog" aria-modal="true" aria-labelledby="result-title">
-          <div class="dialog-top"><span class="dialog-kicker"><i></i> ПОЛЁТ ЗАВЕРШЁН</span><span class="result-spark" aria-hidden="true">✦</span></div>
-          <div class="result-content">
-            <div class="result-main"><h2 id="result-title">ОТЛИЧНЫЙ<br />ПОЛЁТ!</h2><p class="dialog-intro">Каждое путешествие приближает к звёздам.</p><div id="result-stars-row" class="result-stars-row" hidden></div></div>
-            <div class="result-score"><span class="hud-label">ВАШ РЕЗУЛЬТАТ</span><strong id="result-score">0</strong><span id="new-record" class="new-record" hidden>✦ НОВЫЙ РЕКОРД</span></div>
-          </div>
-          <div class="result-stats"><span>ПУТЬ <b id="result-distance">0 м</b></span><span>ЗВЁЗДЫ <b id="result-stars">0</b></span><span>СТРАЖИ <b id="result-bosses">0</b></span><span>РЕКОРД <b id="result-best">0</b></span></div>
-          <div class="result-rewards"><span>НАГРАДА ЗА ПОЛЁТ</span><strong>◈ +<b id="result-credits">0</b></strong><strong>⬡ +<b id="result-parts">0</b></strong><span id="result-unlock" hidden>✦ НОВЫЙ СЕКТОР ОТКРЫТ</span></div>
-          <div class="result-actions"><button id="next-level-button" class="button button-primary compact" type="button" hidden>СЛЕДУЮЩИЙ УРОВЕНЬ <span class="button-arrow">↗</span></button><button id="retry-button" class="button button-primary compact" type="button">ЕЩЁ РАЗ <span class="button-arrow">↗</span></button><button id="menu-button" class="button button-quiet" type="button">В ГЛАВНОЕ МЕНЮ</button></div>
-        </section>
-      </div>
-
-
-      <div id="flight-overlay" class="overlay" hidden>
-        <section class="dialog flight-dialog" role="dialog" aria-modal="true" aria-labelledby="flight-title">
-          <div class="dialog-top"><span class="dialog-kicker"><i></i> КАРТА ПОЛЁТОВ</span><button id="flight-close" class="close-button" type="button" aria-label="Закрыть выбор полёта">×</button></div>
-          <div class="flight-heading"><div><h2 id="flight-title">КУДА ЛЕТИМ?</h2><p class="dialog-intro">Кампания: 8 биомов, 24 уровня, у каждого свой страж.</p></div><div class="mode-tabs" role="group" aria-label="Режим игры"><button id="mode-campaign" class="active" type="button">КАМПАНИЯ</button><button id="mode-endless" type="button">БЕСКОНЕЧНЫЙ</button></div></div>
-          <div id="campaign-map" class="campaign-map">
-            <div id="biome-list" class="biome-list" role="group" aria-label="Биомы кампании"></div>
-            <div class="campaign-side">
-              <div id="biome-detail" class="biome-detail"></div>
-              <div id="level-list" class="level-list" role="group" aria-label="Уровни биома"></div>
+          <div class="hud-block hud-center">
+            <div id="level-title">ПОДВАЛ · ЭТАЖ 1</div>
+            <div id="objective">НАЙДИ КЛЮЧ</div>
+            <div id="boss-bar" class="boss-bar hidden">
+              <div id="boss-fill"></div>
+              <span id="boss-name">СМОТРИТЕЛЬ</span>
             </div>
           </div>
-          <div id="endless-map" class="endless-map" hidden>
-            <div id="sector-grid" class="sector-grid"></div>
-            <p id="endless-note" class="endless-note">Бесконечный полёт: биомы сменяются после каждого стража, награды растут.</p>
+          <div class="hud-block hud-right">
+            <div class="hud-line"><span class="tag">МОНЕТЫ</span> <span id="coins">0</span></div>
+            <div class="hud-line"><span class="tag">КЛЮЧИ</span> <span id="keys">0</span></div>
+            <div class="hud-line"><span class="tag">ГРАНАТЫ</span> <span id="grenade-count">0</span></div>
+            <button id="btn-pause" class="icon-btn" aria-label="Пауза">| |</button>
           </div>
-          <div class="flight-bottom"><span id="campaign-note">Пройди уровень, чтобы открыть следующий.</span><button id="launch-button" class="button button-primary compact" type="button">НАЧАТЬ ПОЛЁТ <span class="button-arrow">↗</span></button></div>
-        </section>
-      </div>
-
-      <div id="hub-overlay" class="overlay" hidden>
-        <section class="dialog hub-dialog" role="dialog" aria-modal="true" aria-labelledby="hub-title">
-          <div class="hub-head"><div><span class="dialog-kicker"><i></i> ТВОЯ КОСМИЧЕСКАЯ БАЗА</span><h2 id="hub-title">АНГАР</h2></div><div class="hub-wallet"><span title="Кредиты">◈ <b id="hub-credits">0</b></span><span title="Детали">⬡ <b id="hub-parts">0</b></span><button id="hub-close" class="close-button" type="button" aria-label="Закрыть базу">×</button></div></div>
-          <nav class="hub-tabs" aria-label="Разделы базы"><button data-hub-tab="upgrades" type="button">УЛУЧШЕНИЯ</button><button data-hub-tab="ships" type="button">КОРАБЛИ</button><button data-hub-tab="shop" type="button">КЕЙСЫ</button><button data-hub-tab="missions" type="button">ИСПЫТАНИЯ</button><button data-hub-tab="backup" type="button">ПРОГРЕСС</button></nav>
-          <div id="hub-message" class="hub-message" role="status" hidden></div>
-          <div id="hub-content" class="hub-content"></div>
-        </section>
-      </div>
-
-      <div id="case-overlay" class="overlay case-overlay" hidden>
-        <section class="dialog case-dialog" role="dialog" aria-modal="true" aria-labelledby="case-title">
-          <span class="dialog-kicker"><i></i> КЕЙС ОТКРЫТ</span><div class="case-open-art" aria-hidden="true"><span>✦</span></div><h2 id="case-title">ТВОЯ НАГРАДА</h2><p id="case-reward" class="case-reward"></p><button id="case-close" class="button button-primary compact" type="button">ОТЛИЧНО <span class="button-arrow">↗</span></button>
-        </section>
-      </div>
-
-      <div id="import-overlay" class="overlay" hidden>
-        <section class="dialog pause-dialog" role="dialog" aria-modal="true" aria-labelledby="import-title"><span class="dialog-kicker"><i></i> РЕЗЕРВНАЯ КОПИЯ</span><h2 id="import-title">ВОССТАНОВИТЬ?</h2><p class="dialog-intro">Текущий прогресс будет заменён данными из кода.</p><div class="pause-actions"><button id="import-confirm" class="button button-primary compact" type="button">ВОССТАНОВИТЬ</button><button id="import-cancel" class="button button-quiet" type="button">ОТМЕНА</button></div></section>
-      </div>
-
-      <div id="intro" class="intro" aria-label="Заставка игры" hidden>
-        <div class="warp" aria-hidden="true"><span class="warp-layer l1"></span><span class="warp-layer l2"></span><span class="warp-layer l3"></span></div>
-        <div class="intro-glow" aria-hidden="true"></div>
-        <div class="intro-planet" aria-hidden="true"></div>
-        <svg class="intro-rocket" viewBox="0 0 220 96" aria-hidden="true">
-          <defs>
-            <linearGradient id="coreFlame" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#7ef4ff"/><stop offset="1" stop-color="#2f7dff" stop-opacity="0"/></linearGradient>
-            <linearGradient id="hullPaint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7fbff"/><stop offset=".45" stop-color="#e6f5f8"/><stop offset="1" stop-color="#8fa6bb"/></linearGradient>
-            <linearGradient id="finPaint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd0b8"/><stop offset=".5" stop-color="#f48d76"/><stop offset="1" stop-color="#8b4f6a"/></linearGradient>
-            <radialGradient id="glassPaint" cx=".35" cy=".35" r=".8"><stop offset="0" stop-color="#9fe9f5"/><stop offset=".6" stop-color="#1f4b70"/><stop offset="1" stop-color="#0a1730"/></radialGradient>
-          </defs>
-          <path class="flame" d="M74 44 6 48l68 4Z" fill="url(#coreFlame)"/>
-          <path d="M92 40 82 16l34 22v20l-34 22 10-24Z" fill="url(#finPaint)" stroke="#ffd9c0" stroke-width="1.6"/>
-          <path d="M86 34q72-10 112 14-40 26-112 15Z" fill="url(#hullPaint)" stroke="#a8f7f2" stroke-width="1.8"/>
-          <path d="M170 40q17 5 26 8-9 6-26 9Z" fill="#f18b74"/>
-          <ellipse cx="128" cy="48" rx="21" ry="12" fill="url(#glassPaint)" stroke="#a9e2ea" stroke-width="1.8"/>
-          <path d="M108 41q14-4 26-1" stroke="rgba(255,255,255,.85)" stroke-width="2" fill="none" stroke-linecap="round"/>
-        </svg>
-        <div class="intro-copy">
-          <span class="intro-kicker">ПРИСТЕГНИ РЕМНИ</span>
-          <strong class="intro-title"><span>КОСМО</span><span>ПИЛОТ</span></strong>
-          <small>ТВОЁ ПУТЕШЕСТВИЕ НАЧИНАЕТСЯ</small>
         </div>
-        <button id="intro-skip" type="button">ПРОПУСТИТЬ <span>↗</span></button>
+
+        <canvas id="minimap" width="120" height="98"></canvas>
+
+        <div id="toast" class="toast"></div>
+
+        <div class="controls">
+          <div class="stick" id="stick" aria-label="Джойстик"><div class="stick-knob"></div></div>
+          <div class="pad">
+            <button class="pad-btn wide" data-action="grenade"><span>ГРАНАТА</span></button>
+            <button class="pad-btn small" data-action="reload"><span>ПЕРЕЗАРЯД</span></button>
+            <button class="pad-btn big attack" data-action="melee"><span>УДАР</span></button>
+            <button class="pad-btn big fire" data-action="shoot"><span>ОГОНЬ</span></button>
+          </div>
+        </div>
       </div>
 
-      <div class="rotate-overlay" role="status"><div class="rotate-icon" aria-hidden="true">↻</div><strong>ПОВЕРНИ ЭКРАН</strong><span>Космопилот летает горизонтально.</span></div>
+      <!-- ===== TITLE ===== -->
+      <section id="screen-title" class="screen active">
+        <div class="panel title-panel">
+          <h1 class="logo">ЗАБРОШКА</h1>
+          <p class="subtitle">ПИКСЕЛЬНЫЙ РОГАЛИК ПО ЗАБРОШЕННЫМ МЕСТАМ</p>
+          <div class="menu">
+            <button class="btn primary" data-go="continue" id="btn-continue">ПРОДОЛЖИТЬ</button>
+            <button class="btn" data-go="new">НОВАЯ ИГРА</button>
+            <button class="btn" data-go="locations">ЛОКАЦИИ</button>
+            <button class="btn" data-go="tutorial">ОБУЧЕНИЕ</button>
+            <button class="btn" data-go="settings">НАСТРОЙКИ</button>
+            <button class="btn ghost" data-go="credits">МУЗЫКА И ЗВУКИ</button>
+          </div>
+          <p class="hint" id="title-hint">Управление: джойстик слева, кнопки справа</p>
+        </div>
+      </section>
+
+      <!-- ===== LOCATIONS ===== -->
+      <section id="screen-locations" class="screen">
+        <div class="panel wide-panel">
+          <h2>КУДА ИДЁМ</h2>
+          <div id="location-list" class="location-list"></div>
+          <div class="row">
+            <button class="btn" data-go="title">НАЗАД</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TUTORIAL ===== -->
+      <section id="screen-tutorial" class="screen">
+        <div class="panel">
+          <h2 id="tutorial-title">ОБУЧЕНИЕ</h2>
+          <div class="tutorial-art"><canvas id="tutorial-canvas" width="320" height="120"></canvas></div>
+          <p id="tutorial-text" class="tutorial-text"></p>
+          <div class="row">
+            <button class="btn ghost" data-go="title">ПРОПУСТИТЬ</button>
+            <button class="btn primary" id="btn-tutorial-next">ДАЛЬШЕ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SETTINGS ===== -->
+      <section id="screen-settings" class="screen">
+        <div class="panel">
+          <h2>НАСТРОЙКИ</h2>
+          <div class="settings">
+            <label class="setting"><span>Звуки</span><input type="checkbox" id="set-sound" /></label>
+            <label class="setting"><span>Музыка</span><input type="checkbox" id="set-music" /></label>
+            <label class="setting"><span>Громкость</span><input type="range" id="set-volume" min="0" max="100" step="5" /></label>
+            <label class="setting"><span>Тряска экрана</span><input type="checkbox" id="set-shake" /></label>
+            <label class="setting"><span>Подсказки</span><input type="checkbox" id="set-hints" /></label>
+            <label class="setting"><span>Мини-карта</span><input type="checkbox" id="set-minimap" /></label>
+            <label class="setting"><span>Размер джойстика</span><input type="range" id="set-stick" min="70" max="130" step="10" /></label>
+          </div>
+          <div class="row">
+            <button class="btn danger" id="btn-wipe">СТЕРЕТЬ ПРОГРЕСС</button>
+            <button class="btn primary" data-go="back">НАЗАД</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SHOP ===== -->
+      <section id="screen-shop" class="screen">
+        <div class="panel wide-panel">
+          <h2>МАГАЗИН <span class="coins-badge" id="shop-coins">0</span></h2>
+          <p class="dim small">Всё найденное в заброшке можно пустить в дело. Цены кусаются, но выбирать тебе.</p>
+          <div class="shop-grid" id="shop-grid"></div>
+          <div class="row">
+            <button class="btn primary" id="btn-shop-next">ДАЛЬШЕ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== LEVEL CLEAR ===== -->
+      <section id="screen-clear" class="screen">
+        <div class="panel">
+          <h2 id="clear-title">ЭТАЖ ПРОЙДЕН</h2>
+          <div class="stats" id="clear-stats"></div>
+          <div class="row">
+            <button class="btn" data-go="title">В МЕНЮ</button>
+            <button class="btn primary" id="btn-clear-next">МАГАЗИН</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== PAUSE ===== -->
+      <section id="screen-pause" class="screen">
+        <div class="panel">
+          <h2>ПАУЗА</h2>
+          <div class="menu">
+            <button class="btn primary" id="btn-resume">ПРОДОЛЖИТЬ</button>
+            <button class="btn" data-go="settings">НАСТРОЙКИ</button>
+            <button class="btn" id="btn-restart-level">ЗАНОВО ЭТАЖ</button>
+            <button class="btn ghost" id="btn-quit">В МЕНЮ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== DEATH ===== -->
+      <section id="screen-death" class="screen">
+        <div class="panel">
+          <h2 class="danger-text">ТЫ ОСТАЛСЯ ТАМ</h2>
+          <p id="death-text" class="dim"></p>
+          <div class="stats" id="death-stats"></div>
+          <div class="row">
+            <button class="btn" data-go="title">В МЕНЮ</button>
+            <button class="btn primary" id="btn-retry">ЕЩЁ РАЗ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== VICTORY ===== -->
+      <section id="screen-victory" class="screen">
+        <div class="panel wide-panel">
+          <h2>ЗАБРОШКА ПРОЙДЕНА</h2>
+          <p class="dim" id="victory-text"></p>
+          <div class="stats" id="victory-stats"></div>
+          <div class="row">
+            <button class="btn primary" data-go="title">В МЕНЮ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CREDITS ===== -->
+      <section id="screen-credits" class="screen">
+        <div class="panel wide-panel scroll">
+          <h2>МУЗЫКА И ЗВУКИ</h2>
+          <p class="dim small">
+            Графика, код и уровни нарисованы процедурно — пиксель за пикселем. Музыка и звуки взяты
+            из открытых сборников с лицензией <b>CC0 1.0</b> (общественное достояние):
+          </p>
+          <ul class="credits-list" id="credits-list"></ul>
+          <p class="dim small">
+            Шрифты <b>Manrope</b> и <b>Russo One</b> — SIL Open Font License 1.1
+            (тексты лицензий лежат в <code>public/licenses</code>).
+          </p>
+          <div class="row"><button class="btn primary" data-go="title">НАЗАД</button></div>
+        </div>
+      </section>
     </div>
-    <script type="module" src="/src/main.js"></script>
+
+    <script type="module" src="./src/main.js"></script>
   </body>
 </html>

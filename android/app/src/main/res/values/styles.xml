@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">Космопилот</string>
+    <string name="app_name">Заброшка</string>
     <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowBackground">#080c23</item>
-        <item name="android:colorAccent">#9bf8ed</item>
+        <item name="android:windowBackground">#0a0a0d</item>
+        <item name="android:colorAccent">#ffb347</item>
     </style>
 </resources>

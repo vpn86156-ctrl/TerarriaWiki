@@ -1,318 +1,215 @@
-// Short synthesized effects and a small procedural soundtrack: no audio files, network, ads or external samples.
-const CALM_STEPS = 0.46;
-const BOSS_STEPS = 0.28;
+/* Звук «Заброшки»: скачанные CC0-сэмплы для ударов, выстрелов, шагов и стонов,
+   плюс синтезированные звуки на тот случай, если файлы ещё не загрузились. */
 
-export class GameAudio {
-  constructor(enabled = true, music = true) {
-    this.enabled = enabled;
-    this.musicEnabled = music;
-    this.context = null; this.master = null; this.sfx = null; this.musicBus = null;
-    this.noiseBuffer = null; this.last = new Map(); this.lastBreak = 0;
-    this.mode = 'calm'; this.timer = null; this.step = 0; this.nextStep = 0; this.playing = false;
+const GROUPS = ['swing', 'hit', 'gun', 'boom', 'step', 'door', 'pickup', 'growl', 'hurt', 'click', 'ambient', 'reload'];
+
+export class AudioEngine {
+  constructor() {
+    this.context = null;
+    this.master = null;
+    this.musicGain = null;
+    this.sfxGain = null;
+    this.buffers = new Map();
+    this.manifest = null;
+    this.settings = { sound: true, music: true, volume: .8 };
+    this.musicRole = null;
+    this.musicSource = null;
+    this.queue = [];
+    this.stepTimer = 0;
+    this.lastPlayed = new Map();
   }
+
   unlock() {
-    if (!this.enabled && !this.musicEnabled) return;
-    const Context = globalThis.window?.AudioContext || globalThis.window?.webkitAudioContext;
-    if (!Context) return;
+    if (!this.context) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      this.context = new Ctx();
+      this.master = this.context.createGain();
+      this.musicGain = this.context.createGain();
+      this.sfxGain = this.context.createGain();
+      this.musicGain.connect(this.master);
+      this.sfxGain.connect(this.master);
+      this.master.connect(this.context.destination);
+      this.applyVolumes();
+      this.loadManifest();
+    }
+    if (this.context.state === 'suspended') this.context.resume();
+  }
+
+  configure(settings) {
+    this.settings = { ...this.settings, ...settings };
+    this.applyVolumes();
+    if (!this.settings.music) this.stopMusic();
+  }
+  applyVolumes() {
+    if (!this.context) return;
+    this.master.gain.value = this.settings.sound || this.settings.music ? this.settings.volume : 0;
+    this.musicGain.gain.value = this.settings.music ? .55 : 0;
+    this.sfxGain.gain.value = this.settings.sound ? .9 : 0;
+  }
+  suspend() { if (this.context?.state === 'running') this.context.suspend(); }
+  resume() { if (this.context?.state === 'suspended') this.context.resume(); }
+
+  async loadManifest() {
+    if (this.manifest) return this.manifest;
     try {
-      if (!this.context) {
-        this.context = new Context();
-        this.master = this.context.createGain();
-        this.master.gain.value = 0.5;
-        this.master.connect(this.context.destination);
-        this.sfx = this.context.createGain();
-        this.sfx.gain.value = 0.3;
-        this.sfx.connect(this.master);
-        this.musicBus = this.context.createGain();
-        this.musicBus.gain.value = this.musicEnabled ? 0.5 : 0.0001;
-        this.musicBus.connect(this.master);
-        const length = Math.floor(this.context.sampleRate * 1.6);
-        this.noiseBuffer = this.context.createBuffer(1, length, this.context.sampleRate);
-        const data = this.noiseBuffer.getChannelData(0);
-        for (let i = 0; i < length; i += 1) data[i] = Math.random() * 2 - 1;
+      const response = await fetch('./audio/manifest.json');
+      const data = await response.json();
+      this.manifest = {};
+      for (const entry of data.sfx || []) {
+        if (!this.manifest[entry.group]) this.manifest[entry.group] = [];
+        this.manifest[entry.group].push(entry);
       }
-      if (this.context.state === 'suspended') this.context.resume().catch(() => {});
-    } catch { /* Sound is optional on devices without Web Audio. */ }
+      this.musicList = data.music || [];
+    } catch {
+      this.manifest = {};
+      this.musicList = [];
+    }
+    return this.manifest;
   }
-  setEnabled(value) {
-    this.enabled = value;
-    if (!value) { this.suspend(); return; }
-    this.unlock();
-    if (this.context) this.sfx.gain.value = value ? 0.3 : 0.0001;
+
+  async bufferFor(url) {
+    if (this.buffers.has(url)) return this.buffers.get(url);
+    try {
+      const response = await fetch(url);
+      const data = await response.arrayBuffer();
+      const buffer = await this.context.decodeAudioData(data);
+      this.buffers.set(url, buffer);
+      return buffer;
+    } catch {
+      this.buffers.set(url, null);
+      return null;
+    }
   }
-  setMusicEnabled(value) {
-    this.musicEnabled = value;
-    if (this.context) this.musicBus.gain.setTargetAtTime(value ? 0.5 : 0.0001, this.context.currentTime, 0.1);
-    if (!value) this.stopMusic();
-  }
-  suspend() {
-    if (this.context?.state === 'running') this.context.suspend().catch(() => {});
-    this.stopMusic();
-  }
-  /* ---------- primitives ---------- */
-  tone(frequency, endFrequency, at, duration, type = 'sine', gain = .5, bus = null) {
-    if (!this.context || this.context.state !== 'running') return;
-    const ctx = this.context;
-    const oscillator = ctx.createOscillator();
-    const envelope = ctx.createGain();
-    oscillator.type = type;
-    oscillator.frequency.setValueAtTime(frequency, at);
-    oscillator.frequency.exponentialRampToValueAtTime(Math.max(15, endFrequency), at + duration);
-    envelope.gain.setValueAtTime(.0001, at);
-    envelope.gain.exponentialRampToValueAtTime(Math.max(.0002, gain), at + Math.min(.03, duration * .3));
-    envelope.gain.exponentialRampToValueAtTime(.0001, at + duration);
-    oscillator.connect(envelope); envelope.connect(bus || this.sfx);
-    oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect(); };
-    oscillator.start(at); oscillator.stop(at + duration + .02);
-  }
-  noise(at, duration, gain = .4, frequency = 1200, type = 'lowpass', q = 1) {
-    if (!this.context || this.context.state !== 'running' || !this.noiseBuffer) return;
-    const ctx = this.context;
-    const source = ctx.createBufferSource();
-    source.buffer = this.noiseBuffer;
-    const filter = ctx.createBiquadFilter();
-    filter.type = type; filter.frequency.setValueAtTime(frequency, at); filter.Q.value = q;
-    const envelope = ctx.createGain();
-    envelope.gain.setValueAtTime(.0001, at);
-    envelope.gain.exponentialRampToValueAtTime(gain, at + .012);
-    envelope.gain.exponentialRampToValueAtTime(.0001, at + duration);
-    source.connect(filter); filter.connect(envelope); envelope.connect(this.sfx);
-    source.onended = () => { source.disconnect(); filter.disconnect(); envelope.disconnect(); };
-    source.start(at); source.stop(at + duration + .02);
-  }
-  sweep(at, from, to, duration, gain = .5, type = 'sawtooth') {
-    if (!this.context || this.context.state !== 'running') return;
-    const ctx = this.context;
-    const oscillator = ctx.createOscillator();
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(Math.max(200, from * 4), at);
-    filter.frequency.exponentialRampToValueAtTime(Math.max(120, to * 4), at + duration);
-    const envelope = ctx.createGain();
-    envelope.gain.setValueAtTime(.0001, at);
-    envelope.gain.exponentialRampToValueAtTime(gain, at + duration * .2);
-    envelope.gain.exponentialRampToValueAtTime(.0001, at + duration);
-    oscillator.type = type;
-    oscillator.frequency.setValueAtTime(from, at);
-    oscillator.frequency.exponentialRampToValueAtTime(Math.max(18, to), at + duration);
-    oscillator.connect(filter); filter.connect(envelope); envelope.connect(this.sfx);
-    oscillator.onended = () => { oscillator.disconnect(); filter.disconnect(); envelope.disconnect(); };
-    oscillator.start(at); oscillator.stop(at + duration + .02);
-  }
+
   /* ---------- effects ---------- */
-  play(name) {
-    if (!this.context || this.context.state !== 'running') return;
-    const now = this.context.currentTime;
-    const throttled = (key, ms) => {
-      const last = this.last.get(key);
-      if (last !== undefined && now - last < ms / 1000) return false;
-      this.last.set(key, now); return true;
-    };
-    switch (name) {
-      case 'shot':
-        if (throttled('shot', 70)) { this.tone(880, 520, now, .07, 'square', .07); this.noise(now, .05, .05, 2600, 'highpass'); }
-        break;
-      case 'star':
-        this.tone(660, 780, now, .12, 'sine', .5); this.tone(990, 1180, now + .08, .18, 'sine', .38);
-        this.tone(1560, 1720, now + .14, .12, 'sine', .16);
-        break;
-      case 'credit':
-        this.tone(1046, 1046, now, .08, 'square', .2); this.tone(1568, 1568, now + .06, .12, 'square', .16);
-        break;
-      case 'part':
-        this.tone(1320, 1760, now, .12, 'triangle', .22); this.noise(now, .06, .06, 3200, 'highpass');
-        break;
-      case 'repair':
-        this.tone(480, 590, now, .16); this.tone(720, 950, now + .1, .22, 'sine', .35);
-        break;
-      case 'hit':
-        this.tone(190, 55, now, .3, 'triangle', .6); this.noise(now, .22, .3, 900);
-        break;
-      case 'wave':
-        this.tone(380, 80, now, .42, 'sine', .7); this.tone(650, 170, now + .26, .26, 'triangle', .18);
-        this.noise(now, .4, .18, 1800, 'bandpass', .8);
-        break;
-      case 'break':
-        if (now - this.lastBreak > .12) {
-          this.lastBreak = now;
-          this.tone(260, 100, now, .1, 'triangle', .2); this.noise(now, .14, .16, 1400);
-        }
-        break;
-      case 'drone-break':
-        this.tone(520, 140, now, .26, 'square', .22); this.noise(now, .2, .18, 1800, 'bandpass', 1.2);
-        break;
-      case 'gameover':
-        [420, 330, 250, 160].forEach((frequency, index) => this.tone(frequency, frequency * .82, now + index * .16, .42, 'triangle', .3));
-        this.noise(now, 1.1, .16, 700);
-        break;
-      case 'boss-warning':
-        // A rising siren over a low rumble: the sector guardian is on its way.
-        for (let i = 0; i < 3; i += 1) this.tone(300 + i * 40, 760 + i * 40, now + i * .34, .34, 'sawtooth', .16);
-        this.tone(58, 44, now, 2.2, 'sine', .5);
-        this.noise(now, 2.2, .1, 420, 'bandpass', .7);
-        break;
-      case 'boss-arrives': {
-        // Deep dive, dissonant tritone cluster and a beast-like growl.
-        this.sweep(now, 90, 26, 1.6, .6, 'sawtooth');
-        this.tone(58, 40, now, 2.4, 'sine', .55);
-        for (const frequency of [104, 147, 208]) this.tone(frequency, frequency * .96, now + .35, 1.9, 'sawtooth', .1);
-        this.tone(73, 110, now + .5, 1.5, 'square', .08);
-        this.noise(now, 1.8, .3, 300, 'lowpass');
-        this.noise(now + .2, 1.4, .12, 2400, 'bandpass', .6);
-        break;
-      }
-      case 'boss-rage':
-        this.sweep(now, 220, 60, .9, .45, 'sawtooth');
-        this.tone(82, 150, now, 1.1, 'square', .18);
-        this.noise(now, 1, .34, 900);
-        break;
-      case 'boss-ascend':
-        // The guardian breaks into its next phase: an upwards roar and a metal shriek.
-        this.sweep(now, 70, 300, .8, .5, 'sawtooth');
-        for (const frequency of [98, 139, 196]) this.tone(frequency, frequency * 1.5, now + .2, 1.4, 'sawtooth', .12);
-        this.tone(1200, 300, now + .1, .5, 'square', .1);
-        this.noise(now, 1.2, .34, 1100);
-        break;
-      case 'weak-open':
-        this.tone(1320, 1980, now, .18, 'sine', .22); this.tone(1980, 2640, now + .1, .16, 'sine', .14);
-        break;
-      case 'weak-hit':
-        // A bright metallic ping with a short shimmer — hitting the exposed core pays off.
-        if (throttled('weak-hit', 90)) {
-          this.tone(1568, 920, now, .16, 'square', .26);
-          this.tone(2340, 1400, now + .04, .12, 'triangle', .18);
-          this.noise(now, .12, .18, 3600, 'highpass');
-        }
-        break;
-      case 'boss-blast':
-        this.noise(now, .5, .5, 700);
-        this.tone(150, 40, now, .5, 'sine', .5);
-        this.tone(320, 90, now + .05, .35, 'triangle', .22);
-        break;
-      case 'boss-defeated':
-        this.noise(now, 1.4, .6, 500);
-        this.tone(180, 30, now, 1.3, 'sine', .6);
-        this.tone(90, 24, now + .2, 1.6, 'triangle', .4);
-        this.noise(now + .5, 1.2, .3, 220, 'lowpass');
-        break;
-      case 'victory':
-        [523, 659, 784, 1047, 1319].forEach((frequency, index) => {
-          this.tone(frequency, frequency * 1.01, now + index * .13, .55, 'sine', .3);
-          this.tone(frequency / 2, frequency / 2, now + index * .13, .5, 'triangle', .12);
-        });
-        break;
-      case 'sector-change':
-        [392, 494, 587, 740].forEach((frequency, index) => this.tone(frequency, frequency * 1.5, now + index * .08, .3, 'sine', .22));
-        break;
-      case 'alarm':
-        this.tone(880, 880, now, .08, 'square', .16); this.tone(660, 660, now + .13, .1, 'square', .16);
-        break;
-      case 'zap':
-        this.sweep(now, 1500, 180, .35, .35, 'sawtooth');
-        this.noise(now, .3, .22, 2200, 'bandpass', 1.4);
-        break;
-      case 'freeze':
-        this.tone(1760, 880, now, .3, 'sine', .3); this.noise(now, .35, .16, 4200, 'highpass');
-        this.tone(120, 60, now, .3, 'triangle', .35);
-        break;
-      case 'beam':
-        this.sweep(now, 240, 1500, .5, .4, 'sawtooth');
-        this.tone(70, 90, now, .7, 'sine', .4);
-        this.noise(now, .6, .18, 1600, 'bandpass', 1.1);
-        break;
-      case 'phase':
-        this.tone(520, 1300, now, .5, 'sine', .2); this.tone(1300, 520, now + .2, .5, 'sine', .14);
-        this.noise(now, .5, .08, 3400, 'bandpass', .8);
-        break;
-      case 'blink':
-        this.sweep(now, 900, 260, .18, .3, 'triangle');
-        this.noise(now, .18, .14, 2600, 'highpass');
-        break;
-      case 'swarm':
-        for (let i = 0; i < 4; i += 1) this.tone(1200 + i * 220, 700 + i * 120, now + i * .05, .12, 'square', .1);
-        this.noise(now, .3, .12, 2800, 'bandpass', 1.6);
-        break;
-      case 'frost':
-        this.tone(1568, 1046, now, .3, 'sine', .22); this.tone(2093, 1568, now + .1, .3, 'sine', .12);
-        this.noise(now, .4, .1, 5200, 'highpass');
-        break;
-      case 'mine-blast':
-        this.noise(now, .55, .5, 800);
-        this.tone(180, 45, now, .5, 'sine', .5);
-        break;
-      case 'crystal-pulse':
-        this.tone(1244, 1864, now, .25, 'sine', .16); this.tone(2489, 3100, now + .06, .22, 'sine', .07);
-        break;
-      case 'hazard-break':
-        this.tone(330, 120, now, .18, 'triangle', .2); this.noise(now, .2, .18, 1900, 'bandpass', 1.1);
-        break;
-      case 'level-complete':
-        [523, 784, 1046].forEach((frequency, index) => this.tone(frequency, frequency * 1.01, now + index * .1, .4, 'sine', .32));
-        this.tone(261, 261, now, .7, 'triangle', .16);
-        break;
-      case 'ui':
-        this.tone(720, 900, now, .07, 'triangle', .18);
-        break;
-      case 'buy':
-        this.tone(560, 720, now, .1, 'triangle', .25); this.tone(840, 1080, now + .08, .16, 'sine', .2);
-        break;
-      case 'case':
-        this.noise(now, .5, .2, 1800, 'bandpass', .8);
-        [660, 880, 1180].forEach((frequency, index) => this.tone(frequency, frequency * 1.2, now + .3 + index * .1, .3, 'sine', .22));
-        break;
-      default: break;
+  play(group, { volume = 1, rate = 1, throttle = 0 } = {}) {
+    if (!this.context || !this.settings.sound) return;
+    if (throttle) {
+      const now = this.context.currentTime;
+      if (now - (this.lastPlayed.get(group) || -9) < throttle) return;
+      this.lastPlayed.set(group, now);
     }
-  }
-  /* ---------- procedural soundtrack ---------- */
-  setMode(mode) { this.mode = mode === 'boss' ? 'boss' : 'calm'; }
-  startMusic() {
-    if (!this.context || this.context.state !== 'running') return;
-    if (this.playing) return;
-    this.playing = true;
-    this.nextStep = this.context.currentTime + .1;
-    this.timer = setInterval(() => this.schedule(), 120);
-    this.schedule();
-  }
-  stopMusic() {
-    if (this.timer) clearInterval(this.timer);
-    this.timer = null; this.playing = false;
-  }
-  schedule() {
-    if (!this.context || this.context.state !== 'running' || !this.playing) { this.stopMusic(); return; }
-    const step = this.mode === 'boss' ? BOSS_STEPS : CALM_STEPS;
-    const horizon = this.context.currentTime + .5;
-    let guard = 0;
-    while (this.nextStep < horizon && guard < 24) {
-      this.playStep(this.step, this.nextStep, step);
-      this.step += 1;
-      this.nextStep += step;
-      guard += 1;
-    }
-  }
-  playStep(index, at, step) {
-    const bus = this.musicBus;
-    const bar = Math.floor(index / 8) % 4;
-    if (this.mode === 'boss') {
-      // Relentless pulse: pounding bass, dissonant stabs and a ticking hat.
-      const beat = index % 8;
-      if (beat % 2 === 0) this.tone(55, 38, at, step * 1.6, 'sine', .5, bus);
-      if (beat === 0 || beat === 3 || beat === 6) this.tone(41, 30, at, step * 2, 'triangle', .35, bus);
-      if (beat === 0) {
-        for (const frequency of [116, 164, 173]) this.tone(frequency, frequency * .98, at, step * 3, 'sawtooth', .055, bus);
-      }
-      const line = [523, 0, 466, 0, 415, 0, 466, 554][beat];
-      if (line) this.tone(line, line * .99, at, step * .9, 'sine', .07, bus);
-      if (beat % 2 === 1) this.noise(at, .06, .04, 7000, 'highpass');
+    const entries = this.manifest?.[group];
+    if (entries && entries.length) {
+      const entry = entries[Math.floor(Math.random() * entries.length)];
+      this.bufferFor(`./audio/sfx/${entry.file}`).then((buffer) => {
+        if (!buffer || !this.context) return;
+        const source = this.context.createBufferSource();
+        source.buffer = buffer;
+        source.playbackRate.value = rate * (.92 + Math.random() * .16);
+        const gain = this.context.createGain();
+        gain.gain.value = volume;
+        source.connect(gain).connect(this.sfxGain);
+        source.start();
+      });
       return;
     }
-    // Calm: a slow chord pad with a sparse arpeggio above it.
-    const chords = [[220, 261.6, 329.6], [174.6, 220, 261.6], [196, 246.9, 293.7], [164.8, 207.7, 246.9]];
-    const chord = chords[bar];
-    if (index % 8 === 0) for (const frequency of chord) this.tone(frequency, frequency, at, step * 8.4, 'triangle', .05, bus);
-    if (index % 8 === 0) this.tone(chord[0] / 2, chord[0] / 2, at, step * 8.4, 'sine', .09, bus);
-    const arpeggio = [chord[2] * 2, 0, chord[1] * 2, 0, chord[0] * 2, 0, chord[1] * 2, chord[2] * 2.5];
-    const note = arpeggio[index % 8];
-    if (note) this.tone(note, note, at, step * 1.6, 'sine', .045, bus);
-    if (index % 8 === 4) this.noise(at, step * 2, .012, 5200, 'bandpass', .6);
+    this.synth(group, volume, rate);
+  }
+
+  // A small synthesised fallback so the game is never silent.
+  synth(group, volume, rate) {
+    const ctx = this.context;
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const tone = (from, to, duration, type, gain, delay = 0) => {
+      const osc = ctx.createOscillator();
+      const amp = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(from, now + delay);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(20, to), now + delay + duration);
+      amp.gain.setValueAtTime(0, now + delay);
+      amp.gain.linearRampToValueAtTime(gain * volume, now + delay + .01);
+      amp.gain.exponentialRampToValueAtTime(.0001, now + delay + duration);
+      osc.connect(amp).connect(this.sfxGain);
+      osc.start(now + delay);
+      osc.stop(now + delay + duration + .02);
+    };
+    const noise = (duration, gain, filter, delay = 0) => {
+      const length = Math.max(1, Math.floor(ctx.sampleRate * duration));
+      const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < length; i += 1) data[i] = (Math.random() * 2 - 1) * (1 - i / length);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      const band = ctx.createBiquadFilter();
+      band.type = filter.type;
+      band.frequency.value = filter.frequency;
+      const amp = ctx.createGain();
+      amp.gain.value = gain * volume;
+      source.connect(band).connect(amp).connect(this.sfxGain);
+      source.start(now + delay);
+    };
+    if (group === 'swing') noise(.16, .35, { type: 'bandpass', frequency: 1800 });
+    else if (group === 'hit') { noise(.14, .5, { type: 'lowpass', frequency: 900 }); tone(180, 60, .12, 'square', .18); }
+    else if (group === 'gun') { noise(.12, .6, { type: 'highpass', frequency: 1200 }); tone(420, 90, .1, 'square', .25); }
+    else if (group === 'boom') { noise(.7, .7, { type: 'lowpass', frequency: 500 }); tone(120, 30, .6, 'sine', .4); }
+    else if (group === 'step') noise(.07, .18, { type: 'lowpass', frequency: 700 });
+    else if (group === 'door') { tone(220, 90, .5, 'sawtooth', .12); noise(.5, .2, { type: 'bandpass', frequency: 600 }); }
+    else if (group === 'pickup') { tone(880, 1320, .1, 'square', .18); tone(1320, 1760, .12, 'square', .14, .07); }
+    else if (group === 'growl') { tone(120, 70, .7, 'sawtooth', .2); noise(.6, .18, { type: 'lowpass', frequency: 400 }); }
+    else if (group === 'hurt') { tone(300, 120, .3, 'triangle', .3); noise(.25, .3, { type: 'lowpass', frequency: 800 }); }
+    else if (group === 'click') tone(1200, 900, .05, 'square', .12);
+    else if (group === 'reload') { tone(600, 300, .06, 'square', .14); tone(420, 260, .07, 'square', .12, .12); }
+    else if (group === 'ambient') { tone(90, 60, 1.4, 'sine', .12); noise(1.2, .1, { type: 'lowpass', frequency: 500 }); }
+  }
+
+  // Footsteps follow the walking rhythm of the player.
+  footsteps(dt, moving) {
+    if (!moving) { this.stepTimer = 0; return; }
+    this.stepTimer -= dt;
+    if (this.stepTimer <= 0) {
+      this.stepTimer = .38;
+      this.play('step', { volume: .5, rate: .9 + Math.random() * .3 });
+    }
+  }
+
+  /* ---------- music ---------- */
+  async playRole(role) {
+    if (!this.context || !this.settings.music) return;
+    if (this.musicRole === role && this.musicSource) return;
+    this.musicRole = role;
+    if (!this.musicList) await this.loadManifest();
+    const tracks = (this.musicList || []).filter((track) => track.role === role);
+    if (!tracks.length) return;
+    this.queue = [...tracks].sort(() => Math.random() - .5);
+    this.nextTrack(true);
+  }
+  async nextTrack(immediate = false) {
+    if (!this.context || !this.settings.music) return;
+    const track = this.queue.shift();
+    if (!track) { this.musicRole = null; return; }
+    this.queue.push(track);
+    const buffer = await this.bufferFor(`./audio/music/${track.file}`);
+    if (!buffer || this.musicRole !== track.role) return;
+    const source = this.context.createBufferSource();
+    source.buffer = buffer;
+    const gain = this.context.createGain();
+    gain.gain.value = 0;
+    source.connect(gain).connect(this.musicGain);
+    const now = this.context.currentTime;
+    const fade = immediate ? 1.2 : .5;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(.7, now + fade);
+    gain.gain.setValueAtTime(.7, now + Math.max(fade, buffer.duration - 1.5));
+    gain.gain.linearRampToValueAtTime(0, now + buffer.duration);
+    source.start(now);
+    if (this.musicSource) {
+      try { this.musicSource.stop(now + .3); } catch { /* already stopped */ }
+    }
+    this.musicSource = source;
+    source.onended = () => {
+      if (this.musicSource === source && this.settings.music && this.musicRole === track.role) this.nextTrack();
+    };
+  }
+  stopMusic() {
+    this.musicRole = null;
+    if (this.musicSource) {
+      try { this.musicSource.stop(); } catch { /* already stopped */ }
+      this.musicSource = null;
+    }
   }
 }
+
+export const SFX_GROUPS = GROUPS;

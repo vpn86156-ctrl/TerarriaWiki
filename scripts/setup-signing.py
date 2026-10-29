@@ -6,8 +6,8 @@ import subprocess
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 java = ROOT / '.local/android/python/jdk4py/java-runtime/bin'
-key = ROOT / '.android-signing/kosmopilot.p12'
-password = ROOT / '.android-signing/password.txt'
+key = ROOT / '.android-signing/zabroshka.p12'
+password = ROOT / '.android-signing/zabroshka-password.txt'
 if key.exists() or password.exists():
     if key.exists() and password.exists():
         raise SystemExit('Signing key already exists; it will not be replaced. Back it up securely.')
@@ -20,10 +20,10 @@ with os.fdopen(fd, 'w') as file:
     file.write(secrets.token_urlsafe(32))
 try:
     subprocess.run([
-        str(java / 'keytool'), '-genkeypair', '-noprompt', '-alias', 'kosmopilot',
+        str(java / 'keytool'), '-genkeypair', '-noprompt', '-alias', 'zabroshka',
         '-keystore', str(key), '-storetype', 'PKCS12', '-storepass:file', str(password),
         '-keyalg', 'RSA', '-keysize', '3072', '-sigalg', 'SHA256withRSA',
-        '-validity', '10000', '-dname', 'CN=Kosmopilot Android',
+        '-validity', '10000', '-dname', 'CN=Zabroshka Android',
     ], check=True)
     key.chmod(0o600)
 except Exception:

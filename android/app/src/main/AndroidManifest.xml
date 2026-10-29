@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.github.vpn86156.kosmopilot"
-    android:versionCode="6" android:versionName="1.4.1">
+    package="io.github.vpn86156.zabroshka"
+    android:versionCode="1" android:versionName="1.0.0">
     <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="35" />
     <!-- The game is fully offline and requests no device permissions. -->
     <application
@@ -14,7 +14,7 @@
         android:hardwareAccelerated="true"
         android:enableOnBackInvokedCallback="false">
         <activity
-            android:name="io.github.vpn86156.kosmopilot.MainActivity"
+            android:name="io.github.vpn86156.zabroshka.MainActivity"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
             android:exported="true">

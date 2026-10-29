@@ -1,9 +1,9 @@
 {
-  "name": "kosmopilot",
-  "version": "1.4.1",
+  "name": "zabroshka",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Офлайн-аркада для Android в горизонтальном режиме",
+  "description": "Пиксельный рогалик по заброшенным местам для Android",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build:web": "vite build",

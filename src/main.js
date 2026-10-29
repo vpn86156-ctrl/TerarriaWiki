@@ -1,617 +1,713 @@
-import '@fontsource/manrope/cyrillic-400.css';
-import '@fontsource/manrope/latin-400.css';
-import '@fontsource/manrope/cyrillic-500.css';
-import '@fontsource/manrope/latin-500.css';
-import '@fontsource/manrope/cyrillic-700.css';
-import '@fontsource/manrope/latin-700.css';
-import '@fontsource/manrope/cyrillic-800.css';
-import '@fontsource/manrope/latin-800.css';
-import '@fontsource/russo-one/cyrillic-400.css';
-import '@fontsource/russo-one/latin-400.css';
-import './style.css';
-import { createGame, evaluateStars, phaseThresholds, resizeGame, setTarget, updateGame, useWave, WORLD_HEIGHT, MINI_BOSS_DELAY, SECTOR_FLIGHT_TIME } from './engine.js';
-import { BIOMES, CASES, LEVELS, LEVELS_BY_ID, MAX_UPGRADE, MISSIONS, OBJECTIVE_LABEL, SKINS, UPGRADES, biomeStars, isLevelUnlocked } from './content.js';
-import { claimMission, exportProgress, importProgress, levelStars, missionValue, newProgress, normalizeProgress, openCase, purchaseUpgrade, settleFlight, STORAGE_KEY, upgradeCost } from './progress.js';
-import { renderGame } from './render.js';
-import { GameAudio } from './audio.js';
+/* «Заброшка» — сборка игры: экраны, HUD, ввод, звук, прогресс. */
+
+import { createGame, updateGame, applyPurchase, equipWeapon } from './engine.js';
+import { renderGame, renderMinimap, resize } from './render.js';
+import {
+  LOCATIONS, SHOP_ITEMS, SHOP_WEAPONS, TUTORIAL, WEAPONS, AMMO_LABEL, TILE,
+} from './content.js';
+import { AudioEngine } from './audio.js';
+import { TouchControls } from './input.js';
+import { loadProgress, saveProgress, wipeProgress, defaultSave } from './progress.js';
 
 const $ = (id) => document.getElementById(id);
-const canvas = $('game-canvas');
+
+const canvas = $('game');
 const ctx = canvas.getContext('2d', { alpha: false });
-const screens = {
-  home: $('home-screen'), hud: $('game-hud'), tutorial: $('tutorial-overlay'),
-  pause: $('pause-overlay'), result: $('result-overlay'), flight: $('flight-overlay'),
-  hub: $('hub-overlay'), case: $('case-overlay'), import: $('import-overlay'),
-};
-const images = new Map();
-function biomeImage(file) {
-  if (!file) return null;
-  if (!images.has(file)) {
-    const image = new Image();
-    image.src = `${import.meta.env.BASE_URL}images/${file}`;
-    images.set(file, image);
-  }
-  return images.get(file);
-}
-const backgroundFor = (game) => biomeImage(BIOMES[game.biomeIndex]?.image);
-let progress;
-try { progress = normalizeProgress(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')); } catch { progress = newProgress(); }
-if (progress === null) progress = newProgress();
-const save = () => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch { /* Storage unavailable: the game keeps working for this session. */ } };
-const audio = new GameAudio(progress.sound, progress.music);
-const number = new Intl.NumberFormat('ru-RU');
-const sounds = [...document.querySelectorAll('.sound-button')];
-const musicButtons = [...document.querySelectorAll('.music-button')];
+const minimap = $('minimap');
+const mapCtx = minimap.getContext('2d');
 
-let mode = 'home';
+const audio = new AudioEngine();
+const controls = new TouchControls();
+
+let progress = loadProgress();
 let game = null;
-let frame = 0;
-let lastTime = 0;
-let viewportWidth = 0, viewportHeight = 0, pixelRatio = 1, worldScale = 1;
-let dragging = null;
-let planned = { mode: 'campaign', levelId: 'lyra-1', biomeIndex: 0 };
-let hubTab = 'upgrades';
-let announcementTimer = 0;
-const keys = new Set();
-const portraitQuery = window.matchMedia('(orientation: portrait)');
-const isPortrait = () => portraitQuery.matches;
+let run = { locationIndex: 0, slot: 0, time: 0, coins: 0, kills: 0 };
+let screenName = 'title';
+// Откуда пришли в настройки: возврат должен попасть ровно туда же.
+let screenBeforeSettings = 'title';
+let paused = false;
+let combatTimer = 0;
+let deathDelay = 0;
+let clearDelay = 0;
+let frames = 0;
+let toastTimer = 0;
+let lastHud = '';
+let lastMusicRole = null;
 
-const starRow = (count) => '★★★'.slice(0, count) + '☆☆☆'.slice(0, 3 - count);
+/* ---------- screens ---------- */
+const SCREENS = ['title', 'locations', 'tutorial', 'settings', 'shop', 'clear', 'pause', 'death', 'victory', 'credits'];
 
-function soundUI() {
-  for (const button of sounds) {
-    button.dataset.muted = String(!progress.sound);
-    button.setAttribute('aria-label', progress.sound ? 'Выключить звук' : 'Включить звук');
-    button.setAttribute('aria-pressed', String(progress.sound));
+function show(name) {
+  if (name === 'settings' && screenName !== 'settings') screenBeforeSettings = screenName;
+  screenName = name;
+  for (const id of SCREENS) $(`screen-${id}`).classList.toggle('active', id === name);
+  const inGame = name === 'game';
+  $('hud').classList.toggle('hidden', !inGame);
+  if (name !== 'game') minimap.classList.add('hidden');
+  else minimap.classList.toggle('hidden', !progress.settings.minimap);
+}
+
+function toast(text, time = 2.2) {
+  const node = $('toast');
+  node.textContent = text;
+  node.classList.add('show');
+  toastTimer = time;
+}
+
+/* ---------- run control ---------- */
+function startLevel(locationIndex, slot, { freshRun = false } = {}) {
+  run.locationIndex = locationIndex;
+  run.slot = slot;
+  run.time = 0;
+  run.coins = 0;
+  run.kills = 0;
+  game = createGame({ seed: Date.now() + slot * 7919 + locationIndex * 104729, locationIndex, slot, upgrades: progress.upgrades });
+  applyLoadout(game);
+  paused = false;
+  deathDelay = 0;
+  clearDelay = 0;
+  combatTimer = 0;
+  lastHud = '';
+  syncHud(true);
+  show('game');
+  audio.playRole(LOCATIONS[locationIndex].levels === slot + 1 ? 'boss' : 'explore');
+  lastMusicRole = null;
+  toast(`${LOCATIONS[locationIndex].short} · ЭТАЖ ${slot + 1}`, 2.4);
+  if (freshRun) progress.stats.levels = 0;
+}
+
+function applyLoadout(target) {
+  const player = target.player;
+  player.maxHealth = 6 + (progress.upgrades.maxhp || 0);
+  player.health = Math.max(1, Math.min(player.maxHealth, progress.health || player.maxHealth));
+  player.grenades = progress.grenades ?? 1;
+  player.melee = progress.melee || 'crowbar';
+  player.gun = null;
+  player.magazine = 0;
+  player.ammo = { pistol: 0, shells: 0, rifle: 0, ...progress.ammo };
+  player.coins = 0;
+  if (progress.gun && progress.weapons.includes(progress.gun)) equipWeapon(target, progress.gun);
+  if (progress.melee && WEAPONS[progress.melee]) player.melee = progress.melee;
+}
+
+function finishLevel() {
+  const location = LOCATIONS[run.locationIndex];
+  progress.coins += game.player.coins;
+  progress.health = game.player.health;
+  progress.ammo = { ...game.player.ammo };
+  progress.grenades = game.player.grenades;
+  progress.stats.kills += game.stats.killed;
+  progress.stats.coins += game.stats.coins;
+  progress.stats.time += game.time;
+  progress.stats.levels += 1;
+  progress.maxLevel[run.locationIndex] = Math.max(progress.maxLevel[run.locationIndex] || 1, run.slot + 2);
+  const isLastLevel = run.slot + 1 >= location.levels;
+  if (isLastLevel) {
+    progress.stats.bosses += 1;
+    if (run.locationIndex + 1 < LOCATIONS.length) {
+      progress.unlocked = Math.max(progress.unlocked, run.locationIndex + 2);
+      progress.location = run.locationIndex + 1;
+      progress.level = 1;
+    }
+  } else {
+    progress.location = run.locationIndex;
+    progress.level = run.slot + 2;
   }
-  for (const button of musicButtons) {
-    button.dataset.muted = String(!progress.music);
-    button.setAttribute('aria-label', progress.music ? 'Выключить музыку' : 'Включить музыку');
-    button.setAttribute('aria-pressed', String(progress.music));
+  saveProgress(progress);
+  return isLastLevel;
+}
+
+function advanceAfterClear() {
+  const location = LOCATIONS[run.locationIndex];
+  const isLastLevel = run.slot + 1 >= location.levels;
+  if (isLastLevel && run.locationIndex + 1 >= LOCATIONS.length) {
+    showVictory();
+    return;
   }
+  openShop();
 }
-function homeUI() {
-  $('home-best').textContent = number.format(progress.best);
-  $('home-credits').textContent = number.format(progress.credits);
-  $('hub-credits').textContent = number.format(progress.credits);
-  $('hub-parts').textContent = number.format(progress.parts);
-  $('home-stars').textContent = `${Object.values(progress.campaign.stars).reduce((total, value) => total + value, 0)}/72`;
-}
-function showMode(next) {
-  mode = next;
-  screens.home.hidden = !['home', 'tutorial'].includes(mode);
-  screens.hud.hidden = !['playing', 'pause', 'result'].includes(mode);
-  for (const [key, element] of Object.entries(screens)) {
-    if (['home', 'hud'].includes(key)) continue;
-    element.hidden = mode !== key;
+
+function nextLevel() {
+  // Everything bought in the shop has to travel into the next level.
+  if (game) {
+    progress.health = game.player.health;
+    progress.ammo = { ...game.player.ammo };
+    progress.grenades = game.player.grenades;
+    progress.melee = game.player.melee;
+    progress.gun = game.player.gun || progress.gun;
+    saveProgress(progress);
   }
-  if (mode === 'home') { homeUI(); $('hub-message').hidden = true; }
+  const location = LOCATIONS[run.locationIndex];
+  if (run.slot + 1 < location.levels) startLevel(run.locationIndex, run.slot + 1);
+  else if (run.locationIndex + 1 < LOCATIONS.length) startLevel(run.locationIndex + 1, 0);
+  else showVictory();
 }
-function announce(text, duration = 2.4) {
-  const element = $('announcement');
-  element.textContent = text;
-  element.hidden = false;
-  element.classList.remove('show');
-  void element.offsetWidth;
-  element.classList.add('show');
-  clearTimeout(announcementTimer);
-  announcementTimer = setTimeout(() => { element.classList.remove('show'); element.hidden = true; }, duration * 1000);
+
+function playerDied() {
+  progress.stats.deaths += 1;
+  progress.health = 8 + (progress.upgrades.maxhp || 0);
+  progress.ammo = { pistol: Math.max(12, (progress.ammo.pistol || 0) >> 1), shells: progress.ammo.shells || 0, rifle: 0 };
+  progress.grenades = Math.max(1, (progress.grenades || 1) - 1);
+  progress.coins += Math.floor(game.player.coins / 2);
+  saveProgress(progress);
+  $('death-stats').innerHTML = statBlock([
+    ['ЭТАЖ', `${LOCATIONS[run.locationIndex].short} ${run.slot + 1}`],
+    ['УБИТО', game.stats.killed],
+    ['МОНЕТ', game.player.coins],
+    ['ВРЕМЯ', formatTime(game.time)],
+  ]);
+  $('death-text').textContent = 'Половина найденных монет осталась в кармане. Остальное — в заброшке.';
+  audio.playRole('explore');
+  show('death');
 }
-function resize() {
-  const rect = canvas.getBoundingClientRect();
-  viewportWidth = rect.width || window.innerWidth;
-  viewportHeight = rect.height || window.innerHeight;
-  pixelRatio = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
-  canvas.width = Math.max(1, Math.round(viewportWidth * pixelRatio));
-  canvas.height = Math.max(1, Math.round(viewportHeight * pixelRatio));
-  worldScale = viewportHeight / WORLD_HEIGHT;
-  ctx.setTransform(worldScale * pixelRatio, 0, 0, worldScale * pixelRatio, 0, 0);
-  if (game) { resizeGame(game, viewportWidth / worldScale); renderGame(ctx, game, backgroundFor(game)); }
-  if (isPortrait() && mode === 'playing') pauseGame();
+
+function showVictory() {
+  $('victory-text').textContent = 'Три заброшки позади: подвал, больница, завод. Ты вышел — редкий случай.';
+  $('victory-stats').innerHTML = statBlock([
+    ['УБИТО', progress.stats.kills],
+    ['БОССОВ', progress.stats.bosses],
+    ['МОНЕТ', progress.coins],
+    ['СМЕРТЕЙ', progress.stats.deaths],
+    ['ВРЕМЯ', formatTime(progress.stats.time)],
+  ]);
+  show('victory');
 }
-function objectiveText() {
-  if (!game) return '';
-  if (game.level) {
-    const level = game.level;
-    if (level.kind === 'boss') return game.boss ? 'БОЙ СО СТРАЖЕМ' : `СТРАЖ ЧЕРЕЗ ${Math.max(0, Math.ceil(game.timers.boss))} С`;
-    return `${OBJECTIVE_LABEL[level.kind](level)} · ${Math.min(game.objective.progress, level.target)}/${level.target}`;
-  }
-  return `ДО БОССА ${Math.max(0, Math.ceil(game.timers.boss))} СЕК`;
-}
-function objectiveFraction() {
-  if (!game) return 0;
-  if (game.level) {
-    const level = game.level;
-    if (level.kind === 'boss') return game.boss ? 1 - game.boss.health / game.boss.maxHealth : Math.max(0, Math.min(1, 1 - game.timers.boss / MINI_BOSS_DELAY));
-    return Math.min(1, game.objective.progress / level.target);
-  }
-  return Math.max(0, Math.min(1, 1 - game.timers.boss / SECTOR_FLIGHT_TIME));
-}
-function updateHUD() {
+
+const formatTime = (seconds) => {
+  const total = Math.floor(seconds);
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+};
+const statBlock = (pairs) => pairs
+  .map(([label, value]) => `<div><span class="tag">${label}</span><span>${value}</span></div>`)
+  .join('');
+
+/* ---------- HUD ---------- */
+function syncHud(force = false) {
   if (!game) return;
-  const biome = BIOMES[game.biomeIndex];
-  const level = game.level;
-  $('score-value').textContent = number.format(game.score);
-  $('stars-value').textContent = number.format(game.stars);
-  $('sector-name').textContent = level ? `${level.name} · ${biome.short}` : biome.short;
-  $('sector-fill').style.width = `${objectiveFraction() * 100}%`;
-  $('sector-progress').textContent = objectiveText();
-  const health = $('health-indicator');
-  const maxHealth = game.player.maxHealth;
-  if (health.children.length !== maxHealth) {
-    health.replaceChildren(...Array.from({ length: maxHealth }, () => document.createElement('span')));
+  const player = game.player;
+  const weapon = WEAPONS[player.gun] || WEAPONS[player.melee];
+  const reserve = player.gun ? (player.ammo[WEAPONS[player.gun].ammo] || 0) : 0;
+  const key = [
+    player.health, player.maxHealth, weapon?.id, player.magazine, reserve,
+    player.coins, game.keys, player.grenades, game.doorOpen,
+    game.level.boss ? Math.ceil(game.level.boss.health) : -1,
+  ].join('|');
+  if (!force && key === lastHud) return;
+  lastHud = key;
+
+  const hearts = Math.max(3, Math.ceil(player.maxHealth));
+  const filled = Math.ceil(Math.max(0, player.health));
+  $('hearts').innerHTML = Array.from({ length: hearts }, (_, index) =>
+    `<div class="heart${index < filled ? '' : ' empty'}"></div>`).join('');
+
+  $('weapon-name').textContent = weapon ? weapon.name : 'БЕЗ ОРУЖИЯ';
+  $('ammo-text').textContent = player.gun
+    ? `${player.magazine} / ${reserve} · ${AMMO_LABEL[WEAPONS[player.gun].ammo]}`
+    : 'ТОЛЬКО БЛИЖНИЙ БОЙ';
+  $('coins').textContent = player.coins;
+  $('keys').textContent = game.keys;
+  $('grenade-count').textContent = player.grenades;
+  $('level-title').textContent = `${LOCATIONS[run.locationIndex].short} · ЭТАЖ ${run.slot + 1}`;
+
+  let objective = 'ИДИ К ВЫХОДУ';
+  if (game.level.boss && !game.level.boss.dead) objective = `УБЕЙ: ${game.level.boss.name}`;
+  else if (!game.doorOpen) objective = game.keys > 0 ? 'ОТКРОЙ ДВЕРЬ КЛЮЧОМ' : 'НАЙДИ КЛЮЧ В ЯЩИКАХ';
+  $('objective').textContent = objective;
+
+  const boss = game.level.boss;
+  const bar = $('boss-bar');
+  if (boss && !boss.dead) {
+    bar.classList.remove('hidden');
+    $('boss-name').textContent = boss.name;
+    $('boss-fill').style.width = `${Math.max(0, (boss.health / boss.maxHealth) * 100).toFixed(1)}%`;
+  } else {
+    bar.classList.add('hidden');
   }
-  health.setAttribute('aria-label', `Корпус: ${game.player.health} из ${maxHealth}`);
-  [...health.children].forEach((pip, index) => pip.classList.toggle('empty', index >= game.player.health));
-  const ready = game.waveCooldown <= 0;
-  const remaining = Math.ceil(game.waveCooldown);
-  const pulse = $('pulse-button');
-  pulse.disabled = !ready;
-  pulse.style.setProperty('--progress', `${Math.round((1 - game.waveCooldown / game.waveMax) * 100)}%`);
-  pulse.setAttribute('aria-label', ready ? 'Волна готова' : `Волна: осталось ${remaining} сек.`);
-  $('pulse-label').textContent = ready ? 'ГОТОВА' : `${remaining} СЕК`;
-  const bossStatus = $('boss-status');
-  bossStatus.hidden = !game.boss;
-  if (game.boss) {
-    $('boss-name').textContent = game.boss.name || biome.guardian.name;
-    $('boss-health').style.width = `${Math.max(0, (game.boss.health / game.boss.maxHealth) * 100)}%`;
-    const boss = game.boss;
-    const shifting = boss.phaseShift > 0;
-    $('boss-phase').hidden = boss.phase < 2 && !shifting;
-    $('boss-phase').textContent = shifting
-      ? 'СМЕНА ФАЗЫ'
-      : `ФАЗА ${['I', 'II', 'III'][Math.min(2, boss.phase - 1)]} / ${['I', 'II', 'III'][Math.min(2, boss.phaseCount - 1)]}`;
-    $('boss-phase').classList.toggle('shift', shifting);
-    $('boss-status').classList.toggle('exposed', boss.weakOpen > 0);
-    // Ticks on the health bar show where the next phase begins.
-    const marks = phaseThresholds(boss);
-    for (const [index, mark] of bossMarks.entries()) {
-      if (index >= marks.length) { mark.hidden = true; continue; }
-      mark.hidden = false;
-      mark.style.left = `${(1 - marks[index]) * 100}%`;
+
+  for (const action of ['reload']) {
+    const button = document.querySelector(`[data-action="${action}"]`);
+    if (button) button.disabled = !player.gun;
+  }
+  const grenadeButton = document.querySelector('[data-action="grenade"]');
+  if (grenadeButton) grenadeButton.disabled = player.grenades <= 0;
+  const fireButton = document.querySelector('[data-action="shoot"]');
+  if (fireButton) fireButton.disabled = !player.gun || (player.magazine <= 0 && reserve <= 0);
+}
+
+/* ---------- events → sound ---------- */
+function handleEvents(events) {
+  for (const event of events) {
+    switch (event) {
+      case 'swing': audio.play('swing', { volume: .5, throttle: .05 }); break;
+      case 'hit-enemy': audio.play('hit', { volume: .6, throttle: .04 }); combatTimer = Math.max(combatTimer, 3); break;
+      case 'enemy-die':
+        audio.play('hit', { volume: .7, rate: .85 });
+        audio.play('growl', { volume: .35, rate: .8, throttle: .3 });
+        break;
+      case 'enemy-shoot': audio.play('gun', { volume: .35, rate: .7, throttle: .1 }); combatTimer = Math.max(combatTimer, 3); break;
+      case 'player-hurt': audio.play('hurt', { volume: .7, throttle: .2 }); combatTimer = Math.max(combatTimer, 3); break;
+      case 'player-die': audio.play('hurt', { volume: 1, rate: .7 }); deathDelay = 1.1; break;
+      case 'shoot': audio.play('gun', { volume: .55, throttle: .04 }); combatTimer = Math.max(combatTimer, 2.5); break;
+      case 'reload': audio.play('reload', { volume: .5 }); break;
+      case 'reload-done': audio.play('click', { volume: .35 }); break;
+      case 'grenade-throw': audio.play('swing', { volume: .4, rate: .6 }); break;
+      case 'explosion': audio.play('boom', { volume: .8 }); combatTimer = Math.max(combatTimer, 3); break;
+      case 'prop-break': audio.play('hit', { volume: .45, rate: .7, throttle: .1 }); break;
+      case 'coin': audio.play('pickup', { volume: .35, rate: 1.5, throttle: .05 }); break;
+      case 'key': audio.play('pickup', { volume: .6, rate: 1.2 }); toast('КЛЮЧ НАЙДЕН'); break;
+      case 'pickup': audio.play('pickup', { volume: .5, throttle: .1 }); break;
+      case 'door-open': audio.play('door', { volume: .7 }); toast('ДВЕРЬ ОТКРЫТА'); break;
+      case 'boss-telegraph': audio.play('growl', { volume: .8 }); break;
+      case 'boss-shoot': audio.play('gun', { volume: .45, rate: .6 }); break;
+      case 'boss-phase': audio.play('boom', { volume: .5, rate: .7 }); toast('БОСС В ЯРОСТИ'); break;
+      case 'boss-summon': audio.play('growl', { volume: .6, rate: 1.2 }); break;
+      case 'boss-die':
+        audio.play('boom', { volume: 1 });
+        toast('БОСС ПОВЕРЖЕН');
+        break;
+      case 'level-complete': clearDelay = .8; break;
+      default:
+        if (event.startsWith('melee:')) audio.play('swing', { volume: .5, rate: event.endsWith('axe') ? .7 : 1 });
+        else if (event.startsWith('gun:')) audio.play('gun', { volume: .55, rate: event.endsWith('shotgun') ? .75 : event.endsWith('rifle') ? 1.15 : 1 });
     }
   }
-  $('first-flight-tip').classList.toggle('fade', game.elapsed > 6 || dragging !== null);
-  $('control-hint').classList.toggle('dimmed', game.elapsed > 10 || dragging !== null);
 }
 
-/* ---------- campaign map ---------- */
-function nextLevelId(level) {
-  const next = LEVELS_BY_ID[`${level.biome}-${level.slot + 2}`];
-  if (next && isLevelUnlocked(progress, next)) return next.id;
-  const biome = BIOMES[level.biomeIndex + 1];
-  if (biome && level.biomeIndex + 1 < progress.campaign.unlockedBiomes) return `${biome.id}-1`;
-  return null;
-}
-function renderCampaign() {
-  const level = LEVELS_BY_ID[planned.levelId] || LEVELS[0];
-  planned.biomeIndex = level.biomeIndex;
-  const list = $('biome-list');
-  list.replaceChildren(...BIOMES.map((biome, index) => {
-    const locked = index >= progress.campaign.unlockedBiomes;
-    const stars = biomeStars(progress, biome.id);
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = `biome-row accent-${biome.accent}${locked ? ' locked' : ''}${level.biomeIndex === index ? ' selected' : ''}`;
-    button.innerHTML = `<span class="biome-index">${String(index + 1).padStart(2, '0')}</span>
-      <span class="biome-text"><strong>${biome.short}</strong><small>${locked ? 'ЗАКРЫТ' : `★ ${stars}/9`}</small></span>
-      <span class="biome-mark">${locked ? '🔒' : stars === 27 ? '✦' : '▸'}</span>`;
-    button.disabled = locked;
-    if (!locked) button.addEventListener('click', () => {
-      const first = LEVELS.find((entry) => entry.biome === biome.id && !levelStars(progress, entry.id)) || LEVELS.find((entry) => entry.biome === biome.id);
-      planned.levelId = first.id;
-      renderCampaign();
-    });
-    return button;
-  }));
-  const biome = BIOMES[level.biomeIndex];
-  $('biome-detail').innerHTML = `<span class="dialog-kicker"><i></i> ${biome.subtitle}</span>
-    <h3>${biome.name}</h3><p>${biome.description}</p>
-    <small>СТРАЖ БИОМА: <b>${biome.guardian.name}</b> · ${biome.guardian.phases} фазы · слабое место: ${({ core: 'ядро', claw: 'клешня', eye: 'глаз', ring: 'кольцо' })[biome.guardian.weak]}</small>`;
-  const levels = $('level-list');
-  levels.replaceChildren(...LEVELS.filter((entry) => entry.biome === biome.id).map((entry) => {
-    const unlocked = isLevelUnlocked(progress, entry);
-    const stars = levelStars(progress, entry.id);
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = `level-card kind-${entry.kind}${unlocked ? '' : ' locked'}${planned.levelId === entry.id ? ' selected' : ''}`;
-    card.innerHTML = `<span class="level-slot">${entry.slot + 1}</span>
-      <span class="level-body"><strong>${entry.name}</strong><small>${entry.brief}</small>
-      <em>${OBJECTIVE_LABEL[entry.kind](entry)} · ПАР ${entry.par} С</em></span>
-      <span class="level-stars">${unlocked ? starRow(stars) : '🔒'}</span>`;
-    card.disabled = !unlocked;
-    if (unlocked) card.addEventListener('click', () => { planned.levelId = entry.id; renderCampaign(); });
-    return card;
-  }));
-  $('campaign-note').textContent = isLevelUnlocked(progress, level)
-    ? (levelStars(progress, level.id) ? `Уровень «${level.name}» уже пройден — можно улучшить результат.` : 'Цель выполнена — уровень открывается со звездой.')
-    : 'Пройди предыдущий уровень, чтобы открыть этот.';
-  $('launch-button').disabled = !isLevelUnlocked(progress, level);
-}
-function renderEndless() {
-  const grid = $('sector-grid');
-  grid.replaceChildren(...BIOMES.map((biome, index) => {
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = `sector-card accent-${biome.accent}${planned.biomeIndex === index ? ' selected' : ''}`;
-    card.innerHTML = `
-      <span class="sector-art"${biome.image ? ` style="background-image:url('${import.meta.env.BASE_URL}images/${biome.image}')"` : ` data-art="${biome.accent}"`}></span>
-      <span class="sector-meta"><span class="sector-sub">${biome.subtitle}</span><strong>${biome.name}</strong><small>${biome.description}</small></span>
-      <span class="sector-flag">СТАРТОВЫЙ БИОМ</span>`;
-    card.addEventListener('click', () => { planned.biomeIndex = index; renderEndless(); });
-    return card;
-  }));
-  $('endless-note').textContent = 'Бесконечный полёт: биомы сменяются после каждого стража, награды растут.';
-  $('launch-button').disabled = false;
-}
-function renderFlight() {
-  const campaign = planned.mode === 'campaign';
-  $('mode-campaign').classList.toggle('active', campaign);
-  $('mode-endless').classList.toggle('active', !campaign);
-  $('campaign-map').hidden = !campaign;
-  $('endless-map').hidden = campaign;
-  if (campaign) renderCampaign(); else renderEndless();
-}
-
-/* ---------- hub: upgrades, ships, cases, missions, backup ---------- */
-function hubMessage(text, positive = true) {
-  const element = $('hub-message');
-  element.textContent = text;
-  element.dataset.tone = positive ? 'good' : 'warn';
-  element.hidden = false;
-}
-function renderHub() {
-  homeUI();
-  for (const button of document.querySelectorAll('[data-hub-tab]')) button.classList.toggle('active', button.dataset.hubTab === hubTab);
-  const content = $('hub-content');
-  if (hubTab === 'upgrades') {
-    content.replaceChildren(...UPGRADES.map((upgrade) => {
-      const cost = upgradeCost(progress, upgrade.id);
-      const card = document.createElement('article');
-      card.className = `hub-card upgrade-card color-${upgrade.color}`;
-      const level = document.createElement('div');
-      level.className = 'card-level';
-      for (let i = 0; i < MAX_UPGRADE; i += 1) level.append(Object.assign(document.createElement('i'), { className: i < cost.level ? 'on' : '' }));
-      level.append(Object.assign(document.createElement('b'), { textContent: cost.maxed ? 'МАКС' : `${cost.level}/${MAX_UPGRADE}` }));
-      const info = document.createElement('div');
-      info.className = 'card-info';
-      info.innerHTML = `<span class="card-icon">${upgrade.icon}</span><div><h3>${upgrade.name}</h3><p>${upgrade.description}</p></div>`;
-      const buy = document.createElement('button');
-      buy.type = 'button';
-      buy.className = 'card-buy';
-      buy.textContent = cost.maxed ? 'МАКСИМУМ' : `◈ ${cost.credits} · ⬡ ${cost.parts}`;
-      buy.disabled = cost.maxed || progress.credits < cost.credits || progress.parts < cost.parts;
-      buy.addEventListener('click', () => {
-        if (purchaseUpgrade(progress, upgrade.id)) { save(); audio.play('victory'); hubMessage(`${upgrade.name}: уровень ${progress.upgrades[upgrade.id]}.`); renderHub(); }
-        else hubMessage('Не хватает кредитов или деталей.', false);
-      });
-      card.append(level, info, buy);
-      return card;
-    }));
-  } else if (hubTab === 'ships') {
-    content.replaceChildren(...SKINS.map((skin) => {
-      const owned = progress.ownedSkins.includes(skin.id);
-      const active = progress.selectedSkin === skin.id;
-      const card = document.createElement('article');
-      card.className = `hub-card ship-card${owned ? '' : ' locked'}${active ? ' selected' : ''}`;
-      card.innerHTML = `<span class="ship-preview" style="--fin:${skin.fin};--light:${skin.light};--hull:${skin.hull}"><i></i></span>
-        <div class="card-info"><h3>${skin.name}</h3><p>${owned ? skin.description : 'Открывается в кейсе'}</p></div>`;
-      const action = document.createElement('button');
-      action.type = 'button';
-      action.className = 'card-buy';
-      action.textContent = active ? 'ВЫБРАН' : owned ? 'ВЫБРАТЬ' : '🔒 НЕТ';
-      action.disabled = !owned || active;
-      action.addEventListener('click', () => { progress.selectedSkin = skin.id; save(); renderHub(); });
-      card.append(action);
-      return card;
-    }));
-  } else if (hubTab === 'shop') {
-    content.replaceChildren(...CASES.map((box) => {
-      const card = document.createElement('article');
-      card.className = `hub-card case-card color-${box.color}`;
-      card.innerHTML = `<span class="case-glyph">✦</span><div class="card-info"><h3>${box.name}</h3><p>${box.caption}</p><small>Детали и облики кораблей</small></div>`;
-      const buy = document.createElement('button');
-      buy.type = 'button';
-      buy.className = 'card-buy';
-      buy.textContent = `◈ ${box.price}`;
-      buy.disabled = progress.credits < box.price;
-      buy.addEventListener('click', () => {
-        const reward = openCase(progress, box.id);
-        if (!reward) { hubMessage('Не хватает кредитов.', false); return; }
-        save(); audio.play('victory'); renderHub(); showCaseReward(reward);
-      });
-      card.append(buy);
-      return card;
-    }));
-  } else if (hubTab === 'missions') {
-    content.replaceChildren(...MISSIONS.map((mission) => {
-      const value = missionValue(progress, mission);
-      const done = progress.claimed.includes(mission.id);
-      const complete = value >= mission.target;
-      const card = document.createElement('article');
-      card.className = `hub-card mission-card${done ? ' done' : ''}`;
-      card.innerHTML = `<span class="card-icon">${mission.icon}</span><div class="card-info"><h3>${mission.name}</h3><p>${mission.description}</p>
-        <div class="mission-track"><i style="width:${Math.min(100, (value / mission.target) * 100)}%"></i></div><small>${Math.min(value, mission.target)} / ${mission.target}</small></div>`;
-      const action = document.createElement('button');
-      action.type = 'button';
-      action.className = 'card-buy';
-      action.textContent = done ? 'ПОЛУЧЕНО' : complete ? 'ЗАБРАТЬ' : 'В ПУТИ';
-      action.disabled = done || !complete;
-      action.addEventListener('click', () => {
-        if (claimMission(progress, mission.id)) { save(); audio.play('victory'); hubMessage(`Награда получена: ◈${mission.credits} · ⬡${mission.parts}.`); renderHub(); }
-      });
-      card.append(action);
-      return card;
-    }));
-  } else {
-    const card = document.createElement('article');
-    card.className = 'hub-card backup-card';
-    card.innerHTML = `<div class="card-info"><h3>СОХРАНИТЬ ПРОГРЕСС</h3><p>Скопируй код в надёжное место. Он восстанавливает корабли, улучшения, кредиты, рекорд и звёзды кампании.</p>
-      <p class="backup-note">Бесплатные игровые деньги и награды. Покупок за реальные деньги в игре нет.</p>
-      <textarea id="backup-code" readonly rows="3"></textarea></div>`;
-    const copyButton = document.createElement('button');
-    copyButton.type = 'button';
-    copyButton.className = 'card-buy';
-    copyButton.textContent = 'СКОПИРОВАТЬ КОД';
-    copyButton.addEventListener('click', async () => {
-      const field = $('backup-code');
-      field.select();
-      try {
-        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(field.value);
-        else document.execCommand?.('copy');
-        hubMessage('Код скопирован. Храни его отдельно от игры.');
-      } catch { hubMessage('Скопируй код вручную — буфер недоступен.', false); }
-    });
-    const restoreButton = document.createElement('button');
-    restoreButton.type = 'button';
-    restoreButton.className = 'card-buy';
-    restoreButton.textContent = 'ВОССТАНОВИТЬ';
-    restoreButton.addEventListener('click', () => {
-      const field = document.createElement('textarea');
-      field.rows = 3;
-      field.placeholder = 'ВСТАВЬ КОД РЕЗЕРВНОЙ КОПИИ';
-      field.id = 'restore-input';
-      const wrap = document.createElement('label');
-      wrap.className = 'restore-wrap';
-      wrap.append(Object.assign(document.createElement('span'), { textContent: 'КОД РЕЗЕРВНОЙ КОПИИ' }), field);
-      card.querySelector('.card-info').append(wrap);
-      wrap.scrollIntoView({ block: 'nearest' });
-      field.focus();
-      field.addEventListener('change', () => {
-        const restored = importProgress(field.value);
-        if (!restored) { hubMessage('Код не подошёл. Проверь, что он скопирован целиком.', false); return; }
-        pendingRestore = restored;
-        screens.import.hidden = false;
-      });
-    });
-    card.append(copyButton, restoreButton);
-    content.replaceChildren(card);
-    $('backup-code').value = exportProgress(progress);
+/* ---------- music roles ---------- */
+function updateMusic(dt) {
+  if (!game) return;
+  combatTimer = Math.max(0, combatTimer - dt);
+  const boss = game.level.boss;
+  const bossNear = boss && !boss.dead && Math.hypot(boss.x - game.player.x, boss.y - game.player.y) < 340;
+  const awake = game.level.enemies.some((enemy) => enemy.state === 'chase' || enemy.state === 'attack');
+  if (awake) combatTimer = Math.max(combatTimer, 2);
+  const role = bossNear ? 'boss' : combatTimer > 0 ? 'fight' : 'explore';
+  if (role !== lastMusicRole) {
+    lastMusicRole = role;
+    audio.playRole(role);
   }
 }
-let pendingRestore = null;
-function showCaseReward(reward) {
-  $('case-reward').innerHTML = reward.kind === 'skin'
-    ? `<b class="reward-title">${reward.label}</b><span class="reward-note">Новый облик доступен в ангаре — раздел «КОРАБЛИ».</span>`
-    : `<b class="reward-title">${reward.label}</b><span class="reward-note">${reward.kind === 'duplicate' ? 'Облик уже был в ангаре.' : 'Детали нужны для улучшений.'}</span>`;
-  screens.case.hidden = false;
-}
 
-/* ---------- flight lifecycle ---------- */
-function startGame() {
-  if (isPortrait()) return;
-  const level = planned.mode === 'campaign' ? LEVELS_BY_ID[planned.levelId] : null;
-  if (level && !isLevelUnlocked(progress, level)) return;
-  progress.tutorialSeen = true; save(); audio.unlock();
-  keys.clear(); dragging = null;
-  game = createGame({
-    width: viewportWidth / worldScale, mode: planned.mode, biomeIndex: planned.biomeIndex,
-    upgrades: progress.upgrades, skin: progress.selectedSkin, level,
-  });
-  showMode('playing'); updateHUD(); audio.setMode('calm'); audio.startMusic();
-  if (level) announce(`${BIOMES[level.biomeIndex].name} · ${level.name}`, 3);
-  else announce(`${BIOMES[game.biomeIndex].name} · бесконечный полёт`, 3);
-  renderGame(ctx, game, backgroundFor(game));
-  lastTime = performance.now(); cancelAnimationFrame(frame); frame = requestAnimationFrame(loop);
-}
-function keyboardMovement(dt) {
-  const horizontal = Number(keys.has('ArrowRight') || keys.has('KeyD')) - Number(keys.has('ArrowLeft') || keys.has('KeyA'));
-  const vertical = Number(keys.has('ArrowDown') || keys.has('KeyS')) - Number(keys.has('ArrowUp') || keys.has('KeyW'));
-  if (horizontal || vertical) {
-    const normal = horizontal && vertical ? Math.SQRT1_2 : 1;
-    setTarget(game, game.player.targetX + horizontal * 360 * dt * normal, game.player.targetY + vertical * 360 * dt * normal);
-  }
-}
-const bossMarks = [...document.querySelectorAll('.boss-mark')];
-const ANNOUNCEMENTS = {
-  'boss-warning': () => 'ОПАСНОСТЬ: СТРАЖ БЛИЗКО',
-  'boss-arrives': (game) => `СТРАЖ БИОМА: ${game.boss?.name || BIOMES[game.biomeIndex].guardian.name}`,
-  'boss-rage': () => 'СТРАЖ МЕНЯЕТ ФАЗУ!',
-  'boss-ascend': (game) => `ФАЗА ${['I', 'II', 'III'][(game.boss?.phase ?? 2) - 1] || 'II'} — СТРАЖ СИЛЬНЕЕ`,
-  'weak-open': () => 'СЛАБАЯ ТОЧКА ОТКРЫТА',
-  'boss-defeated': () => 'СТРАЖ РАСПАДАЕТСЯ!',
-  'boss-vanish': () => 'СТРАЖ УШЁЛ В ФАЗУ',
-  'boss-charge': () => 'ЛУЧ ЗАРЯЖАЕТСЯ!',
-  'boss-swarm': () => 'РОЙ ВЫПУЩЕН!',
-  'boss-frost': () => 'ЛЕДЯНОЙ ЗАЛП!',
-  'level-complete': () => 'ЦЕЛЬ ВЫПОЛНЕНА!',
-  victory: () => 'УРОВЕНЬ ПРОЙДЕН!',
-  'sector-change': (game) => `КУРС: ${BIOMES[game.biomeIndex].name}`,
-};
-const MUSIC_SWITCH = { 'boss-warning': 'boss', 'boss-arrives': 'boss', 'boss-defeated': 'calm', 'sector-change': 'calm', 'level-complete': 'calm' };
-function loop(now) {
-  if (mode !== 'playing' || !game) return;
+/* ---------- loop ---------- */
+let lastTime = performance.now();
+function frame(now) {
   const dt = Math.min(.05, Math.max(0, (now - lastTime) / 1000));
   lastTime = now;
-  keyboardMovement(dt);
-  const events = updateGame(game, dt);
-  for (const event of events) {
-    audio.play(event);
-    if (ANNOUNCEMENTS[event]) announce(ANNOUNCEMENTS[event](game), 2.2);
-    if (MUSIC_SWITCH[event]) audio.setMode(MUSIC_SWITCH[event]);
+  frames += 1;
+
+  if (toastTimer > 0) {
+    toastTimer -= dt;
+    if (toastTimer <= 0) $('toast').classList.remove('show');
   }
-  updateHUD(); renderGame(ctx, game, backgroundFor(game));
-  if (game.gameOver) { finishGame(); return; }
-  frame = requestAnimationFrame(loop);
-}
-function pauseGame() {
-  if (mode !== 'playing') return;
-  cancelAnimationFrame(frame); keys.clear(); dragging = null; audio.stopMusic(); audio.suspend();
-  showMode('pause');
-}
-function resumeGame() {
-  if (mode !== 'pause' || isPortrait()) return;
-  audio.unlock(); audio.startMusic(); showMode('playing'); lastTime = performance.now(); frame = requestAnimationFrame(loop);
-}
-function finishGame() {
-  if (!game) return;
-  cancelAnimationFrame(frame); keys.clear(); dragging = null; audio.stopMusic(); audio.suspend();
-  const level = game.level;
-  const stars = level ? evaluateStars(level, game) : 0;
-  const outcome = settleFlight(progress, game) || { credits: 0, parts: 0, newRecord: false, isFirstClear: false, stars: 0, unlockedBiome: null };
-  save();
-  const title = $('result-title');
-  if (level && game.levelComplete) title.innerHTML = 'УРОВЕНЬ<br />ПРОЙДЕН!';
-  else if (game.victory) title.innerHTML = 'СТРАЖ<br />ПОВЕРЖЕН!';
-  else title.innerHTML = 'ОТЛИЧНЫЙ<br />ПОЛЁТ!';
-  const starRowElement = $('result-stars-row');
-  starRowElement.hidden = !level;
-  starRowElement.textContent = level ? starRow(stars) : '';
-  starRowElement.setAttribute('aria-label', level ? `Звёзд получено: ${stars} из 3` : '');
-  $('result-score').textContent = number.format(game.score);
-  $('result-distance').textContent = `${number.format(Math.floor(game.distance))} м`;
-  $('result-stars').textContent = number.format(game.stars);
-  $('result-bosses').textContent = number.format(game.bossesDefeated);
-  $('result-best').textContent = number.format(progress.best);
-  $('result-credits').textContent = number.format(outcome.credits);
-  $('result-parts').textContent = number.format(outcome.parts);
-  $('new-record').hidden = !outcome.newRecord;
-  const unlock = $('result-unlock');
-  if (outcome.unlockedBiome) { unlock.hidden = false; unlock.textContent = `✦ ОТКРЫТ БИОМ: ${outcome.unlockedBiome}`; }
-  else if (outcome.stars >= 3) { unlock.hidden = false; unlock.textContent = '✦ ВСЕ ЗВЁЗДЫ УРОВНЯ'; }
-  else unlock.hidden = true;
-  const next = level ? nextLevelId(level) : null;
-  const nextButton = $('next-level-button');
-  nextButton.hidden = !next;
-  if (next) nextButton.onclick = () => { planned.levelId = next; planned.mode = 'campaign'; startGame(); };
-  updateHUD(); showMode('result');
-  if (game.victory) audio.play('victory');
-}
-function returnHome() {
-  cancelAnimationFrame(frame); keys.clear(); dragging = null; game = null; audio.stopMusic(); audio.suspend();
-  showMode('home');
-}
-function activateWave() {
-  if (mode !== 'playing' || !game) return;
-  if (useWave(game)) { audio.play('wave'); updateHUD(); renderGame(ctx, game, backgroundFor(game)); }
+
+  if (game && screenName === 'game' && !paused) {
+    const events = updateGame(game, dt, controls.state);
+    handleEvents(events);
+    audio.footsteps(dt, game.player.moving && !game.dead);
+    updateMusic(dt);
+    syncHud();
+    if (!minimap.classList.contains('hidden')) renderMinimap(mapCtx, game, 0, 0, 120);
+
+    if (deathDelay > 0) {
+      deathDelay -= dt;
+      if (deathDelay <= 0) playerDied();
+    }
+    if (clearDelay > 0) {
+      clearDelay -= dt;
+      if (clearDelay <= 0) {
+        clearDelay = 0;
+        const isLastLevel = finishLevel();
+        $('clear-title').textContent = isLastLevel ? 'ЛОКАЦИЯ ЗАЧИЩЕНА' : 'ЭТАЖ ПРОЙДЕН';
+        $('clear-stats').innerHTML = statBlock([
+          ['УБИТО', game.stats.killed],
+          ['МОНЕТ', game.player.coins],
+          ['ВРЕМЯ', formatTime(game.time)],
+          ['ЗДОРОВЬЕ', `${Math.ceil(game.player.health)} / ${game.player.maxHealth}`],
+        ]);
+        audio.playRole('explore');
+        show('clear');
+      }
+    }
+  }
+
+  if (game) renderGame(ctx, game, { weapon: game.player.melee });
+  requestAnimationFrame(frame);
 }
 
-/* ---------- intro ---------- */
-// The launch cinematic plays every time the game is opened; any tap skips it.
-function playIntro() {
-  const intro = $('intro');
-  intro.hidden = false;
-  let closed = false;
-  const finish = () => {
-    if (closed) return;
-    closed = true;
-    clearTimeout(timer);
-    intro.classList.add('skip');
-    setTimeout(() => { intro.hidden = true; intro.classList.remove('skip'); }, 420);
+/* ---------- screens: locations ---------- */
+function renderLocations() {
+  const list = $('location-list');
+  list.innerHTML = '';
+  LOCATIONS.forEach((location, index) => {
+    const locked = index + 1 > progress.unlocked;
+    const card = document.createElement('div');
+    card.className = `location-card${locked ? ' locked' : ''}`;
+    const levels = Array.from({ length: location.levels }, (_, level) => {
+      const done = level + 1 < (progress.maxLevel[index] || 1);
+      const current = level + 1 === (progress.maxLevel[index] || 1) && !locked;
+      const lockedLevel = locked || level + 1 > (progress.maxLevel[index] || 1);
+      const className = `level-pip${done ? ' done' : ''}${current ? ' current' : ''}${lockedLevel && !done ? ' locked' : ''}`;
+      return `<span class="${className}" data-loc="${index}" data-slot="${level}">${level + 1}</span>`;
+    }).join('');
+    card.innerHTML = `
+      <div class="name">${location.name}</div>
+      <div class="intro">${locked ? 'Закрыто. Пройди предыдущую заброшку.' : location.intro}</div>
+      <div class="levels">${levels}</div>`;
+    if (!locked) {
+      card.querySelectorAll('.level-pip').forEach((pip) => {
+        const slot = Number(pip.dataset.slot);
+        if (pip.classList.contains('locked')) return;
+        pip.addEventListener('click', (event) => {
+          event.stopPropagation();
+          audio.play('click', { volume: .5 });
+          startLevel(index, slot);
+        });
+      });
+    }
+    list.appendChild(card);
+  });
+}
+
+/* ---------- screens: shop ---------- */
+function openShop() {
+  renderShop();
+  show('shop');
+}
+
+function renderShop() {
+  $('shop-coins').textContent = progress.coins;
+  const grid = $('shop-grid');
+  grid.innerHTML = '';
+
+  const addItem = (item, { owned = false, equipped = false, onClick }) => {
+    const node = document.createElement('div');
+    node.className = `shop-item${equipped ? ' equipped' : ''}${owned ? ' owned' : ''}`;
+    node.innerHTML = `
+      <div class="item-name">${item.name}</div>
+      <div class="item-desc">${item.description}</div>
+      <button class="buy" ${progress.coins < item.price ? 'disabled' : ''}>${equipped ? 'В РУКАХ' : owned ? 'КУПЛЕНО' : `${item.price} М`}</button>`;
+    const button = node.querySelector('.buy');
+    button.addEventListener('click', () => {
+      if (progress.coins < item.price) return;
+      progress.coins -= item.price;
+      onClick();
+      audio.play('pickup', { volume: .5, rate: 1.1 });
+      saveProgress(progress);
+      renderShop();
+    });
+    grid.appendChild(node);
   };
-  const timer = setTimeout(finish, 3600);
-  intro.addEventListener('click', finish, { once: true });
-  $('intro-skip').addEventListener('click', finish, { once: true });
-  window.__cosmoSkipIntro = finish;
+
+  for (const item of SHOP_WEAPONS) {
+    const owned = (progress.weapons || []).includes(item.weapon);
+    const equipped = owned && (WEAPONS[item.weapon].kind === 'melee' ? progress.melee : progress.gun) === item.weapon;
+    addItem(item, {
+      owned,
+      equipped,
+      onClick: () => {
+        if (!owned) progress.weapons = [...(progress.weapons || []), item.weapon];
+        if (WEAPONS[item.weapon].kind === 'melee') progress.melee = item.weapon;
+        else progress.gun = item.weapon;
+      },
+    });
+  }
+  for (const item of SHOP_ITEMS) {
+    addItem(item, { onClick: () => { applyPurchase(game, item.id, progress); } });
+  }
 }
 
-/* ---------- wiring ---------- */
-$('start-button').addEventListener('click', () => { if (progress.tutorialSeen) { renderFlight(); showMode('flight'); } else showMode('tutorial'); });
-$('help-button').addEventListener('click', () => showMode('tutorial'));
-$('tutorial-close').addEventListener('click', () => showMode('home'));
-$('tutorial-start').addEventListener('click', () => { progress.tutorialSeen = true; save(); renderFlight(); showMode('flight'); });
-$('hangar-button').addEventListener('click', () => { hubTab = 'upgrades'; renderHub(); showMode('hub'); });
-$('shop-button').addEventListener('click', () => { hubTab = 'shop'; renderHub(); showMode('hub'); });
-$('missions-button').addEventListener('click', () => { hubTab = 'missions'; renderHub(); showMode('hub'); });
-$('hub-close').addEventListener('click', () => showMode('home'));
-for (const button of document.querySelectorAll('[data-hub-tab]')) button.addEventListener('click', () => { hubTab = button.dataset.hubTab; renderHub(); });
-$('flight-close').addEventListener('click', () => showMode('home'));
-$('mode-campaign').addEventListener('click', () => { planned.mode = 'campaign'; renderFlight(); });
-$('mode-endless').addEventListener('click', () => { planned.mode = 'endless'; renderFlight(); });
-$('launch-button').addEventListener('click', startGame);
-$('case-close').addEventListener('click', () => { screens.case.hidden = true; });
-$('import-cancel').addEventListener('click', () => { pendingRestore = null; screens.import.hidden = true; });
-$('import-confirm').addEventListener('click', () => {
-  if (pendingRestore) { progress = pendingRestore; save(); soundUI(); renderHub(); hubMessage('Прогресс восстановлен из кода.'); }
-  pendingRestore = null; screens.import.hidden = true;
-});
-$('pause-button').addEventListener('click', pauseGame);
-$('resume-button').addEventListener('click', resumeGame);
-$('end-button').addEventListener('click', finishGame);
-$('retry-button').addEventListener('click', () => { renderFlight(); showMode('flight'); });
-$('menu-button').addEventListener('click', returnHome);
-// Mobile browsers do not always synthesize a click for a second finger: activate on touch/pen down.
-$('pulse-button').addEventListener('pointerdown', (event) => { if (event.pointerType !== 'mouse') { event.preventDefault(); activateWave(); } });
-$('pulse-button').addEventListener('click', activateWave);
-for (const button of sounds) button.addEventListener('click', () => { progress.sound = !progress.sound; audio.setEnabled(progress.sound); save(); soundUI(); if (progress.sound) audio.play('ui'); });
-for (const button of musicButtons) button.addEventListener('click', () => {
-  progress.music = !progress.music; audio.setMusicEnabled(progress.music); save(); soundUI();
-  if (progress.music && mode === 'playing') { audio.unlock(); audio.startMusic(); }
-});
-for (const button of document.querySelectorAll('.button, .home-nav button, .card-buy, .mode-tabs button, .hub-tabs button, .sector-card, .biome-row, .level-card')) {
-  button.addEventListener('click', () => audio.play('ui'));
+/* ---------- screens: tutorial ---------- */
+let tutorialStep = 0;
+function renderTutorial() {
+  const step = TUTORIAL[Math.min(tutorialStep, TUTORIAL.length - 1)];
+  $('tutorial-text').textContent = step.text;
+  $('tutorial-title').textContent = `ОБУЧЕНИЕ ${tutorialStep + 1} / ${TUTORIAL.length}`;
+  $('btn-tutorial-next').textContent = tutorialStep >= TUTORIAL.length - 1 ? 'ПОНЯТНО' : 'ДАЛЬШЕ';
+  drawTutorialArt(step.key);
 }
-for (const button of document.querySelectorAll('.card-buy')) button.addEventListener('click', () => audio.play('buy'));
 
-canvas.addEventListener('pointerdown', (event) => {
-  if (mode !== 'playing' || dragging || event.clientX > viewportWidth * .72) return;
-  event.preventDefault();
-  dragging = { id: event.pointerId, x: event.clientX, y: event.clientY, targetX: game.player.targetX, targetY: game.player.targetY };
-  try { canvas.setPointerCapture(event.pointerId); } catch { /* The drag still works within the canvas. */ }
-  updateHUD();
-});
-canvas.addEventListener('pointermove', (event) => {
-  if (mode !== 'playing' || !dragging || event.pointerId !== dragging.id) return;
-  event.preventDefault();
-  setTarget(game, dragging.targetX + (event.clientX - dragging.x) / worldScale, dragging.targetY + (event.clientY - dragging.y) / worldScale);
-});
-function stopDragging(event) {
-  if (!dragging || event.pointerId !== dragging.id) return;
-  dragging = null;
-  try { if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId); } catch { /* Already released. */ }
+function drawTutorialArt(key) {
+  const art = $('tutorial-canvas');
+  const g = art.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.clearRect(0, 0, art.width, art.height);
+  g.fillStyle = '#14161d';
+  g.fillRect(0, 0, art.width, art.height);
+  // floor
+  for (let y = 74; y < art.height; y += 8) {
+    for (let x = 0; x < art.width; x += 8) {
+      g.fillStyle = ((x / 8 + y / 8) % 2 === 0) ? '#242832' : '#1e212a';
+      g.fillRect(x, y, 8, 8);
+    }
+  }
+  g.fillStyle = '#3b3f4b';
+  g.fillRect(0, 66, art.width, 8);
+
+  const hero = (x, y, extra) => {
+    g.fillStyle = '#f0c090'; g.fillRect(x - 4, y - 20, 8, 7);
+    g.fillStyle = '#2f6f4f'; g.fillRect(x - 5, y - 13, 10, 11);
+    g.fillStyle = '#26313f'; g.fillRect(x - 5, y - 2, 4, 6); g.fillRect(x + 1, y - 2, 4, 6);
+    if (extra) extra();
+  };
+
+  if (key === 'move') {
+    hero(110, 96);
+    g.fillStyle = '#ffb347';
+    for (let i = 0; i < 5; i += 1) g.fillRect(140 + i * 12, 92, 8, 3);
+    g.fillRect(196, 86, 4, 15); g.fillRect(190, 92, 16, 4);
+    const stick = $('stick');
+    void stick;
+  } else if (key === 'melee') {
+    hero(100, 96, () => {
+      g.save();
+      g.translate(112, 78); g.rotate(-.5);
+      g.fillStyle = '#c9c9d4'; g.fillRect(0, 0, 34, 4);
+      g.fillStyle = '#8a8a99'; g.fillRect(0, 4, 6, 4);
+      g.restore();
+    });
+    g.fillStyle = '#6f8f5a'; g.fillRect(160, 76, 12, 22);
+    g.fillStyle = '#3f5c38'; g.fillRect(160, 88, 12, 10);
+    g.fillStyle = '#ff6b5a';
+    for (let i = 0; i < 6; i += 1) g.fillRect(178 + i * 6, 74 + (i % 2) * 10, 4, 4);
+  } else if (key === 'shoot') {
+    hero(90, 96, () => {
+      g.fillStyle = '#4a4a58'; g.fillRect(104, 80, 16, 5);
+    });
+    g.fillStyle = '#ffd166';
+    for (let i = 0; i < 5; i += 1) g.fillRect(130 + i * 18, 82, 8, 3);
+    g.fillStyle = '#d8d3c2'; g.fillRect(230, 74, 12, 24);
+    g.fillStyle = '#8a8676'; g.fillRect(230, 86, 12, 12);
+  } else if (key === 'keys') {
+    g.fillStyle = '#7a5a3a'; g.fillRect(120, 76, 30, 22);
+    g.fillStyle = '#5d432b'; g.fillRect(120, 76, 30, 4); g.fillRect(120, 92, 30, 6);
+    g.fillStyle = '#ffe9b0';
+    g.fillRect(196, 84, 14, 4); g.fillRect(206, 78, 4, 6); g.fillRect(206, 88, 4, 5);
+    hero(70, 98);
+  } else if (key === 'light') {
+    g.fillStyle = '#0a0b10'; g.fillRect(0, 66, art.width, 54);
+    const gradient = g.createRadialGradient(150, 88, 6, 150, 88, 92);
+    gradient.addColorStop(0, 'rgba(255,190,110,.55)');
+    gradient.addColorStop(1, 'rgba(255,190,110,0)');
+    g.fillStyle = gradient; g.fillRect(0, 60, art.width, 60);
+    hero(140, 96);
+    g.fillStyle = '#ffb347'; g.fillRect(206, 84, 4, 10); g.fillStyle = '#ff7b3a'; g.fillRect(204, 78, 8, 8);
+    g.fillStyle = '#0a0b10'; g.fillRect(240, 70, 60, 50);
+  }
 }
-canvas.addEventListener('pointerup', stopDragging);
-canvas.addEventListener('pointercancel', stopDragging);
-canvas.addEventListener('lostpointercapture', stopDragging);
-window.addEventListener('keydown', (event) => {
-  if (event.code === 'Escape' || event.code === 'Backspace') { if (!event.repeat) window.__cosmoBack(); event.preventDefault(); return; }
-  if (mode !== 'playing') return;
-  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) { keys.add(event.code); event.preventDefault(); }
-  if (event.code === 'Space') { if (!event.repeat) activateWave(); event.preventDefault(); }
-});
-window.addEventListener('keyup', (event) => keys.delete(event.code));
-window.addEventListener('resize', resize);
-portraitQuery.addEventListener('change', (event) => { if (event.matches && mode === 'playing') pauseGame(); });
-window.addEventListener('blur', () => { if (mode === 'playing') pauseGame(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden && mode === 'playing') pauseGame(); });
-window.addEventListener('cosmopilot:background', () => { if (mode === 'playing') pauseGame(); else audio.suspend(); });
-// A tiny read-only hook so automated UI tests can inspect and drive the running game.
-window.__kosmopilot = {
+
+/* ---------- settings ---------- */
+function bindSettings() {
+  const settings = progress.settings;
+  const map = {
+    'set-sound': 'sound', 'set-music': 'music', 'set-shake': 'shake',
+    'set-hints': 'hints', 'set-minimap': 'minimap',
+  };
+  for (const [id, key] of Object.entries(map)) {
+    const node = $(id);
+    node.checked = !!settings[key];
+    node.addEventListener('change', () => {
+      settings[key] = node.checked;
+      audio.configure(settings);
+      if (key === 'music' && node.checked) audio.playRole(lastMusicRole || 'explore');
+      if (key === 'minimap') minimap.classList.toggle('hidden', !node.checked || screenName !== 'game');
+      saveProgress(progress);
+    });
+  }
+  const volume = $('set-volume');
+  volume.value = Math.round(settings.volume * 100);
+  volume.addEventListener('input', () => {
+    settings.volume = Number(volume.value) / 100;
+    audio.configure(settings);
+    saveProgress(progress);
+  });
+  const stickSize = $('set-stick');
+  stickSize.value = Math.round((settings.stickSize || 1) * 100);
+  stickSize.addEventListener('input', () => {
+    settings.stickSize = Number(stickSize.value) / 100;
+    document.documentElement.style.setProperty('--ui-scale', String(settings.stickSize));
+    saveProgress(progress);
+  });
+  $('btn-wipe').addEventListener('click', () => {
+    progress = wipeProgress();
+    audio.configure(progress.settings);
+    bindSettings();
+    toast('ПРОГРЕСС СТЁРТ');
+  });
+}
+
+/* ---------- credits ---------- */
+async function renderCredits() {
+  const list = $('credits-list');
+  list.innerHTML = '<li>Загружаю список…</li>';
+  try {
+    const response = await fetch('./audio/manifest.json');
+    const data = await response.json();
+    const groups = new Map();
+    for (const entry of data.sfx || []) {
+      if (!groups.has(entry.pack)) groups.set(entry.pack, { title: entry.pack, license: entry.license, source: entry.source, count: 0 });
+      groups.get(entry.pack).count += 1;
+    }
+    const items = [...groups.values()].sort((a, b) => b.count - a.count)
+      .map((group) => `<li><b>${group.title}</b> — ${group.count} звуков, ${group.license}. ${group.source}</li>`);
+    items.push(`<li><b>FreePD</b> — ${(data.music || []).length} музыкальных треков, CC0 1.0. github.com/SoundSafari/CC0-1.0-Music</li>`);
+    list.innerHTML = items.join('');
+  } catch {
+    list.innerHTML = '<li>Не удалось прочитать список файлов.</li>';
+  }
+}
+
+/* ---------- buttons ---------- */
+function bindUi() {
+  document.querySelectorAll('[data-go]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const go = button.dataset.go;
+      audio.unlock();
+      audio.play('click', { volume: .5 });
+      if (go === 'new') {
+        progress = { ...defaultSave(), settings: progress.settings, stats: progress.stats };
+        progress.tutorialSeen = true;
+        saveProgress(progress);
+        startLevel(0, 0, { freshRun: true });
+      } else if (go === 'continue') {
+        startLevel(progress.location || 0, Math.max(0, (progress.level || 1) - 1));
+      } else if (go === 'locations') { renderLocations(); show('locations'); }
+      else if (go === 'tutorial') { tutorialStep = 0; renderTutorial(); show('tutorial'); }
+      else if (go === 'settings') show('settings');
+      else if (go === 'credits') { renderCredits(); show('credits'); }
+      else if (go === 'back') show(screenBeforeSettings === 'settings' ? 'title' : screenBeforeSettings || 'title');
+      else if (go === 'title') { game = null; show('title'); refreshTitle(); }
+    });
+  });
+
+  $('btn-tutorial-next').addEventListener('click', () => {
+    audio.play('click', { volume: .5 });
+    if (tutorialStep >= TUTORIAL.length - 1) {
+      progress.tutorialSeen = true;
+      saveProgress(progress);
+      show('title');
+    } else {
+      tutorialStep += 1;
+      renderTutorial();
+    }
+  });
+
+  $('btn-pause').addEventListener('click', () => {
+    audio.play('click', { volume: .5 });
+    paused = true;
+    controls.release();
+    show('pause');
+  });
+  $('btn-resume').addEventListener('click', () => {
+    audio.play('click', { volume: .5 });
+    paused = false;
+    show('game');
+  });
+  $('btn-quit').addEventListener('click', () => {
+    game = null;
+    show('title');
+    refreshTitle();
+  });
+  $('btn-restart-level').addEventListener('click', () => {
+    paused = false;
+    startLevel(run.locationIndex, run.slot);
+  });
+  $('btn-retry').addEventListener('click', () => { startLevel(run.locationIndex, run.slot); });
+  $('btn-clear-next').addEventListener('click', () => { audio.play('click', { volume: .5 }); advanceAfterClear(); });
+  $('btn-shop-next').addEventListener('click', () => { audio.play('click', { volume: .5 }); nextLevel(); });
+}
+
+function refreshTitle() {
+  const hasProgress = (progress.level || 1) > 1 || (progress.location || 0) > 0 || progress.coins > 0;
+  $('btn-continue').disabled = !hasProgress;
+  $('title-hint').textContent = hasProgress
+    ? `Прогресс: ${LOCATIONS[progress.location || 0].short} · этаж ${progress.level || 1} · монет ${progress.coins}`
+    : 'Управление: джойстик слева, кнопки справа';
+}
+
+/* ---------- boot ---------- */
+function resizeAll() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  resize(canvas, ctx, width, height);
+}
+
+function boot() {
+  resizeAll();
+  window.addEventListener('resize', resizeAll);
+  window.addEventListener('orientationchange', () => setTimeout(resizeAll, 120));
+
+  controls.attach({
+    stick: $('stick'),
+    buttons: [...document.querySelectorAll('[data-action]')],
+  });
+  controls.onFirstInput = () => {
+    audio.unlock();
+    audio.configure(progress.settings);
+    audio.playRole(screenName === 'game' ? (lastMusicRole || 'explore') : 'explore');
+  };
+
+  document.documentElement.style.setProperty('--ui-scale', String(progress.settings.stickSize || 1));
+  audio.settings = { ...audio.settings, ...progress.settings };
+
+  bindSettings();
+  bindUi();
+  refreshTitle();
+  show('title');
+  if (!progress.tutorialSeen) {
+    tutorialStep = 0;
+    renderTutorial();
+    show('tutorial');
+  }
+
+  // Кнопка «назад» на телефоне и уход в фон.
+  window.__zabroshkaBack = () => {
+    if (screenName === 'game') {
+      paused = true;
+      controls.release();
+      show('pause');
+      return true;
+    }
+    if (screenName !== 'title') {
+      show('title');
+      refreshTitle();
+      return true;
+    }
+    return false;
+  };
+  window.addEventListener('zabroshka:background', () => {
+    audio.suspend();
+    if (screenName === 'game') {
+      paused = true;
+      controls.release();
+      show('pause');
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      audio.suspend();
+      if (screenName === 'game') { paused = true; show('pause'); }
+    } else {
+      audio.resume();
+    }
+  });
+
+  requestAnimationFrame(frame);
+}
+
+/* Хуки для автотестов. */
+window.__zabroshka = {
   get game() { return game; },
-  get mode() { return mode; },
+  get progress() { return progress; },
+  get screen() { return screenName; },
+  get frames() { return frames; },
+  get audio() { return audio; },
+  get controls() { return controls; },
+  startLevel,
+  show,
+  openShop,
+  setProgress(next) { progress = { ...progress, ...next }; saveProgress(progress); },
+  toast,
 };
-window.__cosmoBack = () => {
-  if (!$('intro').hidden) { window.__cosmoSkipIntro?.(); return true; }
-  if (!screens.case.hidden) { screens.case.hidden = true; return true; }
-  if (!screens.import.hidden) { pendingRestore = null; screens.import.hidden = true; return true; }
-  if (mode === 'playing') { pauseGame(); return true; }
-  if (mode === 'pause') { resumeGame(); return true; }
-  if (mode === 'tutorial') { showMode('home'); return true; }
-  if (['result', 'flight', 'hub'].includes(mode)) { returnHome(); return true; }
-  return false;
-};
-for (const biome of BIOMES) {
-  const image = biomeImage(biome.image);
-  if (image) image.addEventListener('load', () => { if (game) renderGame(ctx, game, backgroundFor(game)); });
-}
-soundUI(); showMode('home'); resize(); playIntro();
+
+boot();
