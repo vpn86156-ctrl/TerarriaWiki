@@ -1,6 +1,5 @@
 node_modules/
 .local/
-.android-signing/
 build/
 dist/
 artifacts/
