@@ -1,13 +1,38 @@
 {
+ "boss-caretaker": {
+  "file": "boss-caretaker.png",
+  "fill": 0.438,
+  "size": 64
+ },
+ "boss-foreman": {
+  "file": "boss-foreman.png",
+  "fill": 0.466,
+  "size": 64
+ },
+ "boss-surgeon": {
+  "file": "boss-surgeon.png",
+  "fill": 0.323,
+  "size": 64
+ },
  "door-basement": {
   "file": "door-basement.png",
   "fill": 0.781,
+  "size": 16
+ },
+ "door-factory": {
+  "file": "door-factory.png",
+  "fill": 1.0,
   "size": 16
  },
  "door-hospital": {
   "file": "door-hospital.png",
   "fill": 0.625,
   "size": 16
+ },
+ "enemy-nurse": {
+  "file": "enemy-nurse.png",
+  "fill": 0.323,
+  "size": 24
  },
  "enemy-rat": {
   "file": "enemy-rat.png",
@@ -31,6 +56,11 @@
  },
  "exit-basement": {
   "file": "exit-basement.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "exit-factory": {
+  "file": "exit-factory.png",
   "fill": 1.0,
   "size": 16
  },
@@ -119,9 +149,24 @@
   "fill": 0.245,
   "size": 24
  },
+ "prop-barrel": {
+  "file": "prop-barrel.png",
+  "fill": 0.543,
+  "size": 24
+ },
+ "prop-crate": {
+  "file": "prop-crate.png",
+  "fill": 0.627,
+  "size": 24
+ },
  "wall-basement": {
   "file": "wall-basement.png",
   "fill": 1.0,
+  "size": 16
+ },
+ "wall-factory": {
+  "file": "wall-factory.png",
+  "fill": 0.629,
   "size": 16
  },
  "wall-hospital": {
@@ -132,6 +177,11 @@
  "wall-top-basement": {
   "file": "wall-top-basement.png",
   "fill": 0.367,
+  "size": 16
+ },
+ "wall-top-factory": {
+  "file": "wall-top-factory.png",
+  "fill": 0.746,
   "size": 16
  },
  "wall-top-hospital": {
