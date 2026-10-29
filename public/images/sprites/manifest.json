@@ -9,6 +9,26 @@
   "fill": 0.625,
   "size": 16
  },
+ "enemy-rat": {
+  "file": "enemy-rat.png",
+  "fill": 0.469,
+  "size": 24
+ },
+ "enemy-skeleton": {
+  "file": "enemy-skeleton.png",
+  "fill": 0.387,
+  "size": 24
+ },
+ "enemy-worker": {
+  "file": "enemy-worker.png",
+  "fill": 0.406,
+  "size": 24
+ },
+ "enemy-zombie": {
+  "file": "enemy-zombie.png",
+  "fill": 0.366,
+  "size": 24
+ },
  "exit-basement": {
   "file": "exit-basement.png",
   "fill": 1.0,
@@ -39,6 +59,26 @@
   "fill": 1.0,
   "size": 16
  },
+ "floor-factory-0": {
+  "file": "floor-factory-0.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-factory-1": {
+  "file": "floor-factory-1.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-factory-2": {
+  "file": "floor-factory-2.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-factory-3": {
+  "file": "floor-factory-3.png",
+  "fill": 1.0,
+  "size": 16
+ },
  "floor-hospital-0": {
   "file": "floor-hospital-0.png",
   "fill": 1.0,
@@ -58,6 +98,26 @@
   "file": "floor-hospital-3.png",
   "fill": 1.0,
   "size": 16
+ },
+ "hero-down": {
+  "file": "hero-down.png",
+  "fill": 0.278,
+  "size": 24
+ },
+ "hero-left": {
+  "file": "hero-left.png",
+  "fill": 0.273,
+  "size": 24
+ },
+ "hero-right": {
+  "file": "hero-right.png",
+  "fill": 0.323,
+  "size": 24
+ },
+ "hero-up": {
+  "file": "hero-up.png",
+  "fill": 0.245,
+  "size": 24
  },
  "wall-basement": {
   "file": "wall-basement.png",
