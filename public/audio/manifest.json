@@ -1,6 +1,6 @@
 {
  "generated": "2026-10-29",
- "note": "685 звуков CC0 и 40 музыкальных треков CC0.",
+ "note": "685 звуков CC0 и 54 музыкальных треков CC0.",
  "sfx": [
   {
    "file": "ambient-01.ogg",
@@ -6170,18 +6170,18 @@
  ],
  "music": [
   {
-   "file": "boss-01.mp3",
+   "file": "boss-01.ogg",
    "role": "boss",
    "title": "Epic Boss Battle",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "boss-02.mp3",
+   "file": "boss-02.ogg",
    "role": "boss",
    "title": "The Enemy",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
    "file": "boss-20.ogg",
@@ -6240,60 +6240,60 @@
    "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
   },
   {
-   "file": "explore-01.mp3",
+   "file": "explore-01.ogg",
    "role": "explore",
    "title": "Dark Hallway",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "explore-02.mp3",
+   "file": "explore-02.ogg",
    "role": "explore",
    "title": "Deep Tones",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "explore-03.mp3",
+   "file": "explore-03.ogg",
    "role": "explore",
    "title": "Horror Suspense",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "explore-04.mp3",
+   "file": "explore-04.ogg",
    "role": "explore",
    "title": "Attic Secrets",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "explore-05.mp3",
+   "file": "explore-05.ogg",
    "role": "explore",
    "title": "Mysterious Lights",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "explore-06.mp3",
+   "file": "explore-06.ogg",
    "role": "explore",
    "title": "Footsteps in the Attic",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "explore-07.mp3",
+   "file": "explore-07.ogg",
    "role": "explore",
    "title": "Painful Disorientation",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "explore-08.mp3",
+   "file": "explore-08.ogg",
    "role": "explore",
    "title": "Ancient Rite",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
    "file": "explore-20.ogg",
@@ -6352,46 +6352,102 @@
    "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
   },
   {
-   "file": "fight-01.mp3",
+   "file": "explore-30.ogg",
+   "role": "explore",
+   "title": "Тихий этаж",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-31.ogg",
+   "role": "explore",
+   "title": "Пыльный проход",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-32.ogg",
+   "role": "explore",
+   "title": "Скрип железа",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-33.ogg",
+   "role": "explore",
+   "title": "Холодная вода",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-34.ogg",
+   "role": "explore",
+   "title": "Ожидание в темноте",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-35.ogg",
+   "role": "explore",
+   "title": "Свет фонаря",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-36.ogg",
+   "role": "explore",
+   "title": "Пустая комната",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-37.ogg",
+   "role": "explore",
+   "title": "Шорох за спиной",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-01.ogg",
    "role": "fight",
    "title": "Night Attack",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "fight-02.mp3",
+   "file": "fight-02.ogg",
    "role": "fight",
    "title": "Battle Ready",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "fight-03.mp3",
+   "file": "fight-03.ogg",
    "role": "fight",
    "title": "Beginning of Conflict",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "fight-04.mp3",
+   "file": "fight-04.ogg",
    "role": "fight",
    "title": "Find Them",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "fight-05.mp3",
+   "file": "fight-05.ogg",
    "role": "fight",
    "title": "Satin Danger",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
-   "file": "fight-06.mp3",
+   "file": "fight-06.ogg",
    "role": "fight",
    "title": "Hit n Smash",
    "license": "CC0 1.0",
-   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music"
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
   },
   {
    "file": "fight-20.ogg",
@@ -6446,6 +6502,48 @@
    "file": "fight-27.ogg",
    "role": "fight",
    "title": "Железо и кровь",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-30.ogg",
+   "role": "fight",
+   "title": "Коридорная схватка",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-31.ogg",
+   "role": "fight",
+   "title": "На звук выстрела",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-32.ogg",
+   "role": "fight",
+   "title": "Отблеск пламени",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-33.ogg",
+   "role": "fight",
+   "title": "Узкий проём",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-34.ogg",
+   "role": "fight",
+   "title": "Железный лязг",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-35.ogg",
+   "role": "fight",
+   "title": "Не отступать",
    "license": "CC0 1.0 (процедурная генерация)",
    "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
   }
