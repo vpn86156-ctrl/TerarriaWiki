@@ -80,13 +80,14 @@ function spriteTile(name, painter, palette = null) {
   return canvas;
 }
 // Чем разбавлен пол каждой локации: пятна, мусор, трещины.
+// Декорации пола нарезаны из листов по шесть штук (decal-<локация>-0..5).
 export const FLOOR_DECALS = {
-  basement: ['decal-puddle-basement', 'decal-rubble-basement', 'decal-crack-basement',
-    'decal-moss-basement', 'decal-blood-basement', 'decal-planks-basement'],
-  hospital: ['decal-blood-hospital', 'decal-puddle-hospital', 'decal-glass-hospital',
-    'decal-theatre-hospital', 'decal-peel-hospital', 'decal-vent-hospital'],
-  factory: ['decal-oil-factory', 'decal-scrap-factory', 'decal-rebar-factory',
-    'decal-hazard-factory', 'decal-ember-factory', 'decal-conveyor-factory'],
+  basement: ['decal-basement-0', 'decal-basement-1', 'decal-basement-2',
+    'decal-basement-3', 'decal-basement-4', 'decal-basement-5'],
+  hospital: ['decal-hospital-0', 'decal-hospital-1', 'decal-hospital-2',
+    'decal-hospital-3', 'decal-hospital-4', 'decal-hospital-5'],
+  factory: ['decal-factory-0', 'decal-factory-1', 'decal-factory-2',
+    'decal-factory-3', 'decal-factory-4', 'decal-factory-5'],
 };
 
 export function resize(canvas, ctx, width, height) {
