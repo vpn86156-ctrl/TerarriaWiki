@@ -1,0 +1,6551 @@
+{
+ "generated": "2026-10-29",
+ "note": "685 звуков CC0 и 54 музыкальных треков CC0.",
+ "sfx": [
+  {
+   "file": "ambient-01.ogg",
+   "group": "ambient",
+   "title": "water flowing",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 1.883,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-02.ogg",
+   "group": "ambient",
+   "title": "water boiling",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 4.492,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-03.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 loop water 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 6.367,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-04.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 loop water 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 8.734,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-05.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 loop water 03",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 9.707,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-06.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 misc 07",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.178,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-07.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 door 04",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.201,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-08.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 metal hit 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.21,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-09.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 hit 03",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.224,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-10.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 switch 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.227,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-11.ogg",
+   "group": "ambient",
+   "title": "machine 01",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.554,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-12.ogg",
+   "group": "ambient",
+   "title": "machine 02",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.526,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-13.ogg",
+   "group": "ambient",
+   "title": "machine 03",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.462,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-14.ogg",
+   "group": "ambient",
+   "title": "human 01",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.623,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-15.ogg",
+   "group": "ambient",
+   "title": "human 02",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.75,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-16.ogg",
+   "group": "ambient",
+   "title": "human 03",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.772,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-17.ogg",
+   "group": "ambient",
+   "title": "human 04",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.657,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-18.ogg",
+   "group": "ambient",
+   "title": "human 05",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.623,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-19.ogg",
+   "group": "ambient",
+   "title": "human 06",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.75,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-20.ogg",
+   "group": "ambient",
+   "title": "human 07",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.772,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-21.ogg",
+   "group": "ambient",
+   "title": "human 08",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.657,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-22.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 loop ambient 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 2.998,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-23.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 loop ambient 03",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 3.511,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-24.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 loop machine 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 7.558,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-25.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 loop machine 03",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 1.839,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-26.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 loop machine 04",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 4.576,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-27.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 loop water 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 6.367,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-28.ogg",
+   "group": "ambient",
+   "title": "sfx100v2 loop water 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 8.734,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-29.ogg",
+   "group": "ambient",
+   "title": "ambient 01",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 8.234,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-30.ogg",
+   "group": "ambient",
+   "title": "ambient 02",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 3.17,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-31.ogg",
+   "group": "ambient",
+   "title": "ambient 03",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 7.042,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-32.ogg",
+   "group": "ambient",
+   "title": "machine 01",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 1.196,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-33.ogg",
+   "group": "ambient",
+   "title": "machine 02",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 0.629,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-34.ogg",
+   "group": "ambient",
+   "title": "machine 03",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 0.787,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-35.ogg",
+   "group": "ambient",
+   "title": "machine 04",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 0.625,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-36.ogg",
+   "group": "ambient",
+   "title": "machine 05",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 1.19,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-37.ogg",
+   "group": "ambient",
+   "title": "machine 06",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 3.171,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-38.ogg",
+   "group": "ambient",
+   "title": "machine 07",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 1.35,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-39.ogg",
+   "group": "ambient",
+   "title": "machine 08",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 4.525,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-40.ogg",
+   "group": "ambient",
+   "title": "machine 09",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 2.705,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-41.ogg",
+   "group": "ambient",
+   "title": "machine 10",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 1.346,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-42.ogg",
+   "group": "ambient",
+   "title": "machine 11",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 5.672,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-43.ogg",
+   "group": "ambient",
+   "title": "water boiling",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 4.492,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-44.ogg",
+   "group": "ambient",
+   "title": "water flowing",
+   "pack": "oga-rubberduck-loops-30",
+   "duration": 1.883,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-45.ogg",
+   "group": "ambient",
+   "title": "loop ambient 01",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 6.224,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-46.ogg",
+   "group": "ambient",
+   "title": "loop ambient weird",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 3.202,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-47.ogg",
+   "group": "ambient",
+   "title": "loop machine 01",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 3.114,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-48.ogg",
+   "group": "ambient",
+   "title": "loop machine 02",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 3.201,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-49.ogg",
+   "group": "ambient",
+   "title": "loop machine 03",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 4.663,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-50.ogg",
+   "group": "ambient",
+   "title": "loop bubbles 02",
+   "pack": "oga-rubberduck-water-40",
+   "duration": 7.334,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-51.ogg",
+   "group": "ambient",
+   "title": "loop bubbles 1",
+   "pack": "oga-rubberduck-water-40",
+   "duration": 4.407,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-52.ogg",
+   "group": "ambient",
+   "title": "loop rain",
+   "pack": "oga-rubberduck-water-40",
+   "duration": 6.827,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-53.ogg",
+   "group": "ambient",
+   "title": "loop water 01",
+   "pack": "oga-rubberduck-water-40",
+   "duration": 3.38,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-54.ogg",
+   "group": "ambient",
+   "title": "loop water 02",
+   "pack": "oga-rubberduck-water-40",
+   "duration": 7.014,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "ambient-55.ogg",
+   "group": "ambient",
+   "title": "loop water 03",
+   "pack": "oga-rubberduck-water-40",
+   "duration": 3.541,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-01.ogg",
+   "group": "boom",
+   "title": "explosion",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.562,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-02.ogg",
+   "group": "boom",
+   "title": "explosionCrunch 000",
+   "pack": "sci-fi-sounds",
+   "duration": 0.777,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-03.ogg",
+   "group": "boom",
+   "title": "lowFrequency explosion 001",
+   "pack": "sci-fi-sounds",
+   "duration": 1.0,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-04.ogg",
+   "group": "boom",
+   "title": "retro explosion",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 1.003,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-05.ogg",
+   "group": "boom",
+   "title": "explosion 02",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 1.229,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-06.ogg",
+   "group": "boom",
+   "title": "explosionCrunch 002",
+   "pack": "sci-fi-sounds",
+   "duration": 1.256,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-07.ogg",
+   "group": "boom",
+   "title": "explosionCrunch 001",
+   "pack": "sci-fi-sounds",
+   "duration": 1.357,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-08.ogg",
+   "group": "boom",
+   "title": "explosionCrunch 003",
+   "pack": "sci-fi-sounds",
+   "duration": 1.553,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-09.ogg",
+   "group": "boom",
+   "title": "explosion 01",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 1.84,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-10.ogg",
+   "group": "boom",
+   "title": "explosionCrunch 004",
+   "pack": "sci-fi-sounds",
+   "duration": 1.98,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-11.ogg",
+   "group": "boom",
+   "title": "explosion",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.562,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-12.ogg",
+   "group": "boom",
+   "title": "explosion 01",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 1.84,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-13.ogg",
+   "group": "boom",
+   "title": "explosion 02",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 1.229,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-14.ogg",
+   "group": "boom",
+   "title": "retro explosion",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 1.003,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-15.ogg",
+   "group": "boom",
+   "title": "explosionCrunch 000",
+   "pack": "sci-fi-sounds",
+   "duration": 0.777,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-16.ogg",
+   "group": "boom",
+   "title": "explosionCrunch 001",
+   "pack": "sci-fi-sounds",
+   "duration": 1.357,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-17.ogg",
+   "group": "boom",
+   "title": "explosionCrunch 002",
+   "pack": "sci-fi-sounds",
+   "duration": 1.256,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-18.ogg",
+   "group": "boom",
+   "title": "explosionCrunch 003",
+   "pack": "sci-fi-sounds",
+   "duration": 1.553,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-19.ogg",
+   "group": "boom",
+   "title": "explosionCrunch 004",
+   "pack": "sci-fi-sounds",
+   "duration": 1.98,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-20.ogg",
+   "group": "boom",
+   "title": "lowFrequency explosion 000",
+   "pack": "sci-fi-sounds",
+   "duration": 2.0,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "boom-21.ogg",
+   "group": "boom",
+   "title": "lowFrequency explosion 001",
+   "pack": "sci-fi-sounds",
+   "duration": 1.0,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-01.ogg",
+   "group": "click",
+   "title": "switch13",
+   "pack": "ui-audio",
+   "duration": 0.028,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-02.ogg",
+   "group": "click",
+   "title": "click5",
+   "pack": "ui-audio",
+   "duration": 0.032,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-03.ogg",
+   "group": "click",
+   "title": "switch14",
+   "pack": "ui-audio",
+   "duration": 0.033,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-04.ogg",
+   "group": "click",
+   "title": "click4",
+   "pack": "ui-audio",
+   "duration": 0.037,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-05.ogg",
+   "group": "click",
+   "title": "select 001",
+   "pack": "interface-sounds",
+   "duration": 0.043,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-06.ogg",
+   "group": "click",
+   "title": "select 002",
+   "pack": "interface-sounds",
+   "duration": 0.043,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-07.ogg",
+   "group": "click",
+   "title": "select 007",
+   "pack": "interface-sounds",
+   "duration": 0.047,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-08.ogg",
+   "group": "click",
+   "title": "select 008",
+   "pack": "interface-sounds",
+   "duration": 0.047,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-09.ogg",
+   "group": "click",
+   "title": "switch12",
+   "pack": "ui-audio",
+   "duration": 0.054,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-10.ogg",
+   "group": "click",
+   "title": "click2",
+   "pack": "ui-audio",
+   "duration": 0.056,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-11.ogg",
+   "group": "click",
+   "title": "click 001",
+   "pack": "interface-sounds",
+   "duration": 0.1,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-12.ogg",
+   "group": "click",
+   "title": "click 002",
+   "pack": "interface-sounds",
+   "duration": 0.01,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-13.ogg",
+   "group": "click",
+   "title": "click 003",
+   "pack": "interface-sounds",
+   "duration": 0.01,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-14.ogg",
+   "group": "click",
+   "title": "click 004",
+   "pack": "interface-sounds",
+   "duration": 0.01,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-15.ogg",
+   "group": "click",
+   "title": "click 005",
+   "pack": "interface-sounds",
+   "duration": 0.01,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-16.ogg",
+   "group": "click",
+   "title": "confirmation 001",
+   "pack": "interface-sounds",
+   "duration": 0.29,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-17.ogg",
+   "group": "click",
+   "title": "confirmation 002",
+   "pack": "interface-sounds",
+   "duration": 0.539,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-18.ogg",
+   "group": "click",
+   "title": "confirmation 003",
+   "pack": "interface-sounds",
+   "duration": 0.322,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-19.ogg",
+   "group": "click",
+   "title": "confirmation 004",
+   "pack": "interface-sounds",
+   "duration": 0.49,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-20.ogg",
+   "group": "click",
+   "title": "select 001",
+   "pack": "interface-sounds",
+   "duration": 0.043,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-21.ogg",
+   "group": "click",
+   "title": "select 002",
+   "pack": "interface-sounds",
+   "duration": 0.043,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-22.ogg",
+   "group": "click",
+   "title": "select 003",
+   "pack": "interface-sounds",
+   "duration": 0.383,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-23.ogg",
+   "group": "click",
+   "title": "select 004",
+   "pack": "interface-sounds",
+   "duration": 0.383,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-24.ogg",
+   "group": "click",
+   "title": "select 005",
+   "pack": "interface-sounds",
+   "duration": 0.383,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-25.ogg",
+   "group": "click",
+   "title": "select 006",
+   "pack": "interface-sounds",
+   "duration": 1.944,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-26.ogg",
+   "group": "click",
+   "title": "select 007",
+   "pack": "interface-sounds",
+   "duration": 0.047,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-27.ogg",
+   "group": "click",
+   "title": "select 008",
+   "pack": "interface-sounds",
+   "duration": 0.047,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-28.ogg",
+   "group": "click",
+   "title": "switch 001",
+   "pack": "interface-sounds",
+   "duration": 0.618,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-29.ogg",
+   "group": "click",
+   "title": "switch 002",
+   "pack": "interface-sounds",
+   "duration": 0.611,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-30.ogg",
+   "group": "click",
+   "title": "switch 003",
+   "pack": "interface-sounds",
+   "duration": 0.5,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-31.ogg",
+   "group": "click",
+   "title": "switch 004",
+   "pack": "interface-sounds",
+   "duration": 0.5,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-32.ogg",
+   "group": "click",
+   "title": "switch 005",
+   "pack": "interface-sounds",
+   "duration": 0.612,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-33.ogg",
+   "group": "click",
+   "title": "switch 006",
+   "pack": "interface-sounds",
+   "duration": 0.611,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-34.ogg",
+   "group": "click",
+   "title": "switch 007",
+   "pack": "interface-sounds",
+   "duration": 0.614,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-35.ogg",
+   "group": "click",
+   "title": "switch 01",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.231,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-36.ogg",
+   "group": "click",
+   "title": "switch 02",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.457,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-37.ogg",
+   "group": "click",
+   "title": "sfx100v2 switch 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.227,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-38.ogg",
+   "group": "click",
+   "title": "sfx100v2 switch 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.233,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-39.ogg",
+   "group": "click",
+   "title": "beep 01",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.324,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-40.ogg",
+   "group": "click",
+   "title": "beep 02",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.411,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-41.ogg",
+   "group": "click",
+   "title": "beep 03",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.235,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-42.ogg",
+   "group": "click",
+   "title": "retro beep 01",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.51,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-43.ogg",
+   "group": "click",
+   "title": "retro beep 02",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.408,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-44.ogg",
+   "group": "click",
+   "title": "retro beep 03",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.533,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-45.ogg",
+   "group": "click",
+   "title": "retro beep 04",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.721,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-46.ogg",
+   "group": "click",
+   "title": "retro beep 05",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.695,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-47.ogg",
+   "group": "click",
+   "title": "retro beep 06",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.673,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-48.ogg",
+   "group": "click",
+   "title": "metalClick",
+   "pack": "rpg-audio",
+   "duration": 0.446,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-49.ogg",
+   "group": "click",
+   "title": "click1",
+   "pack": "ui-audio",
+   "duration": 0.094,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-50.ogg",
+   "group": "click",
+   "title": "click2",
+   "pack": "ui-audio",
+   "duration": 0.056,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-51.ogg",
+   "group": "click",
+   "title": "click3",
+   "pack": "ui-audio",
+   "duration": 0.086,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-52.ogg",
+   "group": "click",
+   "title": "click4",
+   "pack": "ui-audio",
+   "duration": 0.037,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-53.ogg",
+   "group": "click",
+   "title": "click5",
+   "pack": "ui-audio",
+   "duration": 0.032,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-54.ogg",
+   "group": "click",
+   "title": "mouseclick1",
+   "pack": "ui-audio",
+   "duration": 0.059,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-55.ogg",
+   "group": "click",
+   "title": "switch1",
+   "pack": "ui-audio",
+   "duration": 0.315,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-56.ogg",
+   "group": "click",
+   "title": "switch10",
+   "pack": "ui-audio",
+   "duration": 0.367,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-57.ogg",
+   "group": "click",
+   "title": "switch11",
+   "pack": "ui-audio",
+   "duration": 0.297,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-58.ogg",
+   "group": "click",
+   "title": "switch12",
+   "pack": "ui-audio",
+   "duration": 0.054,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-59.ogg",
+   "group": "click",
+   "title": "switch13",
+   "pack": "ui-audio",
+   "duration": 0.028,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-60.ogg",
+   "group": "click",
+   "title": "switch14",
+   "pack": "ui-audio",
+   "duration": 0.033,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-61.ogg",
+   "group": "click",
+   "title": "switch15",
+   "pack": "ui-audio",
+   "duration": 0.256,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-62.ogg",
+   "group": "click",
+   "title": "switch16",
+   "pack": "ui-audio",
+   "duration": 0.359,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-63.ogg",
+   "group": "click",
+   "title": "switch17",
+   "pack": "ui-audio",
+   "duration": 0.333,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-64.ogg",
+   "group": "click",
+   "title": "switch18",
+   "pack": "ui-audio",
+   "duration": 0.435,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-65.ogg",
+   "group": "click",
+   "title": "switch19",
+   "pack": "ui-audio",
+   "duration": 0.384,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-66.ogg",
+   "group": "click",
+   "title": "switch2",
+   "pack": "ui-audio",
+   "duration": 0.297,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-67.ogg",
+   "group": "click",
+   "title": "switch20",
+   "pack": "ui-audio",
+   "duration": 0.359,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-68.ogg",
+   "group": "click",
+   "title": "switch21",
+   "pack": "ui-audio",
+   "duration": 0.41,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-69.ogg",
+   "group": "click",
+   "title": "switch22",
+   "pack": "ui-audio",
+   "duration": 0.359,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-70.ogg",
+   "group": "click",
+   "title": "switch23",
+   "pack": "ui-audio",
+   "duration": 0.384,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-71.ogg",
+   "group": "click",
+   "title": "switch24",
+   "pack": "ui-audio",
+   "duration": 0.282,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-72.ogg",
+   "group": "click",
+   "title": "switch25",
+   "pack": "ui-audio",
+   "duration": 0.384,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-73.ogg",
+   "group": "click",
+   "title": "switch26",
+   "pack": "ui-audio",
+   "duration": 0.23,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-74.ogg",
+   "group": "click",
+   "title": "switch27",
+   "pack": "ui-audio",
+   "duration": 0.282,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-75.ogg",
+   "group": "click",
+   "title": "switch28",
+   "pack": "ui-audio",
+   "duration": 0.205,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-76.ogg",
+   "group": "click",
+   "title": "switch29",
+   "pack": "ui-audio",
+   "duration": 0.307,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-77.ogg",
+   "group": "click",
+   "title": "switch3",
+   "pack": "ui-audio",
+   "duration": 0.367,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-78.ogg",
+   "group": "click",
+   "title": "switch30",
+   "pack": "ui-audio",
+   "duration": 0.359,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-79.ogg",
+   "group": "click",
+   "title": "switch31",
+   "pack": "ui-audio",
+   "duration": 0.435,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-80.ogg",
+   "group": "click",
+   "title": "switch32",
+   "pack": "ui-audio",
+   "duration": 0.435,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-81.ogg",
+   "group": "click",
+   "title": "switch33",
+   "pack": "ui-audio",
+   "duration": 0.512,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-82.ogg",
+   "group": "click",
+   "title": "switch34",
+   "pack": "ui-audio",
+   "duration": 0.461,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-83.ogg",
+   "group": "click",
+   "title": "switch35",
+   "pack": "ui-audio",
+   "duration": 0.333,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-84.ogg",
+   "group": "click",
+   "title": "switch36",
+   "pack": "ui-audio",
+   "duration": 0.307,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-85.ogg",
+   "group": "click",
+   "title": "switch37",
+   "pack": "ui-audio",
+   "duration": 0.307,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-86.ogg",
+   "group": "click",
+   "title": "switch38",
+   "pack": "ui-audio",
+   "duration": 0.424,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-87.ogg",
+   "group": "click",
+   "title": "switch4",
+   "pack": "ui-audio",
+   "duration": 0.42,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-88.ogg",
+   "group": "click",
+   "title": "switch5",
+   "pack": "ui-audio",
+   "duration": 0.315,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-89.ogg",
+   "group": "click",
+   "title": "switch6",
+   "pack": "ui-audio",
+   "duration": 0.35,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-90.ogg",
+   "group": "click",
+   "title": "switch7",
+   "pack": "ui-audio",
+   "duration": 0.192,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-91.ogg",
+   "group": "click",
+   "title": "switch8",
+   "pack": "ui-audio",
+   "duration": 0.332,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "click-92.ogg",
+   "group": "click",
+   "title": "switch9",
+   "pack": "ui-audio",
+   "duration": 0.262,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-01.ogg",
+   "group": "door",
+   "title": "door open 01",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.433,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-02.ogg",
+   "group": "door",
+   "title": "door open",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.452,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-03.ogg",
+   "group": "door",
+   "title": "sfx100v2 lock open 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.643,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-04.ogg",
+   "group": "door",
+   "title": "lock open 01",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.737,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-05.ogg",
+   "group": "door",
+   "title": "microwave door open",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.747,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-06.ogg",
+   "group": "door",
+   "title": "open 001",
+   "pack": "interface-sounds",
+   "duration": 0.148,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-07.ogg",
+   "group": "door",
+   "title": "sfx100v2 door 04",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.201,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-08.ogg",
+   "group": "door",
+   "title": "sfx100v2 door 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.304,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-09.ogg",
+   "group": "door",
+   "title": "sfx100v2 door 05",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.306,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-10.ogg",
+   "group": "door",
+   "title": "open 002",
+   "pack": "interface-sounds",
+   "duration": 0.314,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-11.ogg",
+   "group": "door",
+   "title": "cards pack open 1",
+   "pack": "casino-audio",
+   "duration": 0.937,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-12.ogg",
+   "group": "door",
+   "title": "cards pack open 2",
+   "pack": "casino-audio",
+   "duration": 0.732,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-13.ogg",
+   "group": "door",
+   "title": "close 001",
+   "pack": "interface-sounds",
+   "duration": 0.148,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-14.ogg",
+   "group": "door",
+   "title": "close 002",
+   "pack": "interface-sounds",
+   "duration": 0.314,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-15.ogg",
+   "group": "door",
+   "title": "close 003",
+   "pack": "interface-sounds",
+   "duration": 0.314,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-16.ogg",
+   "group": "door",
+   "title": "close 004",
+   "pack": "interface-sounds",
+   "duration": 0.323,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-17.ogg",
+   "group": "door",
+   "title": "open 001",
+   "pack": "interface-sounds",
+   "duration": 0.148,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-18.ogg",
+   "group": "door",
+   "title": "open 002",
+   "pack": "interface-sounds",
+   "duration": 0.314,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-19.ogg",
+   "group": "door",
+   "title": "open 003",
+   "pack": "interface-sounds",
+   "duration": 0.314,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-20.ogg",
+   "group": "door",
+   "title": "open 004",
+   "pack": "interface-sounds",
+   "duration": 0.323,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-21.ogg",
+   "group": "door",
+   "title": "door 01",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 2.78,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-22.ogg",
+   "group": "door",
+   "title": "door 02",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 2.643,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-23.ogg",
+   "group": "door",
+   "title": "door close 01",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.497,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-24.ogg",
+   "group": "door",
+   "title": "door close 02",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.859,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-25.ogg",
+   "group": "door",
+   "title": "door close 03",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.424,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-26.ogg",
+   "group": "door",
+   "title": "door close 04",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.537,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-27.ogg",
+   "group": "door",
+   "title": "door open",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.452,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-28.ogg",
+   "group": "door",
+   "title": "key open 01",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.432,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-29.ogg",
+   "group": "door",
+   "title": "key open 02",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.337,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-30.ogg",
+   "group": "door",
+   "title": "microwave door close",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.725,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-31.ogg",
+   "group": "door",
+   "title": "microwave door open",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.747,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-32.ogg",
+   "group": "door",
+   "title": "wooded box open",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.374,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-33.ogg",
+   "group": "door",
+   "title": "sfx100v2 door 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.415,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-34.ogg",
+   "group": "door",
+   "title": "sfx100v2 door 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.304,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-35.ogg",
+   "group": "door",
+   "title": "sfx100v2 door 03",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.753,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-36.ogg",
+   "group": "door",
+   "title": "sfx100v2 door 04",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.201,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-37.ogg",
+   "group": "door",
+   "title": "sfx100v2 door 05",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.306,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-38.ogg",
+   "group": "door",
+   "title": "sfx100v2 lock open 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.643,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-39.ogg",
+   "group": "door",
+   "title": "door open 01",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.433,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-40.ogg",
+   "group": "door",
+   "title": "lock open 01",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.737,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-41.ogg",
+   "group": "door",
+   "title": "metal close 01",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.869,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-42.ogg",
+   "group": "door",
+   "title": "metal open 01",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 1.15,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-43.ogg",
+   "group": "door",
+   "title": "wood close 01",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.397,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-44.ogg",
+   "group": "door",
+   "title": "wood close 02",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.44,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-45.ogg",
+   "group": "door",
+   "title": "lock 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.411,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-46.ogg",
+   "group": "door",
+   "title": "lock 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.397,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-47.ogg",
+   "group": "door",
+   "title": "lock 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.34,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-48.ogg",
+   "group": "door",
+   "title": "bookClose",
+   "pack": "rpg-audio",
+   "duration": 0.231,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-49.ogg",
+   "group": "door",
+   "title": "bookOpen",
+   "pack": "rpg-audio",
+   "duration": 0.154,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-50.ogg",
+   "group": "door",
+   "title": "creak1",
+   "pack": "rpg-audio",
+   "duration": 0.661,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-51.ogg",
+   "group": "door",
+   "title": "creak2",
+   "pack": "rpg-audio",
+   "duration": 0.83,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-52.ogg",
+   "group": "door",
+   "title": "creak3",
+   "pack": "rpg-audio",
+   "duration": 0.338,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-53.ogg",
+   "group": "door",
+   "title": "doorClose 1",
+   "pack": "rpg-audio",
+   "duration": 0.675,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-54.ogg",
+   "group": "door",
+   "title": "doorClose 2",
+   "pack": "rpg-audio",
+   "duration": 0.612,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-55.ogg",
+   "group": "door",
+   "title": "doorClose 3",
+   "pack": "rpg-audio",
+   "duration": 0.714,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-56.ogg",
+   "group": "door",
+   "title": "doorClose 4",
+   "pack": "rpg-audio",
+   "duration": 0.603,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-57.ogg",
+   "group": "door",
+   "title": "doorOpen 1",
+   "pack": "rpg-audio",
+   "duration": 0.919,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-58.ogg",
+   "group": "door",
+   "title": "doorOpen 2",
+   "pack": "rpg-audio",
+   "duration": 1.413,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-59.ogg",
+   "group": "door",
+   "title": "metalLatch",
+   "pack": "rpg-audio",
+   "duration": 0.261,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-60.ogg",
+   "group": "door",
+   "title": "doorClose 000",
+   "pack": "sci-fi-sounds",
+   "duration": 0.532,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-61.ogg",
+   "group": "door",
+   "title": "doorClose 001",
+   "pack": "sci-fi-sounds",
+   "duration": 0.529,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-62.ogg",
+   "group": "door",
+   "title": "doorClose 002",
+   "pack": "sci-fi-sounds",
+   "duration": 0.533,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-63.ogg",
+   "group": "door",
+   "title": "doorOpen 000",
+   "pack": "sci-fi-sounds",
+   "duration": 0.532,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-64.ogg",
+   "group": "door",
+   "title": "doorOpen 001",
+   "pack": "sci-fi-sounds",
+   "duration": 0.529,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "door-65.ogg",
+   "group": "door",
+   "title": "doorOpen 002",
+   "pack": "sci-fi-sounds",
+   "duration": 0.533,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-01.ogg",
+   "group": "growl",
+   "title": "breath 02",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.356,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-02.ogg",
+   "group": "growl",
+   "title": "roar 01",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.373,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-03.ogg",
+   "group": "growl",
+   "title": "roar 03",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.458,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-04.ogg",
+   "group": "growl",
+   "title": "breath",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.67,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-05.ogg",
+   "group": "growl",
+   "title": "roar 02",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.903,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-06.ogg",
+   "group": "growl",
+   "title": "roar 04",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.906,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-07.ogg",
+   "group": "growl",
+   "title": "roar 06",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.946,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-08.ogg",
+   "group": "growl",
+   "title": "scream 01",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.96,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-09.ogg",
+   "group": "growl",
+   "title": "scream 02",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.96,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-10.ogg",
+   "group": "growl",
+   "title": "roar 05",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 1.127,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-11.ogg",
+   "group": "growl",
+   "title": "attack 05",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.133,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-12.ogg",
+   "group": "growl",
+   "title": "attack 01",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.188,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-13.ogg",
+   "group": "growl",
+   "title": "creature monster 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.236,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-14.ogg",
+   "group": "growl",
+   "title": "misc 03",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.248,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-15.ogg",
+   "group": "growl",
+   "title": "creature monster 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.258,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-16.ogg",
+   "group": "growl",
+   "title": "eat 03",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.272,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-17.ogg",
+   "group": "growl",
+   "title": "bug 13",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.281,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-18.ogg",
+   "group": "growl",
+   "title": "cute 07",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.293,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-19.ogg",
+   "group": "growl",
+   "title": "breath",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.67,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-20.ogg",
+   "group": "growl",
+   "title": "monster 01",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.998,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-21.ogg",
+   "group": "growl",
+   "title": "monster 02",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.577,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-22.ogg",
+   "group": "growl",
+   "title": "monster 03",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.779,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-23.ogg",
+   "group": "growl",
+   "title": "monster 04",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 1.275,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-24.ogg",
+   "group": "growl",
+   "title": "monster 05",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.428,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-25.ogg",
+   "group": "growl",
+   "title": "monster 06",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.834,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-26.ogg",
+   "group": "growl",
+   "title": "monster 07",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 1.131,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-27.ogg",
+   "group": "growl",
+   "title": "roar 01",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.373,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-28.ogg",
+   "group": "growl",
+   "title": "roar 02",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.903,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-29.ogg",
+   "group": "growl",
+   "title": "roar 03",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.458,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-30.ogg",
+   "group": "growl",
+   "title": "breath 02",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.356,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-31.ogg",
+   "group": "growl",
+   "title": "monster 08",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.481,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-32.ogg",
+   "group": "growl",
+   "title": "monster 09",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.55,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-33.ogg",
+   "group": "growl",
+   "title": "monster 10",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.493,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-34.ogg",
+   "group": "growl",
+   "title": "monster 11",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.407,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-35.ogg",
+   "group": "growl",
+   "title": "monster 12",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.609,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-36.ogg",
+   "group": "growl",
+   "title": "monster 13",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.696,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-37.ogg",
+   "group": "growl",
+   "title": "monster 14",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.518,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-38.ogg",
+   "group": "growl",
+   "title": "monster 15",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.395,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-39.ogg",
+   "group": "growl",
+   "title": "monster 16",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.72,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-40.ogg",
+   "group": "growl",
+   "title": "monster 17",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.871,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-41.ogg",
+   "group": "growl",
+   "title": "monster 18",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.788,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-42.ogg",
+   "group": "growl",
+   "title": "monster 19",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 1.422,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-43.ogg",
+   "group": "growl",
+   "title": "monster 20",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 1.523,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-44.ogg",
+   "group": "growl",
+   "title": "roar 04",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.906,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-45.ogg",
+   "group": "growl",
+   "title": "roar 05",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 1.127,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-46.ogg",
+   "group": "growl",
+   "title": "roar 06",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.946,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-47.ogg",
+   "group": "growl",
+   "title": "creature die 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.06,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-48.ogg",
+   "group": "growl",
+   "title": "creature hurt 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.621,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-49.ogg",
+   "group": "growl",
+   "title": "creature hurt 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.678,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-50.ogg",
+   "group": "growl",
+   "title": "creature misc 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.255,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-51.ogg",
+   "group": "growl",
+   "title": "creature misc 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.189,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-52.ogg",
+   "group": "growl",
+   "title": "creature misc 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.637,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-53.ogg",
+   "group": "growl",
+   "title": "creature misc 04",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.549,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-54.ogg",
+   "group": "growl",
+   "title": "creature misc 05",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.601,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-55.ogg",
+   "group": "growl",
+   "title": "creature misc 06",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.418,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-56.ogg",
+   "group": "growl",
+   "title": "creature misc 07",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.349,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-57.ogg",
+   "group": "growl",
+   "title": "creature misc 08",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.461,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-58.ogg",
+   "group": "growl",
+   "title": "creature monster 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.258,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-59.ogg",
+   "group": "growl",
+   "title": "creature monster 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.236,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-60.ogg",
+   "group": "growl",
+   "title": "creature monster 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.991,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-61.ogg",
+   "group": "growl",
+   "title": "creature monster 04",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.721,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-62.ogg",
+   "group": "growl",
+   "title": "creature roar 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.64,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-63.ogg",
+   "group": "growl",
+   "title": "creature roar 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.043,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-64.ogg",
+   "group": "growl",
+   "title": "creature roar 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.163,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-65.ogg",
+   "group": "growl",
+   "title": "creature slime 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.672,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-66.ogg",
+   "group": "growl",
+   "title": "creature slime 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.741,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-67.ogg",
+   "group": "growl",
+   "title": "creature slime 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.482,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "growl-68.ogg",
+   "group": "growl",
+   "title": "creature slime 04",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.625,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-01.ogg",
+   "group": "gun",
+   "title": "shoot 02",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.149,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-02.ogg",
+   "group": "gun",
+   "title": "shoot 01",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.253,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-03.ogg",
+   "group": "gun",
+   "title": "shot 02",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.325,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-04.ogg",
+   "group": "gun",
+   "title": "shot 01",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.752,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-05.ogg",
+   "group": "gun",
+   "title": "laser1",
+   "pack": "digital-audio",
+   "duration": 1.1,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-06.ogg",
+   "group": "gun",
+   "title": "laser2",
+   "pack": "digital-audio",
+   "duration": 1.091,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-07.ogg",
+   "group": "gun",
+   "title": "laser3",
+   "pack": "digital-audio",
+   "duration": 0.984,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-08.ogg",
+   "group": "gun",
+   "title": "laser4",
+   "pack": "digital-audio",
+   "duration": 1.132,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-09.ogg",
+   "group": "gun",
+   "title": "laser5",
+   "pack": "digital-audio",
+   "duration": 1.014,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-10.ogg",
+   "group": "gun",
+   "title": "laser6",
+   "pack": "digital-audio",
+   "duration": 0.971,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-11.ogg",
+   "group": "gun",
+   "title": "laser7",
+   "pack": "digital-audio",
+   "duration": 0.933,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-12.ogg",
+   "group": "gun",
+   "title": "laser8",
+   "pack": "digital-audio",
+   "duration": 0.987,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-13.ogg",
+   "group": "gun",
+   "title": "laser9",
+   "pack": "digital-audio",
+   "duration": 1.009,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-14.ogg",
+   "group": "gun",
+   "title": "shot 01",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.752,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-15.ogg",
+   "group": "gun",
+   "title": "shot 02",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.325,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-16.ogg",
+   "group": "gun",
+   "title": "spell fire 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.057,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-17.ogg",
+   "group": "gun",
+   "title": "spell fire 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.072,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-18.ogg",
+   "group": "gun",
+   "title": "spell fire 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.927,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-19.ogg",
+   "group": "gun",
+   "title": "spell fire 04",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.595,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-20.ogg",
+   "group": "gun",
+   "title": "spell fire 05",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.245,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-21.ogg",
+   "group": "gun",
+   "title": "spell fire 06",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.005,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-22.ogg",
+   "group": "gun",
+   "title": "spell fire 07",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.651,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-23.ogg",
+   "group": "gun",
+   "title": "retro laser 01",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.533,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-24.ogg",
+   "group": "gun",
+   "title": "retro laser 02",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 1.244,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-25.ogg",
+   "group": "gun",
+   "title": "shoot 01",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.253,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-26.ogg",
+   "group": "gun",
+   "title": "shoot 02",
+   "pack": "oga-rubberduck-scifi-50",
+   "duration": 0.149,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-27.ogg",
+   "group": "gun",
+   "title": "laserLarge 000",
+   "pack": "sci-fi-sounds",
+   "duration": 0.677,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-28.ogg",
+   "group": "gun",
+   "title": "laserLarge 001",
+   "pack": "sci-fi-sounds",
+   "duration": 0.721,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-29.ogg",
+   "group": "gun",
+   "title": "laserLarge 002",
+   "pack": "sci-fi-sounds",
+   "duration": 0.744,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-30.ogg",
+   "group": "gun",
+   "title": "laserLarge 003",
+   "pack": "sci-fi-sounds",
+   "duration": 0.716,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-31.ogg",
+   "group": "gun",
+   "title": "laserLarge 004",
+   "pack": "sci-fi-sounds",
+   "duration": 0.693,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-32.ogg",
+   "group": "gun",
+   "title": "laserRetro 000",
+   "pack": "sci-fi-sounds",
+   "duration": 0.235,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-33.ogg",
+   "group": "gun",
+   "title": "laserRetro 001",
+   "pack": "sci-fi-sounds",
+   "duration": 0.236,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-34.ogg",
+   "group": "gun",
+   "title": "laserRetro 002",
+   "pack": "sci-fi-sounds",
+   "duration": 0.255,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-35.ogg",
+   "group": "gun",
+   "title": "laserRetro 003",
+   "pack": "sci-fi-sounds",
+   "duration": 0.255,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-36.ogg",
+   "group": "gun",
+   "title": "laserRetro 004",
+   "pack": "sci-fi-sounds",
+   "duration": 0.279,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-37.ogg",
+   "group": "gun",
+   "title": "laserSmall 000",
+   "pack": "sci-fi-sounds",
+   "duration": 0.239,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-38.ogg",
+   "group": "gun",
+   "title": "laserSmall 001",
+   "pack": "sci-fi-sounds",
+   "duration": 0.247,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-39.ogg",
+   "group": "gun",
+   "title": "laserSmall 002",
+   "pack": "sci-fi-sounds",
+   "duration": 0.344,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-40.ogg",
+   "group": "gun",
+   "title": "laserSmall 003",
+   "pack": "sci-fi-sounds",
+   "duration": 0.3,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "gun-41.ogg",
+   "group": "gun",
+   "title": "laserSmall 004",
+   "pack": "sci-fi-sounds",
+   "duration": 0.414,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-01.ogg",
+   "group": "hit",
+   "title": "footstep concrete 000",
+   "pack": "impact-sounds",
+   "duration": 0.106,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-02.ogg",
+   "group": "hit",
+   "title": "footstep concrete 001",
+   "pack": "impact-sounds",
+   "duration": 0.108,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-03.ogg",
+   "group": "hit",
+   "title": "impactMetal medium 004",
+   "pack": "impact-sounds",
+   "duration": 0.109,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-04.ogg",
+   "group": "hit",
+   "title": "bfh1 rock hit 01",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.109,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-05.ogg",
+   "group": "hit",
+   "title": "footstep concrete 003",
+   "pack": "impact-sounds",
+   "duration": 0.11,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-06.ogg",
+   "group": "hit",
+   "title": "footstep concrete 002",
+   "pack": "impact-sounds",
+   "duration": 0.113,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-07.ogg",
+   "group": "hit",
+   "title": "footstep concrete 004",
+   "pack": "impact-sounds",
+   "duration": 0.114,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-08.ogg",
+   "group": "hit",
+   "title": "impactMetal heavy 002",
+   "pack": "impact-sounds",
+   "duration": 0.117,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-09.ogg",
+   "group": "hit",
+   "title": "impactGeneric light 001",
+   "pack": "impact-sounds",
+   "duration": 0.118,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-10.ogg",
+   "group": "hit",
+   "title": "impactSoft medium 000",
+   "pack": "impact-sounds",
+   "duration": 0.118,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-100.ogg",
+   "group": "hit",
+   "title": "impactSoft medium 003",
+   "pack": "impact-sounds",
+   "duration": 0.14,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-101.ogg",
+   "group": "hit",
+   "title": "impactSoft medium 004",
+   "pack": "impact-sounds",
+   "duration": 0.147,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-102.ogg",
+   "group": "hit",
+   "title": "impactTin medium 000",
+   "pack": "impact-sounds",
+   "duration": 0.159,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-103.ogg",
+   "group": "hit",
+   "title": "impactTin medium 001",
+   "pack": "impact-sounds",
+   "duration": 0.174,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-104.ogg",
+   "group": "hit",
+   "title": "impactTin medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.134,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-105.ogg",
+   "group": "hit",
+   "title": "impactTin medium 003",
+   "pack": "impact-sounds",
+   "duration": 0.215,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-106.ogg",
+   "group": "hit",
+   "title": "impactTin medium 004",
+   "pack": "impact-sounds",
+   "duration": 0.179,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-107.ogg",
+   "group": "hit",
+   "title": "impactWood heavy 000",
+   "pack": "impact-sounds",
+   "duration": 0.313,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-108.ogg",
+   "group": "hit",
+   "title": "impactWood heavy 001",
+   "pack": "impact-sounds",
+   "duration": 0.313,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-109.ogg",
+   "group": "hit",
+   "title": "impactWood heavy 002",
+   "pack": "impact-sounds",
+   "duration": 0.313,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-11.ogg",
+   "group": "hit",
+   "title": "impactMetal medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.119,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-110.ogg",
+   "group": "hit",
+   "title": "impactWood heavy 003",
+   "pack": "impact-sounds",
+   "duration": 0.313,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-111.ogg",
+   "group": "hit",
+   "title": "impactWood heavy 004",
+   "pack": "impact-sounds",
+   "duration": 0.313,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-112.ogg",
+   "group": "hit",
+   "title": "impactWood light 000",
+   "pack": "impact-sounds",
+   "duration": 0.266,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-113.ogg",
+   "group": "hit",
+   "title": "impactWood light 001",
+   "pack": "impact-sounds",
+   "duration": 0.266,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-114.ogg",
+   "group": "hit",
+   "title": "impactWood light 002",
+   "pack": "impact-sounds",
+   "duration": 0.266,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-115.ogg",
+   "group": "hit",
+   "title": "impactWood light 003",
+   "pack": "impact-sounds",
+   "duration": 0.266,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-116.ogg",
+   "group": "hit",
+   "title": "impactWood light 004",
+   "pack": "impact-sounds",
+   "duration": 0.266,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-117.ogg",
+   "group": "hit",
+   "title": "impactWood medium 000",
+   "pack": "impact-sounds",
+   "duration": 0.333,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-118.ogg",
+   "group": "hit",
+   "title": "impactWood medium 001",
+   "pack": "impact-sounds",
+   "duration": 0.333,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-119.ogg",
+   "group": "hit",
+   "title": "impactWood medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.333,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-12.ogg",
+   "group": "hit",
+   "title": "impactMetal heavy 004",
+   "pack": "impact-sounds",
+   "duration": 0.134,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-120.ogg",
+   "group": "hit",
+   "title": "impactWood medium 003",
+   "pack": "impact-sounds",
+   "duration": 0.333,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-121.ogg",
+   "group": "hit",
+   "title": "impactWood medium 004",
+   "pack": "impact-sounds",
+   "duration": 0.333,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-122.ogg",
+   "group": "hit",
+   "title": "jingles HIT00",
+   "pack": "music-jingles",
+   "duration": 0.284,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-123.ogg",
+   "group": "hit",
+   "title": "jingles HIT01",
+   "pack": "music-jingles",
+   "duration": 0.506,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-124.ogg",
+   "group": "hit",
+   "title": "jingles HIT02",
+   "pack": "music-jingles",
+   "duration": 0.524,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-125.ogg",
+   "group": "hit",
+   "title": "jingles HIT03",
+   "pack": "music-jingles",
+   "duration": 0.746,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-126.ogg",
+   "group": "hit",
+   "title": "jingles HIT04",
+   "pack": "music-jingles",
+   "duration": 0.639,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-127.ogg",
+   "group": "hit",
+   "title": "jingles HIT05",
+   "pack": "music-jingles",
+   "duration": 0.613,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-128.ogg",
+   "group": "hit",
+   "title": "jingles HIT06",
+   "pack": "music-jingles",
+   "duration": 0.515,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-129.ogg",
+   "group": "hit",
+   "title": "jingles HIT07",
+   "pack": "music-jingles",
+   "duration": 0.284,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-13.ogg",
+   "group": "hit",
+   "title": "impactTin medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.134,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-130.ogg",
+   "group": "hit",
+   "title": "jingles HIT08",
+   "pack": "music-jingles",
+   "duration": 0.284,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-131.ogg",
+   "group": "hit",
+   "title": "jingles HIT09",
+   "pack": "music-jingles",
+   "duration": 0.746,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-132.ogg",
+   "group": "hit",
+   "title": "jingles HIT10",
+   "pack": "music-jingles",
+   "duration": 0.746,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-133.ogg",
+   "group": "hit",
+   "title": "jingles HIT11",
+   "pack": "music-jingles",
+   "duration": 0.959,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-134.ogg",
+   "group": "hit",
+   "title": "jingles HIT12",
+   "pack": "music-jingles",
+   "duration": 0.275,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-135.ogg",
+   "group": "hit",
+   "title": "jingles HIT13",
+   "pack": "music-jingles",
+   "duration": 0.293,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-136.ogg",
+   "group": "hit",
+   "title": "jingles HIT14",
+   "pack": "music-jingles",
+   "duration": 0.417,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-137.ogg",
+   "group": "hit",
+   "title": "jingles HIT15",
+   "pack": "music-jingles",
+   "duration": 1.163,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-138.ogg",
+   "group": "hit",
+   "title": "jingles HIT16",
+   "pack": "music-jingles",
+   "duration": 0.293,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-139.ogg",
+   "group": "hit",
+   "title": "hit 01",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.265,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-14.ogg",
+   "group": "hit",
+   "title": "impactSoft medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.135,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-140.ogg",
+   "group": "hit",
+   "title": "hit 02",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.327,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-141.ogg",
+   "group": "hit",
+   "title": "hit 03",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.426,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-142.ogg",
+   "group": "hit",
+   "title": "hit 04",
+   "pack": "oga-rubberduck-100-foley",
+   "duration": 0.451,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-143.ogg",
+   "group": "hit",
+   "title": "bfh1 glass hit 01",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.302,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-144.ogg",
+   "group": "hit",
+   "title": "bfh1 glass hit 02",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.333,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-145.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 01",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.729,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-146.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 02",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.797,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-147.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 03",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.485,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-148.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 04",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.497,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-149.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 05",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.276,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-15.ogg",
+   "group": "hit",
+   "title": "impactGeneric light 003",
+   "pack": "impact-sounds",
+   "duration": 0.138,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-150.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 06",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.595,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-151.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 07",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.456,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-152.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 08",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.39,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-153.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 09",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.262,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-154.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 10",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.303,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-155.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 11",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.302,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-156.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 12",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.511,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-157.ogg",
+   "group": "hit",
+   "title": "bfh1 hit 13",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.377,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-158.ogg",
+   "group": "hit",
+   "title": "bfh1 metal hit 01",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.238,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-159.ogg",
+   "group": "hit",
+   "title": "bfh1 metal hit 02",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.55,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-16.ogg",
+   "group": "hit",
+   "title": "impactGeneric light 000",
+   "pack": "impact-sounds",
+   "duration": 0.139,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-160.ogg",
+   "group": "hit",
+   "title": "bfh1 metal hit 03",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.46,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-161.ogg",
+   "group": "hit",
+   "title": "bfh1 metal hit 04",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.406,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-162.ogg",
+   "group": "hit",
+   "title": "bfh1 metal hit 05",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.33,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-163.ogg",
+   "group": "hit",
+   "title": "bfh1 metal hit 06",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.371,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-164.ogg",
+   "group": "hit",
+   "title": "bfh1 rock hit 01",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.109,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-165.ogg",
+   "group": "hit",
+   "title": "bfh1 wood hit 01",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.248,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-166.ogg",
+   "group": "hit",
+   "title": "bfh1 wood hit 02",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.281,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-167.ogg",
+   "group": "hit",
+   "title": "bfh1 wood hit 03",
+   "pack": "oga-rubberduck-breaking-75",
+   "duration": 0.403,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-168.ogg",
+   "group": "hit",
+   "title": "sfx100v2 hit 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.481,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-169.ogg",
+   "group": "hit",
+   "title": "sfx100v2 hit 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.457,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-17.ogg",
+   "group": "hit",
+   "title": "impactBell heavy 000",
+   "pack": "impact-sounds",
+   "duration": 1.48,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-170.ogg",
+   "group": "hit",
+   "title": "sfx100v2 hit 03",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.224,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-171.ogg",
+   "group": "hit",
+   "title": "sfx100v2 metal hit 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.811,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-172.ogg",
+   "group": "hit",
+   "title": "sfx100v2 metal hit 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.21,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-173.ogg",
+   "group": "hit",
+   "title": "sfx100v2 wood hit 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.35,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-174.ogg",
+   "group": "hit",
+   "title": "sfx100v2 wood hit 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.357,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-175.ogg",
+   "group": "hit",
+   "title": "sfx100v2 wood hit 03",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.469,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-176.ogg",
+   "group": "hit",
+   "title": "metal hit 01",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.269,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-177.ogg",
+   "group": "hit",
+   "title": "metal hit 02",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.435,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-178.ogg",
+   "group": "hit",
+   "title": "metal hit 03",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.395,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-179.ogg",
+   "group": "hit",
+   "title": "metal hit 04",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.373,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-18.ogg",
+   "group": "hit",
+   "title": "impactBell heavy 001",
+   "pack": "impact-sounds",
+   "duration": 1.741,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-180.ogg",
+   "group": "hit",
+   "title": "metal hit 05",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.329,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-181.ogg",
+   "group": "hit",
+   "title": "wood hit 01",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.338,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-182.ogg",
+   "group": "hit",
+   "title": "wood hit 02",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.385,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-183.ogg",
+   "group": "hit",
+   "title": "wood hit 03",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.407,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-184.ogg",
+   "group": "hit",
+   "title": "wood hit 04",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.303,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-185.ogg",
+   "group": "hit",
+   "title": "wood hit 05",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.308,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-186.ogg",
+   "group": "hit",
+   "title": "wood hit 06",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.284,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-187.ogg",
+   "group": "hit",
+   "title": "wood hit 07",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.288,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-188.ogg",
+   "group": "hit",
+   "title": "wood hit 08",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.367,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-189.ogg",
+   "group": "hit",
+   "title": "wood hit 09",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.258,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-19.ogg",
+   "group": "hit",
+   "title": "impactBell heavy 002",
+   "pack": "impact-sounds",
+   "duration": 0.697,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-190.ogg",
+   "group": "hit",
+   "title": "impactMetal 000",
+   "pack": "sci-fi-sounds",
+   "duration": 0.635,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-191.ogg",
+   "group": "hit",
+   "title": "impactMetal 001",
+   "pack": "sci-fi-sounds",
+   "duration": 0.688,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-192.ogg",
+   "group": "hit",
+   "title": "impactMetal 002",
+   "pack": "sci-fi-sounds",
+   "duration": 0.471,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-193.ogg",
+   "group": "hit",
+   "title": "impactMetal 003",
+   "pack": "sci-fi-sounds",
+   "duration": 0.777,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-194.ogg",
+   "group": "hit",
+   "title": "impactMetal 004",
+   "pack": "sci-fi-sounds",
+   "duration": 0.39,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-20.ogg",
+   "group": "hit",
+   "title": "impactBell heavy 003",
+   "pack": "impact-sounds",
+   "duration": 0.654,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-21.ogg",
+   "group": "hit",
+   "title": "impactBell heavy 004",
+   "pack": "impact-sounds",
+   "duration": 0.301,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-22.ogg",
+   "group": "hit",
+   "title": "impactGeneric light 000",
+   "pack": "impact-sounds",
+   "duration": 0.139,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-23.ogg",
+   "group": "hit",
+   "title": "impactGeneric light 001",
+   "pack": "impact-sounds",
+   "duration": 0.118,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-24.ogg",
+   "group": "hit",
+   "title": "impactGeneric light 002",
+   "pack": "impact-sounds",
+   "duration": 0.14,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-25.ogg",
+   "group": "hit",
+   "title": "impactGeneric light 003",
+   "pack": "impact-sounds",
+   "duration": 0.138,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-26.ogg",
+   "group": "hit",
+   "title": "impactGeneric light 004",
+   "pack": "impact-sounds",
+   "duration": 0.14,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-27.ogg",
+   "group": "hit",
+   "title": "impactGlass heavy 000",
+   "pack": "impact-sounds",
+   "duration": 0.241,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-28.ogg",
+   "group": "hit",
+   "title": "impactGlass heavy 001",
+   "pack": "impact-sounds",
+   "duration": 0.429,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-29.ogg",
+   "group": "hit",
+   "title": "impactGlass heavy 002",
+   "pack": "impact-sounds",
+   "duration": 0.247,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-30.ogg",
+   "group": "hit",
+   "title": "impactGlass heavy 003",
+   "pack": "impact-sounds",
+   "duration": 0.172,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-31.ogg",
+   "group": "hit",
+   "title": "impactGlass heavy 004",
+   "pack": "impact-sounds",
+   "duration": 0.399,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-32.ogg",
+   "group": "hit",
+   "title": "impactGlass light 000",
+   "pack": "impact-sounds",
+   "duration": 0.21,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-33.ogg",
+   "group": "hit",
+   "title": "impactGlass light 001",
+   "pack": "impact-sounds",
+   "duration": 0.21,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-34.ogg",
+   "group": "hit",
+   "title": "impactGlass light 002",
+   "pack": "impact-sounds",
+   "duration": 0.21,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-35.ogg",
+   "group": "hit",
+   "title": "impactGlass light 003",
+   "pack": "impact-sounds",
+   "duration": 0.21,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-36.ogg",
+   "group": "hit",
+   "title": "impactGlass light 004",
+   "pack": "impact-sounds",
+   "duration": 0.21,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-37.ogg",
+   "group": "hit",
+   "title": "impactGlass medium 000",
+   "pack": "impact-sounds",
+   "duration": 0.543,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-38.ogg",
+   "group": "hit",
+   "title": "impactGlass medium 001",
+   "pack": "impact-sounds",
+   "duration": 0.543,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-39.ogg",
+   "group": "hit",
+   "title": "impactGlass medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.543,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-40.ogg",
+   "group": "hit",
+   "title": "impactGlass medium 003",
+   "pack": "impact-sounds",
+   "duration": 0.543,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-41.ogg",
+   "group": "hit",
+   "title": "impactGlass medium 004",
+   "pack": "impact-sounds",
+   "duration": 0.543,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-42.ogg",
+   "group": "hit",
+   "title": "impactMetal heavy 000",
+   "pack": "impact-sounds",
+   "duration": 0.168,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-43.ogg",
+   "group": "hit",
+   "title": "impactMetal heavy 001",
+   "pack": "impact-sounds",
+   "duration": 0.359,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-44.ogg",
+   "group": "hit",
+   "title": "impactMetal heavy 002",
+   "pack": "impact-sounds",
+   "duration": 0.117,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-45.ogg",
+   "group": "hit",
+   "title": "impactMetal heavy 003",
+   "pack": "impact-sounds",
+   "duration": 0.207,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-46.ogg",
+   "group": "hit",
+   "title": "impactMetal heavy 004",
+   "pack": "impact-sounds",
+   "duration": 0.134,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-47.ogg",
+   "group": "hit",
+   "title": "impactMetal light 000",
+   "pack": "impact-sounds",
+   "duration": 0.351,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-48.ogg",
+   "group": "hit",
+   "title": "impactMetal light 001",
+   "pack": "impact-sounds",
+   "duration": 0.252,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-49.ogg",
+   "group": "hit",
+   "title": "impactMetal light 002",
+   "pack": "impact-sounds",
+   "duration": 0.236,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-50.ogg",
+   "group": "hit",
+   "title": "impactMetal light 003",
+   "pack": "impact-sounds",
+   "duration": 0.482,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-51.ogg",
+   "group": "hit",
+   "title": "impactMetal light 004",
+   "pack": "impact-sounds",
+   "duration": 0.213,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-52.ogg",
+   "group": "hit",
+   "title": "impactMetal medium 000",
+   "pack": "impact-sounds",
+   "duration": 0.272,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-53.ogg",
+   "group": "hit",
+   "title": "impactMetal medium 001",
+   "pack": "impact-sounds",
+   "duration": 0.143,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-54.ogg",
+   "group": "hit",
+   "title": "impactMetal medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.119,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-55.ogg",
+   "group": "hit",
+   "title": "impactMetal medium 003",
+   "pack": "impact-sounds",
+   "duration": 0.254,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-56.ogg",
+   "group": "hit",
+   "title": "impactMetal medium 004",
+   "pack": "impact-sounds",
+   "duration": 0.109,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-57.ogg",
+   "group": "hit",
+   "title": "impactMining 000",
+   "pack": "impact-sounds",
+   "duration": 0.937,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-58.ogg",
+   "group": "hit",
+   "title": "impactMining 001",
+   "pack": "impact-sounds",
+   "duration": 0.869,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-59.ogg",
+   "group": "hit",
+   "title": "impactMining 002",
+   "pack": "impact-sounds",
+   "duration": 0.805,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-60.ogg",
+   "group": "hit",
+   "title": "impactMining 003",
+   "pack": "impact-sounds",
+   "duration": 0.992,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-61.ogg",
+   "group": "hit",
+   "title": "impactMining 004",
+   "pack": "impact-sounds",
+   "duration": 0.83,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-62.ogg",
+   "group": "hit",
+   "title": "impactPlank medium 000",
+   "pack": "impact-sounds",
+   "duration": 0.779,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-63.ogg",
+   "group": "hit",
+   "title": "impactPlank medium 001",
+   "pack": "impact-sounds",
+   "duration": 0.779,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-64.ogg",
+   "group": "hit",
+   "title": "impactPlank medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.779,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-65.ogg",
+   "group": "hit",
+   "title": "impactPlank medium 003",
+   "pack": "impact-sounds",
+   "duration": 0.779,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-66.ogg",
+   "group": "hit",
+   "title": "impactPlank medium 004",
+   "pack": "impact-sounds",
+   "duration": 0.779,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-67.ogg",
+   "group": "hit",
+   "title": "impactPlate heavy 000",
+   "pack": "impact-sounds",
+   "duration": 0.489,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-68.ogg",
+   "group": "hit",
+   "title": "impactPlate heavy 001",
+   "pack": "impact-sounds",
+   "duration": 0.352,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-69.ogg",
+   "group": "hit",
+   "title": "impactPlate heavy 002",
+   "pack": "impact-sounds",
+   "duration": 0.494,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-70.ogg",
+   "group": "hit",
+   "title": "impactPlate heavy 003",
+   "pack": "impact-sounds",
+   "duration": 0.347,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-71.ogg",
+   "group": "hit",
+   "title": "impactPlate heavy 004",
+   "pack": "impact-sounds",
+   "duration": 0.559,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-72.ogg",
+   "group": "hit",
+   "title": "impactPlate light 000",
+   "pack": "impact-sounds",
+   "duration": 0.542,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-73.ogg",
+   "group": "hit",
+   "title": "impactPlate light 001",
+   "pack": "impact-sounds",
+   "duration": 0.655,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-74.ogg",
+   "group": "hit",
+   "title": "impactPlate light 002",
+   "pack": "impact-sounds",
+   "duration": 0.489,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-75.ogg",
+   "group": "hit",
+   "title": "impactPlate light 003",
+   "pack": "impact-sounds",
+   "duration": 0.528,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-76.ogg",
+   "group": "hit",
+   "title": "impactPlate light 004",
+   "pack": "impact-sounds",
+   "duration": 0.657,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-77.ogg",
+   "group": "hit",
+   "title": "impactPlate medium 000",
+   "pack": "impact-sounds",
+   "duration": 0.609,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-78.ogg",
+   "group": "hit",
+   "title": "impactPlate medium 001",
+   "pack": "impact-sounds",
+   "duration": 0.616,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-79.ogg",
+   "group": "hit",
+   "title": "impactPlate medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.515,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-80.ogg",
+   "group": "hit",
+   "title": "impactPlate medium 003",
+   "pack": "impact-sounds",
+   "duration": 0.654,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-81.ogg",
+   "group": "hit",
+   "title": "impactPlate medium 004",
+   "pack": "impact-sounds",
+   "duration": 0.534,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-82.ogg",
+   "group": "hit",
+   "title": "impactPunch heavy 000",
+   "pack": "impact-sounds",
+   "duration": 0.649,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-83.ogg",
+   "group": "hit",
+   "title": "impactPunch heavy 001",
+   "pack": "impact-sounds",
+   "duration": 0.536,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-84.ogg",
+   "group": "hit",
+   "title": "impactPunch heavy 002",
+   "pack": "impact-sounds",
+   "duration": 0.457,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-85.ogg",
+   "group": "hit",
+   "title": "impactPunch heavy 003",
+   "pack": "impact-sounds",
+   "duration": 0.474,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-86.ogg",
+   "group": "hit",
+   "title": "impactPunch heavy 004",
+   "pack": "impact-sounds",
+   "duration": 0.536,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-87.ogg",
+   "group": "hit",
+   "title": "impactPunch medium 000",
+   "pack": "impact-sounds",
+   "duration": 0.431,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-88.ogg",
+   "group": "hit",
+   "title": "impactPunch medium 001",
+   "pack": "impact-sounds",
+   "duration": 0.405,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-89.ogg",
+   "group": "hit",
+   "title": "impactPunch medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.541,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-90.ogg",
+   "group": "hit",
+   "title": "impactPunch medium 003",
+   "pack": "impact-sounds",
+   "duration": 0.455,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-91.ogg",
+   "group": "hit",
+   "title": "impactPunch medium 004",
+   "pack": "impact-sounds",
+   "duration": 0.543,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-92.ogg",
+   "group": "hit",
+   "title": "impactSoft heavy 000",
+   "pack": "impact-sounds",
+   "duration": 0.505,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-93.ogg",
+   "group": "hit",
+   "title": "impactSoft heavy 001",
+   "pack": "impact-sounds",
+   "duration": 0.572,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-94.ogg",
+   "group": "hit",
+   "title": "impactSoft heavy 002",
+   "pack": "impact-sounds",
+   "duration": 0.572,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-95.ogg",
+   "group": "hit",
+   "title": "impactSoft heavy 003",
+   "pack": "impact-sounds",
+   "duration": 0.544,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-96.ogg",
+   "group": "hit",
+   "title": "impactSoft heavy 004",
+   "pack": "impact-sounds",
+   "duration": 0.501,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-97.ogg",
+   "group": "hit",
+   "title": "impactSoft medium 000",
+   "pack": "impact-sounds",
+   "duration": 0.118,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-98.ogg",
+   "group": "hit",
+   "title": "impactSoft medium 001",
+   "pack": "impact-sounds",
+   "duration": 0.183,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hit-99.ogg",
+   "group": "hit",
+   "title": "impactSoft medium 002",
+   "pack": "impact-sounds",
+   "duration": 0.135,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-01.ogg",
+   "group": "hurt",
+   "title": "hurt 04",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.349,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-02.ogg",
+   "group": "hurt",
+   "title": "hurt 05",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.45,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-03.ogg",
+   "group": "hurt",
+   "title": "hurt 03",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.458,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-04.ogg",
+   "group": "hurt",
+   "title": "hurt 02",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.48,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-05.ogg",
+   "group": "hurt",
+   "title": "hurt 01",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.495,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-06.ogg",
+   "group": "hurt",
+   "title": "grunt 02",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.535,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-07.ogg",
+   "group": "hurt",
+   "title": "grunt 08",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.571,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-08.ogg",
+   "group": "hurt",
+   "title": "grunt 04",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.611,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-09.ogg",
+   "group": "hurt",
+   "title": "creature hurt 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.621,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-10.ogg",
+   "group": "hurt",
+   "title": "grunt 06",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.629,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-11.ogg",
+   "group": "hurt",
+   "title": "hurt 01",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.495,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-12.ogg",
+   "group": "hurt",
+   "title": "hurt 02",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.48,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-13.ogg",
+   "group": "hurt",
+   "title": "hurt 03",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.458,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-14.ogg",
+   "group": "hurt",
+   "title": "hurt 04",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.349,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "hurt-15.ogg",
+   "group": "hurt",
+   "title": "hurt 05",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.45,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-01.ogg",
+   "group": "pickup",
+   "title": "item coins 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.406,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-02.ogg",
+   "group": "pickup",
+   "title": "item coins 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.482,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-03.ogg",
+   "group": "pickup",
+   "title": "item coins 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.616,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-04.ogg",
+   "group": "pickup",
+   "title": "item coins 04",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.61,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-05.ogg",
+   "group": "pickup",
+   "title": "wood 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.188,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-06.ogg",
+   "group": "pickup",
+   "title": "creature misc 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.189,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-07.ogg",
+   "group": "pickup",
+   "title": "item gem 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.2,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-08.ogg",
+   "group": "pickup",
+   "title": "creature monster 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.236,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-09.ogg",
+   "group": "pickup",
+   "title": "misc 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.237,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-10.ogg",
+   "group": "pickup",
+   "title": "wood 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.239,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-11.ogg",
+   "group": "pickup",
+   "title": "item gem 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.247,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-12.ogg",
+   "group": "pickup",
+   "title": "creature misc 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.255,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-13.ogg",
+   "group": "pickup",
+   "title": "powerUp1",
+   "pack": "digital-audio",
+   "duration": 1.202,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-14.ogg",
+   "group": "pickup",
+   "title": "powerUp10",
+   "pack": "digital-audio",
+   "duration": 0.653,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-15.ogg",
+   "group": "pickup",
+   "title": "powerUp11",
+   "pack": "digital-audio",
+   "duration": 0.679,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-16.ogg",
+   "group": "pickup",
+   "title": "powerUp12",
+   "pack": "digital-audio",
+   "duration": 0.862,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-17.ogg",
+   "group": "pickup",
+   "title": "powerUp2",
+   "pack": "digital-audio",
+   "duration": 0.47,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-18.ogg",
+   "group": "pickup",
+   "title": "powerUp3",
+   "pack": "digital-audio",
+   "duration": 1.149,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-19.ogg",
+   "group": "pickup",
+   "title": "powerUp4",
+   "pack": "digital-audio",
+   "duration": 0.549,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-20.ogg",
+   "group": "pickup",
+   "title": "powerUp5",
+   "pack": "digital-audio",
+   "duration": 0.444,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-21.ogg",
+   "group": "pickup",
+   "title": "powerUp6",
+   "pack": "digital-audio",
+   "duration": 0.444,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-22.ogg",
+   "group": "pickup",
+   "title": "powerUp7",
+   "pack": "digital-audio",
+   "duration": 0.522,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-23.ogg",
+   "group": "pickup",
+   "title": "powerUp8",
+   "pack": "digital-audio",
+   "duration": 0.575,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-24.ogg",
+   "group": "pickup",
+   "title": "powerUp9",
+   "pack": "digital-audio",
+   "duration": 0.549,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-25.ogg",
+   "group": "pickup",
+   "title": "sfx100v2 items 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.57,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-26.ogg",
+   "group": "pickup",
+   "title": "sfx100v2 items 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.508,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-27.ogg",
+   "group": "pickup",
+   "title": "keys 01",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.41,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-28.ogg",
+   "group": "pickup",
+   "title": "keys 02",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.459,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-29.ogg",
+   "group": "pickup",
+   "title": "keys 03",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.482,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-30.ogg",
+   "group": "pickup",
+   "title": "keys 04",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.379,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-31.ogg",
+   "group": "pickup",
+   "title": "keys 05",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.57,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-32.ogg",
+   "group": "pickup",
+   "title": "keys 06",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.637,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-33.ogg",
+   "group": "pickup",
+   "title": "keys 07",
+   "pack": "oga-rubberduck-metal-wood-100",
+   "duration": 0.569,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-34.ogg",
+   "group": "pickup",
+   "title": "item coins 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.406,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-35.ogg",
+   "group": "pickup",
+   "title": "item coins 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.616,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-36.ogg",
+   "group": "pickup",
+   "title": "item coins 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.482,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-37.ogg",
+   "group": "pickup",
+   "title": "item coins 04",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 1.61,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-38.ogg",
+   "group": "pickup",
+   "title": "item gem 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.247,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-39.ogg",
+   "group": "pickup",
+   "title": "item gem 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.2,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-40.ogg",
+   "group": "pickup",
+   "title": "item gem 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.288,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-41.ogg",
+   "group": "pickup",
+   "title": "item gem 04",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.592,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-42.ogg",
+   "group": "pickup",
+   "title": "item misc 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.408,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-43.ogg",
+   "group": "pickup",
+   "title": "item misc 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.438,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-44.ogg",
+   "group": "pickup",
+   "title": "item misc 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.341,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-45.ogg",
+   "group": "pickup",
+   "title": "item misc 04",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.383,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-46.ogg",
+   "group": "pickup",
+   "title": "item misc 05",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.393,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-47.ogg",
+   "group": "pickup",
+   "title": "item misc 06",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.716,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-48.ogg",
+   "group": "pickup",
+   "title": "item stone 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.735,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-49.ogg",
+   "group": "pickup",
+   "title": "item stone 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.298,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-50.ogg",
+   "group": "pickup",
+   "title": "item stone 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.393,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-51.ogg",
+   "group": "pickup",
+   "title": "item stone 04",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.298,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-52.ogg",
+   "group": "pickup",
+   "title": "item wood 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.542,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-53.ogg",
+   "group": "pickup",
+   "title": "item wood 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.263,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-54.ogg",
+   "group": "pickup",
+   "title": "item wood 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.326,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-55.ogg",
+   "group": "pickup",
+   "title": "handleCoins",
+   "pack": "rpg-audio",
+   "duration": 0.846,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "pickup-56.ogg",
+   "group": "pickup",
+   "title": "handleCoins2",
+   "pack": "rpg-audio",
+   "duration": 0.338,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "reload-01.ogg",
+   "group": "reload",
+   "title": "war reloading",
+   "pack": "voiceover-pack",
+   "duration": 0.712,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "reload-02.ogg",
+   "group": "reload",
+   "title": "war reloading",
+   "pack": "voiceover-pack",
+   "duration": 0.922,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-01.ogg",
+   "group": "step",
+   "title": "gravel",
+   "pack": "oga-footsteps",
+   "duration": 0.704,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-02.ogg",
+   "group": "step",
+   "title": "footstep concrete 000",
+   "pack": "impact-sounds",
+   "duration": 0.106,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-03.ogg",
+   "group": "step",
+   "title": "footstep concrete 001",
+   "pack": "impact-sounds",
+   "duration": 0.108,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-04.ogg",
+   "group": "step",
+   "title": "footstep concrete 003",
+   "pack": "impact-sounds",
+   "duration": 0.11,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-05.ogg",
+   "group": "step",
+   "title": "footstep concrete 002",
+   "pack": "impact-sounds",
+   "duration": 0.113,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-06.ogg",
+   "group": "step",
+   "title": "footstep concrete 004",
+   "pack": "impact-sounds",
+   "duration": 0.114,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-07.ogg",
+   "group": "step",
+   "title": "wood01",
+   "pack": "oga-footsteps",
+   "duration": 0.245,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-08.ogg",
+   "group": "step",
+   "title": "wood02",
+   "pack": "oga-footsteps",
+   "duration": 0.245,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-09.ogg",
+   "group": "step",
+   "title": "mud02",
+   "pack": "oga-footsteps",
+   "duration": 0.26,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-10.ogg",
+   "group": "step",
+   "title": "stone01",
+   "pack": "oga-footsteps",
+   "duration": 0.293,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-11.ogg",
+   "group": "step",
+   "title": "wood03",
+   "pack": "oga-footsteps",
+   "duration": 0.318,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-12.ogg",
+   "group": "step",
+   "title": "leaves01",
+   "pack": "oga-footsteps",
+   "duration": 0.391,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-13.ogg",
+   "group": "step",
+   "title": "leaves02",
+   "pack": "oga-footsteps",
+   "duration": 0.474,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-14.ogg",
+   "group": "step",
+   "title": "footstep carpet 000",
+   "pack": "impact-sounds",
+   "duration": 0.145,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-15.ogg",
+   "group": "step",
+   "title": "footstep carpet 000",
+   "pack": "impact-sounds",
+   "duration": 0.145,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-16.ogg",
+   "group": "step",
+   "title": "footstep carpet 001",
+   "pack": "impact-sounds",
+   "duration": 0.145,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-17.ogg",
+   "group": "step",
+   "title": "footstep carpet 002",
+   "pack": "impact-sounds",
+   "duration": 0.145,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-18.ogg",
+   "group": "step",
+   "title": "footstep carpet 003",
+   "pack": "impact-sounds",
+   "duration": 0.145,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-19.ogg",
+   "group": "step",
+   "title": "footstep carpet 004",
+   "pack": "impact-sounds",
+   "duration": 0.145,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-20.ogg",
+   "group": "step",
+   "title": "footstep concrete 000",
+   "pack": "impact-sounds",
+   "duration": 0.106,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-21.ogg",
+   "group": "step",
+   "title": "footstep concrete 001",
+   "pack": "impact-sounds",
+   "duration": 0.108,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-22.ogg",
+   "group": "step",
+   "title": "footstep concrete 002",
+   "pack": "impact-sounds",
+   "duration": 0.113,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-23.ogg",
+   "group": "step",
+   "title": "footstep concrete 003",
+   "pack": "impact-sounds",
+   "duration": 0.11,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-24.ogg",
+   "group": "step",
+   "title": "footstep concrete 004",
+   "pack": "impact-sounds",
+   "duration": 0.114,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-25.ogg",
+   "group": "step",
+   "title": "footstep grass 000",
+   "pack": "impact-sounds",
+   "duration": 0.778,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-26.ogg",
+   "group": "step",
+   "title": "footstep grass 001",
+   "pack": "impact-sounds",
+   "duration": 0.674,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-27.ogg",
+   "group": "step",
+   "title": "footstep grass 002",
+   "pack": "impact-sounds",
+   "duration": 0.692,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-28.ogg",
+   "group": "step",
+   "title": "footstep grass 003",
+   "pack": "impact-sounds",
+   "duration": 0.669,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-29.ogg",
+   "group": "step",
+   "title": "footstep grass 004",
+   "pack": "impact-sounds",
+   "duration": 0.59,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-30.ogg",
+   "group": "step",
+   "title": "footstep snow 000",
+   "pack": "impact-sounds",
+   "duration": 0.374,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-31.ogg",
+   "group": "step",
+   "title": "footstep snow 001",
+   "pack": "impact-sounds",
+   "duration": 0.374,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-32.ogg",
+   "group": "step",
+   "title": "footstep snow 002",
+   "pack": "impact-sounds",
+   "duration": 0.374,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-33.ogg",
+   "group": "step",
+   "title": "footstep snow 003",
+   "pack": "impact-sounds",
+   "duration": 0.374,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-34.ogg",
+   "group": "step",
+   "title": "footstep snow 004",
+   "pack": "impact-sounds",
+   "duration": 0.374,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-35.ogg",
+   "group": "step",
+   "title": "footstep wood 000",
+   "pack": "impact-sounds",
+   "duration": 0.25,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-36.ogg",
+   "group": "step",
+   "title": "footstep wood 001",
+   "pack": "impact-sounds",
+   "duration": 0.252,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-37.ogg",
+   "group": "step",
+   "title": "footstep wood 002",
+   "pack": "impact-sounds",
+   "duration": 0.251,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-38.ogg",
+   "group": "step",
+   "title": "footstep wood 003",
+   "pack": "impact-sounds",
+   "duration": 0.252,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-39.ogg",
+   "group": "step",
+   "title": "footstep wood 004",
+   "pack": "impact-sounds",
+   "duration": 0.248,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-40.ogg",
+   "group": "step",
+   "title": "gravel",
+   "pack": "oga-footsteps",
+   "duration": 0.704,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-41.ogg",
+   "group": "step",
+   "title": "grunt 01",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.933,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-42.ogg",
+   "group": "step",
+   "title": "grunt 02",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.535,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-43.ogg",
+   "group": "step",
+   "title": "grunt 03",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.666,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-44.ogg",
+   "group": "step",
+   "title": "grunt 04",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.611,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-45.ogg",
+   "group": "step",
+   "title": "grunt 05",
+   "pack": "oga-rubberduck-creatures-80",
+   "duration": 0.65,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-46.ogg",
+   "group": "step",
+   "title": "grunt 06",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.629,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-47.ogg",
+   "group": "step",
+   "title": "grunt 07",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.775,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-48.ogg",
+   "group": "step",
+   "title": "grunt 08",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.571,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-49.ogg",
+   "group": "step",
+   "title": "grunt 09",
+   "pack": "oga-rubberduck-creatures-80-v2",
+   "duration": 0.679,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-50.ogg",
+   "group": "step",
+   "title": "sfx100v2 footstep 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.417,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-51.ogg",
+   "group": "step",
+   "title": "sfx100v2 footstep 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.355,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-52.ogg",
+   "group": "step",
+   "title": "sfx100v2 footstep wet 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.283,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-53.ogg",
+   "group": "step",
+   "title": "sfx100v2 footstep wet 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.402,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-54.ogg",
+   "group": "step",
+   "title": "sfx100v2 footstep wet 03",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.385,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-55.ogg",
+   "group": "step",
+   "title": "sfx100v2 footstep wood 01",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.265,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-56.ogg",
+   "group": "step",
+   "title": "sfx100v2 footstep wood 02",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.247,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-57.ogg",
+   "group": "step",
+   "title": "sfx100v2 footstep wood 03",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.256,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-58.ogg",
+   "group": "step",
+   "title": "sfx100v2 footstep wood 04",
+   "pack": "oga-rubberduck-foley-100-v2",
+   "duration": 0.373,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-59.ogg",
+   "group": "step",
+   "title": "footstep00",
+   "pack": "rpg-audio",
+   "duration": 0.249,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-60.ogg",
+   "group": "step",
+   "title": "footstep01",
+   "pack": "rpg-audio",
+   "duration": 0.282,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-61.ogg",
+   "group": "step",
+   "title": "footstep02",
+   "pack": "rpg-audio",
+   "duration": 0.242,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-62.ogg",
+   "group": "step",
+   "title": "footstep03",
+   "pack": "rpg-audio",
+   "duration": 0.269,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-63.ogg",
+   "group": "step",
+   "title": "footstep04",
+   "pack": "rpg-audio",
+   "duration": 0.323,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-64.ogg",
+   "group": "step",
+   "title": "footstep05",
+   "pack": "rpg-audio",
+   "duration": 0.276,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-65.ogg",
+   "group": "step",
+   "title": "footstep06",
+   "pack": "rpg-audio",
+   "duration": 0.242,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-66.ogg",
+   "group": "step",
+   "title": "footstep07",
+   "pack": "rpg-audio",
+   "duration": 0.256,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-67.ogg",
+   "group": "step",
+   "title": "footstep08",
+   "pack": "rpg-audio",
+   "duration": 0.256,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "step-68.ogg",
+   "group": "step",
+   "title": "footstep09",
+   "pack": "rpg-audio",
+   "duration": 0.215,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "swing-01.ogg",
+   "group": "swing",
+   "title": "blade 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.291,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "swing-02.ogg",
+   "group": "swing",
+   "title": "blade 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.313,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "swing-03.ogg",
+   "group": "swing",
+   "title": "blade 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.396,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "swing-04.ogg",
+   "group": "swing",
+   "title": "knifeSlice2",
+   "pack": "rpg-audio",
+   "duration": 0.569,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "swing-05.ogg",
+   "group": "swing",
+   "title": "knifeSlice",
+   "pack": "rpg-audio",
+   "duration": 0.6,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "swing-06.ogg",
+   "group": "swing",
+   "title": "blade 01",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.291,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "swing-07.ogg",
+   "group": "swing",
+   "title": "blade 02",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.313,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  },
+  {
+   "file": "swing-08.ogg",
+   "group": "swing",
+   "title": "blade 03",
+   "pack": "oga-rubberduck-rpg-80",
+   "duration": 0.396,
+   "license": "CC0 1.0",
+   "source": "open-game-sfx-index (github.com/Legerdo/open-game-sfx-index)"
+  }
+ ],
+ "music": [
+  {
+   "file": "boss-01.ogg",
+   "role": "boss",
+   "title": "Epic Boss Battle",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "boss-02.ogg",
+   "role": "boss",
+   "title": "The Enemy",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "boss-20.ogg",
+   "role": "boss",
+   "title": "Он проснулся",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "boss-21.ogg",
+   "role": "boss",
+   "title": "Тяжёлые шаги",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "boss-22.ogg",
+   "role": "boss",
+   "title": "Молот и хорал",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "boss-23.ogg",
+   "role": "boss",
+   "title": "Последний рубеж",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "boss-24.ogg",
+   "role": "boss",
+   "title": "Дыхание туннеля",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "boss-25.ogg",
+   "role": "boss",
+   "title": "Лязг затвора",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "boss-26.ogg",
+   "role": "boss",
+   "title": "Счёт на удары",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "boss-27.ogg",
+   "role": "boss",
+   "title": "Финальный зал",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-01.ogg",
+   "role": "explore",
+   "title": "Dark Hallway",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "explore-02.ogg",
+   "role": "explore",
+   "title": "Deep Tones",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "explore-03.ogg",
+   "role": "explore",
+   "title": "Horror Suspense",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "explore-04.ogg",
+   "role": "explore",
+   "title": "Attic Secrets",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "explore-05.ogg",
+   "role": "explore",
+   "title": "Mysterious Lights",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "explore-06.ogg",
+   "role": "explore",
+   "title": "Footsteps in the Attic",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "explore-07.ogg",
+   "role": "explore",
+   "title": "Painful Disorientation",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "explore-08.ogg",
+   "role": "explore",
+   "title": "Ancient Rite",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "explore-20.ogg",
+   "role": "explore",
+   "title": "Тихий подвал",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-21.ogg",
+   "role": "explore",
+   "title": "Пустой коридор",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-22.ogg",
+   "role": "explore",
+   "title": "Капает вода",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-23.ogg",
+   "role": "explore",
+   "title": "Холодный цех",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-24.ogg",
+   "role": "explore",
+   "title": "Тени у стены",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-25.ogg",
+   "role": "explore",
+   "title": "Скрип двери",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-26.ogg",
+   "role": "explore",
+   "title": "Мокрый бетон",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-27.ogg",
+   "role": "explore",
+   "title": "Ожидание",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-30.ogg",
+   "role": "explore",
+   "title": "Тихий этаж",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-31.ogg",
+   "role": "explore",
+   "title": "Пыльный проход",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-32.ogg",
+   "role": "explore",
+   "title": "Скрип железа",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-33.ogg",
+   "role": "explore",
+   "title": "Холодная вода",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-34.ogg",
+   "role": "explore",
+   "title": "Ожидание в темноте",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-35.ogg",
+   "role": "explore",
+   "title": "Свет фонаря",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-36.ogg",
+   "role": "explore",
+   "title": "Пустая комната",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "explore-37.ogg",
+   "role": "explore",
+   "title": "Шорох за спиной",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-01.ogg",
+   "role": "fight",
+   "title": "Night Attack",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "fight-02.ogg",
+   "role": "fight",
+   "title": "Battle Ready",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "fight-03.ogg",
+   "role": "fight",
+   "title": "Beginning of Conflict",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "fight-04.ogg",
+   "role": "fight",
+   "title": "Find Them",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "fight-05.ogg",
+   "role": "fight",
+   "title": "Satin Danger",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "fight-06.ogg",
+   "role": "fight",
+   "title": "Hit n Smash",
+   "license": "CC0 1.0",
+   "source": "FreePD (freepd.com) via github.com/SoundSafari/CC0-1.0-Music, перекодировано в OGG"
+  },
+  {
+   "file": "fight-20.ogg",
+   "role": "fight",
+   "title": "Погоня",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-21.ogg",
+   "role": "fight",
+   "title": "Стальная схватка",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-22.ogg",
+   "role": "fight",
+   "title": "На звук",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-23.ogg",
+   "role": "fight",
+   "title": "Драка в темноте",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-24.ogg",
+   "role": "fight",
+   "title": "Отблеск выстрела",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-25.ogg",
+   "role": "fight",
+   "title": "Узкий проход",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-26.ogg",
+   "role": "fight",
+   "title": "Не отступать",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-27.ogg",
+   "role": "fight",
+   "title": "Железо и кровь",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-30.ogg",
+   "role": "fight",
+   "title": "Коридорная схватка",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-31.ogg",
+   "role": "fight",
+   "title": "На звук выстрела",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-32.ogg",
+   "role": "fight",
+   "title": "Отблеск пламени",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-33.ogg",
+   "role": "fight",
+   "title": "Узкий проём",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-34.ogg",
+   "role": "fight",
+   "title": "Железный лязг",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  },
+  {
+   "file": "fight-35.ogg",
+   "role": "fight",
+   "title": "Не отступать",
+   "license": "CC0 1.0 (процедурная генерация)",
+   "source": "Синтезировано скриптом scripts/compose-music.py для «Заброшки»"
+  }
+ ]
+}

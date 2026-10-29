@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0a0d" />
+    <meta name="color-scheme" content="dark" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; frame-src 'none'" />
+    <title>Заброшка</title>
+    <script type="module" crossorigin src="./assets/index-BlV9aJJB.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Dh6BYNeN.css">
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game"></canvas>
+
+      <!-- ===== HUD ===== -->
+      <div id="hud" class="hidden">
+        <div class="hud-top">
+          <div class="hud-block hud-left">
+            <div id="hearts" class="hearts"></div>
+            <div class="hud-line"><span id="weapon-name">ЛОМ</span></div>
+            <div class="hud-line dim"><span id="ammo-text">БЕЗ ПАТРОНОВ</span></div>
+          </div>
+          <div class="hud-block hud-center">
+            <div id="level-title">ПОДВАЛ · ЭТАЖ 1</div>
+            <div id="objective">НАЙДИ КЛЮЧ</div>
+            <div id="boss-bar" class="boss-bar hidden">
+              <div id="boss-fill"></div>
+              <span id="boss-name">СМОТРИТЕЛЬ</span>
+            </div>
+          </div>
+          <div class="hud-block hud-right">
+            <div class="hud-line"><span class="tag">МОНЕТЫ</span> <span id="coins">0</span></div>
+            <div class="hud-line"><span class="tag">КЛЮЧИ</span> <span id="keys">0</span></div>
+            <div class="hud-line"><span class="tag">ГРАНАТЫ</span> <span id="grenade-count">0</span></div>
+            <button id="btn-pause" class="icon-btn" aria-label="Пауза">| |</button>
+          </div>
+        </div>
+
+        <canvas id="minimap" width="120" height="98"></canvas>
+
+        <div id="toast" class="toast"></div>
+
+        <div class="controls">
+          <div class="stick" id="stick" aria-label="Джойстик"><div class="stick-knob"></div></div>
+          <div class="pad">
+            <button class="pad-btn wide" data-action="grenade"><span>ГРАНАТА</span></button>
+            <button class="pad-btn small" data-action="reload"><span>ПЕРЕЗАРЯД</span></button>
+            <button class="pad-btn big attack" data-action="melee"><span>УДАР</span></button>
+            <button class="pad-btn big fire" data-action="shoot"><span>ОГОНЬ</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TITLE ===== -->
+      <section id="screen-title" class="screen active">
+        <div class="panel title-panel">
+          <h1 class="logo">ЗАБРОШКА</h1>
+          <p class="subtitle">ПИКСЕЛЬНЫЙ РОГАЛИК ПО ЗАБРОШЕННЫМ МЕСТАМ</p>
+          <div class="menu">
+            <button class="btn primary" data-go="continue" id="btn-continue">ПРОДОЛЖИТЬ</button>
+            <button class="btn" data-go="new">НОВАЯ ИГРА</button>
+            <button class="btn" data-go="locations">ЛОКАЦИИ</button>
+            <button class="btn" data-go="tutorial">ОБУЧЕНИЕ</button>
+            <button class="btn" data-go="settings">НАСТРОЙКИ</button>
+            <button class="btn ghost" data-go="credits">МУЗЫКА И ЗВУКИ</button>
+          </div>
+          <p class="hint" id="title-hint">Управление: джойстик слева, кнопки справа</p>
+        </div>
+      </section>
+
+      <!-- ===== LOCATIONS ===== -->
+      <section id="screen-locations" class="screen">
+        <div class="panel wide-panel">
+          <h2>КУДА ИДЁМ</h2>
+          <div id="location-list" class="location-list"></div>
+          <div class="row">
+            <button class="btn" data-go="title">НАЗАД</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TUTORIAL ===== -->
+      <section id="screen-tutorial" class="screen">
+        <div class="panel">
+          <h2 id="tutorial-title">ОБУЧЕНИЕ</h2>
+          <div class="tutorial-art"><canvas id="tutorial-canvas" width="320" height="120"></canvas></div>
+          <p id="tutorial-text" class="tutorial-text"></p>
+          <div class="row">
+            <button class="btn ghost" data-go="title">ПРОПУСТИТЬ</button>
+            <button class="btn primary" id="btn-tutorial-next">ДАЛЬШЕ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SETTINGS ===== -->
+      <section id="screen-settings" class="screen">
+        <div class="panel">
+          <h2>НАСТРОЙКИ</h2>
+          <div class="settings">
+            <label class="setting"><span>Звуки</span><input type="checkbox" id="set-sound" /></label>
+            <label class="setting"><span>Музыка</span><input type="checkbox" id="set-music" /></label>
+            <label class="setting"><span>Громкость</span><input type="range" id="set-volume" min="0" max="100" step="5" /></label>
+            <label class="setting"><span>Тряска экрана</span><input type="checkbox" id="set-shake" /></label>
+            <label class="setting"><span>Подсказки</span><input type="checkbox" id="set-hints" /></label>
+            <label class="setting"><span>Мини-карта</span><input type="checkbox" id="set-minimap" /></label>
+            <label class="setting"><span>Размер джойстика</span><input type="range" id="set-stick" min="70" max="130" step="10" /></label>
+          </div>
+          <div class="row">
+            <button class="btn danger" id="btn-wipe">СТЕРЕТЬ ПРОГРЕСС</button>
+            <button class="btn primary" data-go="back">НАЗАД</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SHOP ===== -->
+      <section id="screen-shop" class="screen">
+        <div class="panel wide-panel">
+          <h2>МАГАЗИН <span class="coins-badge" id="shop-coins">0</span></h2>
+          <p class="dim small">Всё найденное в заброшке можно пустить в дело. Цены кусаются, но выбирать тебе.</p>
+          <div class="shop-grid" id="shop-grid"></div>
+          <div class="row">
+            <button class="btn primary" id="btn-shop-next">ДАЛЬШЕ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== LEVEL CLEAR ===== -->
+      <section id="screen-clear" class="screen">
+        <div class="panel">
+          <h2 id="clear-title">ЭТАЖ ПРОЙДЕН</h2>
+          <div class="stats" id="clear-stats"></div>
+          <div class="row">
+            <button class="btn" data-go="title">В МЕНЮ</button>
+            <button class="btn primary" id="btn-clear-next">МАГАЗИН</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== PAUSE ===== -->
+      <section id="screen-pause" class="screen">
+        <div class="panel">
+          <h2>ПАУЗА</h2>
+          <div class="menu">
+            <button class="btn primary" id="btn-resume">ПРОДОЛЖИТЬ</button>
+            <button class="btn" data-go="settings">НАСТРОЙКИ</button>
+            <button class="btn" id="btn-restart-level">ЗАНОВО ЭТАЖ</button>
+            <button class="btn ghost" id="btn-quit">В МЕНЮ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== DEATH ===== -->
+      <section id="screen-death" class="screen">
+        <div class="panel">
+          <h2 class="danger-text">ТЫ ОСТАЛСЯ ТАМ</h2>
+          <p id="death-text" class="dim"></p>
+          <div class="stats" id="death-stats"></div>
+          <div class="row">
+            <button class="btn" data-go="title">В МЕНЮ</button>
+            <button class="btn primary" id="btn-retry">ЕЩЁ РАЗ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== VICTORY ===== -->
+      <section id="screen-victory" class="screen">
+        <div class="panel wide-panel">
+          <h2>ЗАБРОШКА ПРОЙДЕНА</h2>
+          <p class="dim" id="victory-text"></p>
+          <div class="stats" id="victory-stats"></div>
+          <div class="row">
+            <button class="btn primary" data-go="title">В МЕНЮ</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CREDITS ===== -->
+      <section id="screen-credits" class="screen">
+        <div class="panel wide-panel scroll">
+          <h2>МУЗЫКА И ЗВУКИ</h2>
+          <p class="dim small">
+            Графика, код и уровни нарисованы процедурно — пиксель за пикселем. Музыка и звуки взяты
+            из открытых сборников с лицензией <b>CC0 1.0</b> (общественное достояние):
+          </p>
+          <ul class="credits-list" id="credits-list"></ul>
+          <p class="dim small">
+            Шрифты <b>Manrope</b> и <b>Russo One</b> — SIL Open Font License 1.1
+            (тексты лицензий лежат в <code>public/licenses</code>).
+          </p>
+          <div class="row"><button class="btn primary" data-go="title">НАЗАД</button></div>
+        </div>
+      </section>
+    </div>
+
+  </body>
+</html>

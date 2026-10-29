@@ -1,0 +1,372 @@
+{
+ "boss-caretaker": {
+  "file": "boss-caretaker.png",
+  "fill": 0.438,
+  "size": 64
+ },
+ "boss-foreman": {
+  "file": "boss-foreman.png",
+  "fill": 0.466,
+  "size": 64
+ },
+ "boss-surgeon": {
+  "file": "boss-surgeon.png",
+  "fill": 0.323,
+  "size": 64
+ },
+ "decal-basement-0": {
+  "file": "decal-basement-0.png",
+  "fill": 0.316,
+  "size": 16
+ },
+ "decal-basement-1": {
+  "file": "decal-basement-1.png",
+  "fill": 0.312,
+  "size": 16
+ },
+ "decal-basement-2": {
+  "file": "decal-basement-2.png",
+  "fill": 0.25,
+  "size": 16
+ },
+ "decal-basement-3": {
+  "file": "decal-basement-3.png",
+  "fill": 0.238,
+  "size": 16
+ },
+ "decal-basement-4": {
+  "file": "decal-basement-4.png",
+  "fill": 0.254,
+  "size": 16
+ },
+ "decal-basement-5": {
+  "file": "decal-basement-5.png",
+  "fill": 0.469,
+  "size": 16
+ },
+ "decal-factory-0": {
+  "file": "decal-factory-0.png",
+  "fill": 0.617,
+  "size": 16
+ },
+ "decal-factory-1": {
+  "file": "decal-factory-1.png",
+  "fill": 0.723,
+  "size": 16
+ },
+ "decal-factory-2": {
+  "file": "decal-factory-2.png",
+  "fill": 0.508,
+  "size": 16
+ },
+ "decal-factory-3": {
+  "file": "decal-factory-3.png",
+  "fill": 0.73,
+  "size": 16
+ },
+ "decal-factory-4": {
+  "file": "decal-factory-4.png",
+  "fill": 0.871,
+  "size": 16
+ },
+ "decal-factory-5": {
+  "file": "decal-factory-5.png",
+  "fill": 0.844,
+  "size": 16
+ },
+ "decal-hospital-0": {
+  "file": "decal-hospital-0.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "decal-hospital-1": {
+  "file": "decal-hospital-1.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "decal-hospital-2": {
+  "file": "decal-hospital-2.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "decal-hospital-3": {
+  "file": "decal-hospital-3.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "decal-hospital-4": {
+  "file": "decal-hospital-4.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "decal-hospital-5": {
+  "file": "decal-hospital-5.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "door-basement": {
+  "file": "door-basement.png",
+  "fill": 0.781,
+  "size": 16
+ },
+ "door-factory": {
+  "file": "door-factory.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "door-hospital": {
+  "file": "door-hospital.png",
+  "fill": 0.625,
+  "size": 16
+ },
+ "enemy-nurse": {
+  "file": "enemy-nurse.png",
+  "fill": 0.323,
+  "size": 24
+ },
+ "enemy-rat": {
+  "file": "enemy-rat.png",
+  "fill": 0.469,
+  "size": 24
+ },
+ "enemy-skeleton": {
+  "file": "enemy-skeleton.png",
+  "fill": 0.387,
+  "size": 24
+ },
+ "enemy-worker": {
+  "file": "enemy-worker.png",
+  "fill": 0.406,
+  "size": 24
+ },
+ "enemy-zombie": {
+  "file": "enemy-zombie.png",
+  "fill": 0.366,
+  "size": 24
+ },
+ "exit-basement": {
+  "file": "exit-basement.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "exit-factory": {
+  "file": "exit-factory.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "exit-hospital": {
+  "file": "exit-hospital.png",
+  "fill": 0.875,
+  "size": 16
+ },
+ "floor-basement-0": {
+  "file": "floor-basement-0.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-basement-1": {
+  "file": "floor-basement-1.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-basement-2": {
+  "file": "floor-basement-2.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-basement-3": {
+  "file": "floor-basement-3.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-factory-0": {
+  "file": "floor-factory-0.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-factory-1": {
+  "file": "floor-factory-1.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-factory-2": {
+  "file": "floor-factory-2.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-factory-3": {
+  "file": "floor-factory-3.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-hospital-0": {
+  "file": "floor-hospital-0.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-hospital-1": {
+  "file": "floor-hospital-1.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-hospital-2": {
+  "file": "floor-hospital-2.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-hospital-3": {
+  "file": "floor-hospital-3.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "hero-down": {
+  "file": "hero-down.png",
+  "fill": 0.278,
+  "size": 24
+ },
+ "hero-left": {
+  "file": "hero-left.png",
+  "fill": 0.273,
+  "size": 24
+ },
+ "hero-right": {
+  "file": "hero-right.png",
+  "fill": 0.323,
+  "size": 24
+ },
+ "hero-up": {
+  "file": "hero-up.png",
+  "fill": 0.245,
+  "size": 24
+ },
+ "item-ammo": {
+  "file": "item-ammo.png",
+  "fill": 0.714,
+  "size": 14
+ },
+ "item-coin": {
+  "file": "item-coin.png",
+  "fill": 0.699,
+  "size": 14
+ },
+ "item-coins": {
+  "file": "item-coins.png",
+  "fill": 0.577,
+  "size": 14
+ },
+ "item-drink": {
+  "file": "item-drink.png",
+  "fill": 0.367,
+  "size": 14
+ },
+ "item-grenade": {
+  "file": "item-grenade.png",
+  "fill": 0.526,
+  "size": 14
+ },
+ "item-key": {
+  "file": "item-key.png",
+  "fill": 0.224,
+  "size": 14
+ },
+ "item-medkit": {
+  "file": "item-medkit.png",
+  "fill": 0.796,
+  "size": 14
+ },
+ "item-padlock": {
+  "file": "item-padlock.png",
+  "fill": 0.704,
+  "size": 14
+ },
+ "prop-barrel": {
+  "file": "prop-barrel.png",
+  "fill": 0.543,
+  "size": 24
+ },
+ "prop-box": {
+  "file": "prop-box.png",
+  "fill": 0.507,
+  "size": 24
+ },
+ "prop-crate": {
+  "file": "prop-crate.png",
+  "fill": 0.627,
+  "size": 24
+ },
+ "prop-locker": {
+  "file": "prop-locker.png",
+  "fill": 0.427,
+  "size": 24
+ },
+ "prop-torch": {
+  "file": "prop-torch.png",
+  "fill": 0.516,
+  "size": 24
+ },
+ "prop-tyres": {
+  "file": "prop-tyres.png",
+  "fill": 0.658,
+  "size": 24
+ },
+ "wall-basement": {
+  "file": "wall-basement.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "wall-factory": {
+  "file": "wall-factory.png",
+  "fill": 0.629,
+  "size": 16
+ },
+ "wall-hospital": {
+  "file": "wall-hospital.png",
+  "fill": 0.875,
+  "size": 16
+ },
+ "wall-top-basement": {
+  "file": "wall-top-basement.png",
+  "fill": 0.367,
+  "size": 16
+ },
+ "wall-top-factory": {
+  "file": "wall-top-factory.png",
+  "fill": 0.746,
+  "size": 16
+ },
+ "wall-top-hospital": {
+  "file": "wall-top-hospital.png",
+  "fill": 0.531,
+  "size": 16
+ },
+ "weapon-axe": {
+  "file": "weapon-axe.png",
+  "fill": 0.231,
+  "size": 18
+ },
+ "weapon-crowbar": {
+  "file": "weapon-crowbar.png",
+  "fill": 0.123,
+  "size": 18
+ },
+ "weapon-knife": {
+  "file": "weapon-knife.png",
+  "fill": 0.16,
+  "size": 18
+ },
+ "weapon-pistol": {
+  "file": "weapon-pistol.png",
+  "fill": 0.457,
+  "size": 18
+ },
+ "weapon-rifle": {
+  "file": "weapon-rifle.png",
+  "fill": 0.151,
+  "size": 18
+ },
+ "weapon-shotgun": {
+  "file": "weapon-shotgun.png",
+  "fill": 0.238,
+  "size": 18
+ }
+}
