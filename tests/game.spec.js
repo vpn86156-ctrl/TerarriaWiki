@@ -67,6 +67,17 @@ test('новая игра запускает уровень и показыва�
   expect(page.__errors).toEqual([]);
 });
 
+test('спрайты загружаются и используются в кадре', async ({ page }) => {
+  await skipTutorial(page);
+  await page.locator('[data-go="new"]').click();
+  await page.waitForTimeout(1500);
+  const count = await page.evaluate(() => window.__zabroshka.sprites);
+  expect(count, 'спрайты должны прийти из images/sprites').toBeGreaterThan(8);
+  const stats = await canvasStats(page);
+  expect(stats.colors, 'спрайты делают кадр богаче по цвету').toBeGreaterThan(40);
+  expect(page.__errors).toEqual([]);
+});
+
 test('игра рисует кадры и двигает героя клавиатурой', async ({ page }) => {
   await skipTutorial(page);
   await page.locator('[data-go="new"]').click();

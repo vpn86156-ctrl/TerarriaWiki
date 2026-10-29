@@ -1,7 +1,7 @@
 /* «Заброшка» — сборка игры: экраны, HUD, ввод, звук, прогресс. */
 
 import { createGame, updateGame, applyPurchase, equipWeapon } from './engine.js';
-import { renderGame, renderMinimap, resize } from './render.js';
+import { renderGame, renderMinimap, resize, loadSprites, spriteCount } from './render.js';
 import {
   LOCATIONS, SHOP_ITEMS, SHOP_WEAPONS, TUTORIAL, WEAPONS, AMMO_LABEL,
 } from './content.js';
@@ -239,24 +239,28 @@ function handleEvents(events) {
   for (const event of events) {
     switch (event) {
       case 'swing': audio.play('swing', { volume: .5, throttle: .05 }); break;
-      case 'hit-enemy': audio.play('hit', { volume: .6, throttle: .04 }); combatTimer = Math.max(combatTimer, 3); break;
+      case 'hit-enemy': audio.play('hit', { volume: .6, throttle: .04 }); break;
       case 'enemy-die':
         audio.play('hit', { volume: .7, rate: .85 });
         audio.play('growl', { volume: .35, rate: .8, throttle: .3 });
         break;
-      case 'enemy-shoot': audio.play('gun', { volume: .35, rate: .7, throttle: .1 }); combatTimer = Math.max(combatTimer, 3); break;
+      case 'enemy-shoot': audio.play('gun', { volume: .35, rate: .7, throttle: .1 }); break;
       case 'player-hurt': audio.play('hurt', { volume: .7, throttle: .2 }); combatTimer = Math.max(combatTimer, 3); break;
       case 'player-die': audio.play('hurt', { volume: 1, rate: .7 }); deathDelay = 1.1; break;
-      case 'shoot': audio.play('gun', { volume: .55, throttle: .04 }); combatTimer = Math.max(combatTimer, 2.5); break;
+      case 'shoot': audio.play('gun', { volume: .55, throttle: .04 }); break;
       case 'reload': audio.play('reload', { volume: .5 }); break;
       case 'reload-done': audio.play('click', { volume: .35 }); break;
       case 'grenade-throw': audio.play('swing', { volume: .4, rate: .6 }); break;
-      case 'explosion': audio.play('boom', { volume: .8 }); combatTimer = Math.max(combatTimer, 3); break;
+      case 'explosion': audio.play('boom', { volume: .8 }); break;
       case 'prop-break': audio.play('hit', { volume: .45, rate: .7, throttle: .1 }); break;
       case 'coin': audio.play('pickup', { volume: .35, rate: 1.5, throttle: .05 }); break;
       case 'key': audio.play('pickup', { volume: .6, rate: 1.2 }); toast('КЛЮЧ НАЙДЕН'); break;
       case 'pickup': audio.play('pickup', { volume: .5, throttle: .1 }); break;
       case 'door-open': audio.play('door', { volume: .7 }); toast('ДВЕРЬ ОТКРЫТА'); break;
+      case 'boss-wake':
+        audio.play('growl', { volume: .9, rate: .8 });
+        toast('БОСС ПРОСНУЛСЯ');
+        break;
       case 'boss-telegraph': audio.play('growl', { volume: .8 }); break;
       case 'boss-shoot': audio.play('gun', { volume: .45, rate: .6 }); break;
       case 'boss-phase': audio.play('boom', { volume: .5, rate: .7 }); toast('БОСС В ЯРОСТИ'); break;
@@ -278,9 +282,14 @@ function updateMusic(dt) {
   if (!game) return;
   combatTimer = Math.max(0, combatTimer - dt);
   const boss = game.level.boss;
-  const bossNear = boss && !boss.dead && Math.hypot(boss.x - game.player.x, boss.y - game.player.y) < 340;
-  const awake = game.level.enemies.some((enemy) => enemy.state === 'chase' || enemy.state === 'attack');
-  if (awake) combatTimer = Math.max(combatTimer, 2);
+  // Нагнетающая музыка включается только от реальной угрозы рядом:
+  // живой агрессивный моб ближе 250 px или проснувшийся босс ближе 320 px.
+  const threat = game.level.enemies.some((enemy) => !enemy.dead
+    && (enemy.state === 'chase' || enemy.state === 'attack')
+    && Math.hypot(enemy.x - game.player.x, enemy.y - game.player.y) < 250);
+  if (threat) combatTimer = Math.max(combatTimer, 2.5);
+  const bossNear = boss && !boss.dead && boss.awake
+    && Math.hypot(boss.x - game.player.x, boss.y - game.player.y) < 320;
   const role = bossNear ? 'boss' : combatTimer > 0 ? 'fight' : 'explore';
   if (role !== lastMusicRole) {
     lastMusicRole = role;
@@ -633,6 +642,8 @@ function resizeAll() {
 
 function boot() {
   resizeAll();
+  // Спрайты подгружаются параллельно: до их прихода всё рисуется процедурно.
+  void loadSprites();
   window.addEventListener('resize', resizeAll);
   window.addEventListener('orientationchange', () => setTimeout(resizeAll, 120));
 
@@ -703,6 +714,7 @@ window.__zabroshka = {
   get frames() { return frames; },
   get audio() { return audio; },
   get controls() { return controls; },
+  get sprites() { return spriteCount(); },
   startLevel,
   show,
   openShop,

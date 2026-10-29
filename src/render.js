@@ -13,6 +13,82 @@ const state = {
   vignette: null,
 };
 
+/* ---------- pixel sprites ----------
+   Игра рисует настоящие нарисованные спрайты из public/images/sprites:
+   тайлы локаций, герой, враги, боссы, реквизит и предметы. Если картинка
+   не загрузилась (например, игра открыта без ассетов), рендер сам нарисует
+   пиксельный резерв. */
+const sprites = { images: new Map(), pending: null, ready: false };
+
+export function loadSprites(base = './images/sprites') {
+  if (typeof Image === 'undefined' || typeof fetch === 'undefined') return Promise.resolve(sprites);
+  if (sprites.pending) return sprites.pending;
+  sprites.pending = fetch(`${base}/manifest.json`)
+    .then((response) => response.json())
+    .then((manifest) => Promise.all(Object.keys(manifest).map((name) => new Promise((resolve) => {
+      const image = new Image();
+      image.onload = () => { sprites.images.set(name, image); resolve(); };
+      image.onerror = () => resolve();
+      image.src = `${base}/${manifest[name].file}`;
+    }))))
+    .catch(() => {})
+    .then(() => {
+      sprites.ready = true;
+      // Кэш тайлов мог собраться до загрузки картинок — пересоберём его спрайтами.
+      state.tiles.clear();
+      state.vignette = null;
+    });
+  return sprites.pending;
+}
+export const spritesReady = () => sprites.ready;
+export const spriteCount = () => sprites.images.size;
+function sprite(name) {
+  return sprites.images.get(name) || null;
+}
+// Рисует спрайт по центру (x, y); возвращает false, если спрайта нет.
+function drawSprite(ctx, name, x, y, size, { flip = false, alpha = 1, angle = 0 } = {}) {
+  const image = sprite(name);
+  if (!image) return false;
+  ctx.save();
+  if (alpha < 1) ctx.globalAlpha = alpha;
+  if (angle) {
+    ctx.translate(Math.round(x), Math.round(y));
+    ctx.rotate(angle);
+    ctx.drawImage(image, Math.round(-size / 2), Math.round(-size / 2), size, size);
+  } else if (flip) {
+    ctx.translate(Math.round(x) + size / 2, Math.round(y) + size / 2);
+    ctx.scale(-1, 1);
+    ctx.drawImage(image, Math.round(-size / 2), Math.round(-size / 2), size, size);
+  } else {
+    ctx.drawImage(image, Math.round(x - size / 2), Math.round(y - size / 2), size, size);
+  }
+  ctx.restore();
+  return true;
+}
+// Тайл 16×16: спрайт либо процедурный резерв, нарисованный палитрой локации.
+function spriteTile(name, painter, palette = null) {
+  const key = `sprite|${name}`;
+  const cached = state.tiles.get(key);
+  if (cached) return cached;
+  const canvas = document.createElement('canvas');
+  canvas.width = TILE; canvas.height = TILE;
+  const context = canvas.getContext('2d');
+  const image = sprite(name);
+  if (image) context.drawImage(image, 0, 0, TILE, TILE);
+  else painter(context, palette);
+  state.tiles.set(key, canvas);
+  return canvas;
+}
+// Чем разбавлен пол каждой локации: пятна, мусор, трещины.
+export const FLOOR_DECALS = {
+  basement: ['decal-puddle-basement', 'decal-rubble-basement', 'decal-crack-basement',
+    'decal-moss-basement', 'decal-blood-basement', 'decal-planks-basement'],
+  hospital: ['decal-blood-hospital', 'decal-puddle-hospital', 'decal-glass-hospital',
+    'decal-theatre-hospital', 'decal-peel-hospital', 'decal-vent-hospital'],
+  factory: ['decal-oil-factory', 'decal-scrap-factory', 'decal-rebar-factory',
+    'decal-hazard-factory', 'decal-ember-factory', 'decal-conveyor-factory'],
+};
+
 export function resize(canvas, ctx, width, height) {
   const ratio = Math.max(1.3, Math.min(2.6, width / height));
   state.internalH = VIEW_HEIGHT;
@@ -43,8 +119,8 @@ function tileCanvas(key, palette, painter) {
   state.tiles.set(key, canvas);
   return canvas;
 }
-function floorCanvas(palette, index) {
-  return tileCanvas(`floor|${palette.floor[0]}|${index}`, palette, (ctx, colors) => {
+function floorCanvas(palette, index, locationId) {
+  return spriteTile(`floor-${locationId}-${index % 4}`, (ctx, colors) => {
     ctx.fillStyle = colors.floor[index % colors.floor.length];
     ctx.fillRect(0, 0, TILE, TILE);
     // Бетонные крапинки и пара трещин, одинаковые для каждого варианта.
@@ -61,10 +137,10 @@ function floorCanvas(palette, index) {
     ctx.moveTo(1, TILE - 1); ctx.lineTo(TILE - 2, TILE - 1);
     ctx.moveTo(TILE - 1, 1); ctx.lineTo(TILE - 1, TILE - 2);
     ctx.stroke();
-  });
+  }, palette);
 }
-function wallCanvas(palette) {
-  return tileCanvas(`wall|${palette.wall}`, palette, (ctx, colors) => {
+function wallCanvas(palette, locationId, top = false) {
+  return spriteTile(`wall-${top ? 'top-' : ''}${locationId}`, (ctx, colors) => {
     ctx.fillStyle = colors.wall;
     ctx.fillRect(0, 0, TILE, TILE);
     ctx.fillStyle = colors.wallTop;
@@ -74,7 +150,7 @@ function wallCanvas(palette) {
     for (let x = 0; x < TILE; x += 8) ctx.fillRect(x, 0, 1, TILE);
     ctx.fillStyle = 'rgba(0,0,0,.35)';
     ctx.fillRect(0, TILE - 2, TILE, 2);
-  });
+  }, palette);
 }
 
 /* ---------- pixel characters ---------- */
@@ -83,6 +159,25 @@ function drawCharacter(ctx, x, y, options) {
   const bob = Math.round(Math.sin(frame) * 1);
   const px = Math.round(x);
   const py = Math.round(y);
+  // Готовый спрайт перекрывает процедурную фигуру: он заметно детальнее.
+  const spriteName = options.sprite ? (Array.isArray(options.sprite)
+    ? options.sprite[Math.abs(Math.floor(frame)) % options.sprite.length]
+    : options.sprite) : null;
+  if (spriteName && sprite(spriteName)) {
+    const size = (options.spriteSize || 22) * scale;
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,.32)';
+    ctx.beginPath();
+    ctx.ellipse(px, py + 6 * scale, 6 * scale, 2.6 * scale, 0, 0, TAU);
+    ctx.fill();
+    if (flash > 0) ctx.globalAlpha = .75;
+    drawSprite(ctx, spriteName, px, py + 6 * scale - size / 2 - squash, size,
+      { flip: Math.cos(facing) < -.25 });
+    ctx.restore();
+    // Оружие рисуется поверх спрайта — в руке переднего плана.
+    if (swing > 0) drawHeldWeapon(ctx, options.weapon || 'crowbar', px, py - 2 * scale, facing, swing, scale);
+    return;
+  }
   ctx.save();
   // Тень.
   ctx.fillStyle = 'rgba(0,0,0,.32)';
@@ -120,20 +215,25 @@ function drawCharacter(ctx, x, y, options) {
   const handY = py - 2 * scale + Math.sin(facing) * reach * .7;
   ctx.fillStyle = skin;
   ctx.fillRect(Math.round(handX) - scale, Math.round(handY) - scale, 2 * scale, 2 * scale);
-  if (swing > 0) {
-    const weapon = options.weapon || 'crowbar';
-    const length = (weapon === 'axe' ? 9 : weapon === 'knife' ? 5 : 8) * scale;
-    const angle = facing + (0.5 - swing) * 1.6;
-    ctx.strokeStyle = weapon === 'knife' ? '#dfe6ea' : weapon === 'axe' ? '#b9c2c8' : '#8d939a';
-    ctx.lineWidth = weapon === 'crowbar' ? 2 * scale : 2 * scale;
-    ctx.beginPath();
-    ctx.moveTo(Math.round(handX), Math.round(handY));
-    ctx.lineTo(Math.round(handX + Math.cos(angle) * length), Math.round(handY + Math.sin(angle) * length));
-    ctx.stroke();
-    if (weapon === 'axe') {
-      ctx.fillStyle = '#dfe6ea';
-      ctx.fillRect(Math.round(handX + Math.cos(angle) * length) - scale, Math.round(handY + Math.sin(angle) * length) - scale, 3 * scale, 3 * scale);
-    }
+  if (swing > 0) drawHeldWeapon(ctx, options.weapon || 'crowbar', handX, handY, facing, swing, scale);
+  ctx.restore();
+}
+// Оружие в руке: спрайт с поворотом, а если спрайта нет — старая добрая линия.
+function drawHeldWeapon(ctx, weapon, handX, handY, facing, swing, scale = 1) {
+  const angle = facing + (.5 - swing) * 1.6;
+  if (drawSprite(ctx, `weapon-${weapon}`, handX + Math.cos(angle) * 5, handY + Math.sin(angle) * 5,
+    16 * scale, { angle: angle + Math.PI / 4 })) return;
+  const length = (weapon === 'axe' ? 9 : weapon === 'knife' ? 5 : 8) * scale;
+  ctx.save();
+  ctx.strokeStyle = weapon === 'knife' ? '#dfe6ea' : weapon === 'axe' ? '#b9c2c8' : '#8d939a';
+  ctx.lineWidth = 2 * scale;
+  ctx.beginPath();
+  ctx.moveTo(Math.round(handX), Math.round(handY));
+  ctx.lineTo(Math.round(handX + Math.cos(angle) * length), Math.round(handY + Math.sin(angle) * length));
+  ctx.stroke();
+  if (weapon === 'axe') {
+    ctx.fillStyle = '#dfe6ea';
+    ctx.fillRect(Math.round(handX + Math.cos(angle) * length) - scale, Math.round(handY + Math.sin(angle) * length) - scale, 3 * scale, 3 * scale);
   }
   ctx.restore();
 }
@@ -146,6 +246,8 @@ function drawProp(ctx, prop, palette) {
     return;
   }
   const x = Math.round(prop.x), y = Math.round(prop.y);
+  const spriteName = prop.kind === 'barrel' ? 'prop-barrel' : 'prop-crate';
+  if (drawSprite(ctx, spriteName, x, y - 3, 22, { flip: Math.floor(prop.x) % 2 === 0 })) return;
   ctx.fillStyle = 'rgba(0,0,0,.3)';
   ctx.fillRect(x - 7, y + 4, 14, 3);
   if (prop.kind === 'barrel') {
@@ -166,8 +268,11 @@ function drawProp(ctx, prop, palette) {
     ctx.fillRect(x - 1, y - 8, 2, 13);
   }
 }
+const PICKUP_SPRITE = { coin: 'item-coin', key: 'item-key', ammo: 'item-ammo', medkit: 'item-medkit' };
 function drawPickup(ctx, pickup, time) {
   const x = Math.round(pickup.x), y = Math.round(pickup.y) + Math.round(Math.sin(pickup.bob) * 1.5);
+  const spriteName = PICKUP_SPRITE[pickup.kind];
+  if (spriteName && drawSprite(ctx, spriteName, x, y - 2, 13)) return;
   ctx.fillStyle = 'rgba(0,0,0,.28)';
   ctx.fillRect(x - 3, y + 4, 6, 2);
   if (pickup.kind === 'coin') {
@@ -275,6 +380,7 @@ function drawLighting(game, camera, palette) {
 export function renderGame(ctx, game, options = {}) {
   const { w, h } = state;
   const palette = game.location.palette;
+  const locationId = game.location.id;
   const level = game.level;
   const player = game.player;
   const camera = {
@@ -304,7 +410,16 @@ export function renderGame(ctx, game, options = {}) {
       const tile = level.grid[ty * level.w + tx];
       if (tile === VOID) continue;
       const variant = (tx * 7 + ty * 13) % 4;
-      ctx.drawImage(floorCanvas(palette, variant), tx * TILE - camera.x, ty * TILE - camera.y);
+      ctx.drawImage(floorCanvas(palette, variant, locationId), tx * TILE - camera.x, ty * TILE - camera.y);
+      // Пол разбавлен пятнами и мусором, чтобы не выглядеть однотонным.
+      const decals = FLOOR_DECALS[locationId];
+      if (decals) {
+        const hash = ((tx * 73856093) ^ (ty * 19349663)) >>> 0;
+        if (hash % 100 < 18) {
+          const name = decals[(hash >>> 7) % decals.length];
+          if (sprite(name)) ctx.drawImage(spriteTile(name, () => {}), tx * TILE - camera.x, ty * TILE - camera.y);
+        }
+      }
     }
   }
   // Пятна крови и гари — под всем остальным.
@@ -320,17 +435,22 @@ export function renderGame(ctx, game, options = {}) {
   const exitPulse = .5 + Math.sin(game.time * 3) * .2;
   ctx.fillStyle = `rgba(255,210,120,${(.25 + exitPulse * .3).toFixed(2)})`;
   ctx.fillRect(level.exit.x - 9 - camera.x, level.exit.y - 9 - camera.y, 18, 18);
-  ctx.fillStyle = '#ffd27a';
-  ctx.fillRect(level.exit.x - 7 - camera.x, level.exit.y - 7 - camera.y, 14, 14);
-  ctx.fillStyle = palette.shadow;
-  for (let i = 0; i < 4; i += 1) ctx.fillRect(level.exit.x - 5 - camera.x + i * 3, level.exit.y - 5 - camera.y + i * 4, 2, 3);
+  if (!drawSprite(ctx, `exit-${locationId}`, level.exit.x - camera.x, level.exit.y - camera.y, 18)) {
+    ctx.fillStyle = '#ffd27a';
+    ctx.fillRect(level.exit.x - 7 - camera.x, level.exit.y - 7 - camera.y, 14, 14);
+    ctx.fillStyle = palette.shadow;
+    for (let i = 0; i < 4; i += 1) ctx.fillRect(level.exit.x - 5 - camera.x + i * 3, level.exit.y - 5 - camera.y + i * 4, 2, 3);
+  }
   // Запертая дверь.
   if (!game.doorOpen) {
     const dx = level.door.x * TILE - camera.x, dy = level.door.y * TILE - camera.y;
-    ctx.fillStyle = '#6b4a2a';
-    ctx.fillRect(dx, dy, TILE, TILE);
-    ctx.fillStyle = '#8a6438';
-    ctx.fillRect(dx + 1, dy + 1, TILE - 2, TILE - 2);
+    const doorDrawn = drawSprite(ctx, `door-${locationId}`, dx + TILE / 2, dy + TILE / 2, TILE);
+    if (!doorDrawn) {
+      ctx.fillStyle = '#6b4a2a';
+      ctx.fillRect(dx, dy, TILE, TILE);
+      ctx.fillStyle = '#8a6438';
+      ctx.fillRect(dx + 1, dy + 1, TILE - 2, TILE - 2);
+    }
     ctx.fillStyle = '#ffd76a';
     ctx.fillRect(dx + 6, dy + 7, 4, 4);
   }
@@ -345,19 +465,24 @@ export function renderGame(ctx, game, options = {}) {
   drawables.sort((a, b) => a.y - b.y);
 
   // Стены рисуются после пола, но перед теми, кто стоит рядом с ними.
-  const wallTile = wallCanvas(palette);
+  const wallTile = wallCanvas(palette, locationId, false);
+  const wallTopTile = wallCanvas(palette, locationId, true);
   for (let ty = minY; ty <= maxY; ty += 1) {
     for (let tx = minX; tx <= maxX; tx += 1) {
       if (level.grid[ty * level.w + tx] !== WALL) continue;
-      ctx.drawImage(wallTile, tx * TILE - camera.x, ty * TILE - camera.y);
+      // Стена, под которой нет другой стены, получает верхнюю грань.
+      const above = ty > 0 ? level.grid[(ty - 1) * level.w + tx] : VOID;
+      ctx.drawImage(above === WALL ? wallTile : wallTopTile, tx * TILE - camera.x, ty * TILE - camera.y);
     }
   }
   // Факелы горят на стенах.
   for (const torch of level.torches) {
     const x = torch.x - camera.x, y = torch.y - camera.y;
     if (x < -20 || y < -20 || x > w + 20 || y > h + 20) continue;
-    ctx.fillStyle = '#3a2a1c';
-    ctx.fillRect(Math.round(x) - 1, Math.round(y) - 2, 2, 6);
+    if (!drawSprite(ctx, 'prop-torch', x, y - 3, 16)) {
+      ctx.fillStyle = '#3a2a1c';
+      ctx.fillRect(Math.round(x) - 1, Math.round(y) - 2, 2, 6);
+    }
     const flame = 3 + Math.sin(game.time * 9 + torch.phase) * 1.2;
     ctx.fillStyle = palette.torch;
     ctx.fillRect(Math.round(x) - 2, Math.round(y) - 4 - flame, 4, flame + 2);
@@ -372,17 +497,23 @@ export function renderGame(ctx, game, options = {}) {
     else if (entry.kind === 'player') {
       const swing = player.swing ? 1 - player.swing.timer / player.swing.max : 0;
       if (player.invulnerable > 0 && Math.floor(game.time * 20) % 2 === 0) continue;
+      const lookX = Math.cos(player.facing), lookY = Math.sin(player.facing);
+      const direction = lookX < -.35 ? 'left' : lookX > .35 ? 'right' : lookY > 0 ? 'down' : 'up';
       drawCharacter(ctx, player.x - camera.x, player.y - camera.y, {
         colors: player.hurt > 0 ? ['#ffdcdc', '#c9433f', '#7a2020'] : ['#f2c9a0', '#3f6fa8', '#2a3f52'],
         scale: 1, frame: player.moving ? player.walk : Math.sin(game.time * 2) * .4,
         facing: player.facing, swing, weapon: player.melee, flash: 0,
+        sprite: `hero-${direction}`, spriteSize: 24,
       });
       // Оружие во второй руке.
       if (player.gun) {
         const gx = player.x - camera.x + Math.cos(player.facing) * 5;
         const gy = player.y - camera.y - 1 + Math.sin(player.facing) * 3;
-        ctx.fillStyle = '#2f3338';
-        ctx.fillRect(Math.round(gx) - 1, Math.round(gy) - 1, player.gun === 'shotgun' ? 7 : 5, 2);
+        if (!drawSprite(ctx, `weapon-${player.gun}`, gx, gy, 13,
+          { flip: lookX < -.2, angle: lookY > .5 ? Math.PI : 0 })) {
+          ctx.fillStyle = '#2f3338';
+          ctx.fillRect(Math.round(gx) - 1, Math.round(gy) - 1, player.gun === 'shotgun' ? 7 : 5, 2);
+        }
       }
     } else if (entry.kind === 'enemy') {
       drawCharacter(ctx, item.x - camera.x, item.y - camera.y, {
@@ -390,6 +521,7 @@ export function renderGame(ctx, game, options = {}) {
         frame: Math.hypot(item.vx, item.vy) > 5 ? game.time * 8 + item.x : Math.sin(game.time * 2 + item.x) * .5,
         facing: item.facing, swing: item.windup > 0 ? 1 - item.windup / .35 : 0,
         weapon: 'crowbar', flash: item.flash,
+        sprite: `enemy-${item.type}`, spriteSize: 24,
       });
       if (item.windup > 0) {
         ctx.strokeStyle = 'rgba(255,90,90,.8)';
@@ -419,6 +551,7 @@ export function renderGame(ctx, game, options = {}) {
         colors: boss.palette, scale: boss.scale,
         frame: game.time * 4, facing: boss.facing,
         swing: boss.windup > 0 ? 1 : 0, weapon: 'axe', flash: boss.flash,
+        sprite: `boss-${boss.id}`, spriteSize: 46,
       });
       const ratio = Math.max(0, boss.health / boss.maxHealth);
       ctx.fillStyle = 'rgba(0,0,0,.65)';
@@ -433,8 +566,10 @@ export function renderGame(ctx, game, options = {}) {
   // Гранаты, пули, частицы.
   for (const grenade of game.grenades) {
     const x = Math.round(grenade.x - camera.x), y = Math.round(grenade.y - camera.y);
-    ctx.fillStyle = '#3f5c38';
-    ctx.fillRect(x - 2, y - 3, 4, 6);
+    if (!drawSprite(ctx, 'item-grenade', x, y - 2, 11, { angle: grenade.spin })) {
+      ctx.fillStyle = '#3f5c38';
+      ctx.fillRect(x - 2, y - 3, 4, 6);
+    }
     ctx.fillStyle = Math.floor(grenade.fuse * 8) % 2 ? '#ff6b6b' : '#7a2020';
     ctx.fillRect(x - 1, y - 4, 2, 2);
   }

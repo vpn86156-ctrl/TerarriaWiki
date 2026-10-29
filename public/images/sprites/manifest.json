@@ -1,0 +1,82 @@
+{
+ "door-basement": {
+  "file": "door-basement.png",
+  "fill": 0.781,
+  "size": 16
+ },
+ "door-hospital": {
+  "file": "door-hospital.png",
+  "fill": 0.625,
+  "size": 16
+ },
+ "exit-basement": {
+  "file": "exit-basement.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "exit-hospital": {
+  "file": "exit-hospital.png",
+  "fill": 0.875,
+  "size": 16
+ },
+ "floor-basement-0": {
+  "file": "floor-basement-0.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-basement-1": {
+  "file": "floor-basement-1.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-basement-2": {
+  "file": "floor-basement-2.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-basement-3": {
+  "file": "floor-basement-3.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-hospital-0": {
+  "file": "floor-hospital-0.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-hospital-1": {
+  "file": "floor-hospital-1.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-hospital-2": {
+  "file": "floor-hospital-2.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "floor-hospital-3": {
+  "file": "floor-hospital-3.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "wall-basement": {
+  "file": "wall-basement.png",
+  "fill": 1.0,
+  "size": 16
+ },
+ "wall-hospital": {
+  "file": "wall-hospital.png",
+  "fill": 0.875,
+  "size": 16
+ },
+ "wall-top-basement": {
+  "file": "wall-top-basement.png",
+  "fill": 0.367,
+  "size": 16
+ },
+ "wall-top-hospital": {
+  "file": "wall-top-hospital.png",
+  "fill": 0.531,
+  "size": 16
+ }
+}

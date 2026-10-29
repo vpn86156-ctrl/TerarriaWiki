@@ -142,6 +142,8 @@ test('смерть босса открывает выход и не роняет
   const game = createGame({ seed: 321, locationIndex: 0, slot: LOCATIONS[0].levels - 1, upgrades: {} });
   const boss = game.level.boss;
   assert.ok(boss, 'на последнем этаже должен быть босс');
+  // Спящий босс неуязвим: будим его, иначе взрыв пройдёт мимо.
+  boss.awake = true;
   // Прямой урон, как от гранаты: раньше босс умирал «неправильно» и дверь оставалась запертой.
   game.grenades.push({ x: boss.x, y: boss.y, vx: 0, vy: 0, fuse: .01, radius: 6, spin: 0 });
   const before = boss.health;
@@ -152,6 +154,20 @@ test('смерть босса открывает выход и не роняет
   for (let step = 0; step < 30; step += 1) updateGame(game, 1 / 60, { move: { x: 0, y: 0 } });
   assert.equal(boss.dead, true, 'босс должен умереть');
   assert.equal(game.doorOpen, true, 'после смерти босса выход открыт');
+});
+
+test('босс спит и сохраняет полное здоровье, пока игрок не подошёл', () => {
+  const game = createGame({ seed: 4242, locationIndex: 0, slot: LOCATIONS[0].levels - 1, upgrades: {} });
+  const boss = game.level.boss;
+  assert.ok(boss, 'на последнем этаже должен быть босс');
+  game.player.x = game.level.spawn.x; game.player.y = game.level.spawn.y;
+  for (let step = 0; step < 240; step += 1) updateGame(game, 1 / 60, { move: { x: 0, y: 0 } });
+  assert.equal(boss.awake, false, 'далеко от игрока босс должен спать');
+  assert.equal(boss.health, boss.maxHealth, 'к приходу игрока у босса полное здоровье');
+  // Подошли вплотную — босс просыпается.
+  game.player.x = boss.x - 30; game.player.y = boss.y;
+  updateGame(game, 1 / 60, { move: { x: 0, y: 0 } });
+  assert.equal(boss.awake, true, 'рядом с игроком босс должен проснуться');
 });
 
 test('ближний бой и выстрелы наносят урон врагу', () => {

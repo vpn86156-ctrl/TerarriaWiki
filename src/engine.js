@@ -174,7 +174,7 @@ function generateLevel(game, locationIndex, slot) {
       speed: boss.speed, damage: boss.damage, scale: boss.scale, palette: boss.palette,
       attacks: boss.attacks, reward: boss.reward,
       phase: 1, phaseCount: 3, attack: null, timer: 2, windup: 0, cooldown: 1.4,
-      flash: 0, vx: 0, vy: 0, facing: 0,
+      awake: false, flash: 0, vx: 0, vy: 0, facing: 0,
     };
   }
 
@@ -355,6 +355,7 @@ function damageEnemy(game, enemy, amount, sourceX, sourceY, knockback = 60) {
   if (enemy.health <= 0) killEnemy(game, enemy);
 }
 function damageBoss(game, boss, amount, sourceX, sourceY, knockback = 40) {
+  boss.awake = true;
   boss.health -= amount;
   boss.flash = .12;
   game.stats.damage += amount;
@@ -528,7 +529,9 @@ function throwGrenade(game) {
   });
   game.events.push('grenade-throw');
 }
-function explode(game, x, y, radius = 62, damage = 7) {
+// fromPlayer — единственный источник, которому босс вообще подставляется:
+// чужие взрывы (его же «приземление», подрыв мин) не должны бить его самого.
+function explode(game, x, y, radius = 62, damage = 7, fromPlayer = false) {
   for (const enemy of [...game.level.enemies]) {
     if (enemy.dead) continue;
     const d = distance(x, y, enemy.x, enemy.y);
@@ -537,7 +540,7 @@ function explode(game, x, y, radius = 62, damage = 7) {
     damageEnemy(game, enemy, damage * (.4 + falloff), x, y, 180 * falloff);
   }
   const boss = game.level.boss;
-  if (boss && !boss.dead) {
+  if (fromPlayer && boss && !boss.dead && boss.awake) {
     const d = distance(x, y, boss.x, boss.y);
     if (d <= radius + boss.radius) {
       const falloff = 1 - clamp((d - boss.radius) / radius, 0, 1);
@@ -839,7 +842,21 @@ export function updateGame(game, dt, input = {}) {
 
   // --- enemies ---
   for (const enemy of level.enemies) if (!enemy.dead) updateEnemy(game, enemy, dt);
-  if (level.boss && !level.boss.dead) updateBoss(game, level.boss, dt);
+  // Босс дремлет в арене и встречает игрока с полным здоровьем: зомби его не грызут.
+  const boss = level.boss;
+  if (boss && !boss.dead) {
+    if (!boss.awake) {
+      const near = distance(player.x, player.y, boss.x, boss.y) < 230;
+      if (near && lineOfSight(game, boss.x, boss.y, player.x, player.y)) {
+        boss.awake = true;
+        game.events.push('boss-wake');
+        game.shake = Math.max(game.shake, .5);
+        light(game, boss.x, boss.y, 260, '#ff8a5a', .5, 1.2);
+        say(game, boss.x, boss.y - 34, boss.name.toUpperCase(), '#ff9a6a');
+      }
+    }
+    if (boss.awake) updateBoss(game, boss, dt);
+  }
 
   // --- bullets ---
   for (const bullet of game.bullets) {
@@ -887,7 +904,7 @@ export function updateGame(game, dt, input = {}) {
     grenade.vx *= Math.pow(.25, dt); grenade.vy *= Math.pow(.25, dt);
     if (grenade.fuse <= 0) {
       grenade.removed = true;
-      explode(game, grenade.x, grenade.y, 64, 8);
+      explode(game, grenade.x, grenade.y, 64, 8, true);
     }
   }
 
