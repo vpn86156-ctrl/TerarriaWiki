@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.github.vpn86156.kosmopilot"
-    android:versionCode="5" android:versionName="1.4.0">
+    android:versionCode="6" android:versionName="1.4.1">
     <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="35" />
     <!-- The game is fully offline and requests no device permissions. -->
     <application

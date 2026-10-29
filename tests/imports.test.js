@@ -47,6 +47,21 @@ test('every named import resolves to a real export', () => {
   assert.deepEqual(problems, [], problems.join('\n'));
 });
 
+// `rgba(${palette.tint}.16)` reads as an opaque rgb() colour in Chrome and paints a solid square
+// instead of a glow, so every tint-based colour must put the alpha behind a comma.
+test('every colour built from a biome tint separates the alpha with a comma', () => {
+  const offenders = [];
+  for (const file of sources.filter((path) => path.includes('/src/'))) {
+    const text = readFileSync(file, 'utf8');
+    text.split('\n').forEach((line, index) => {
+      for (const match of line.matchAll(/tint\}(.?)/g)) {
+        if (match[1] !== ',') offenders.push(`${relative(root, file)}:${index + 1} -> "tint}${match[1]}"`);
+      }
+    });
+  }
+  assert.deepEqual(offenders, [], `alpha must follow a comma: ${offenders.join(', ')}`);
+});
+
 test('the source tree has no leftover debug output', () => {
   const offenders = [];
   for (const file of sources.filter((path) => path.includes('/src/'))) {

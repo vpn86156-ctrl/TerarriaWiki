@@ -59,9 +59,14 @@ function starLayer(biome, index, w, h) {
   return canvas;
 }
 
+// `tint` stores three comma-separated channels (for example "120,255,196"), so the alpha needs a
+// comma of its own: `rgba(120,255,196.16)` would be parsed as an opaque rgb() colour and would paint
+// a solid square instead of a soft glow.
+const tintA = (palette, alpha) => `rgba(${palette.tint},${alpha})`;
+const glowSprite = (color, size = 64, core = .55) => cachedGlow(color, size, core);
 // Radial glow sprites are drawn once and blitted, which keeps the frame free of gradient allocations.
 const spriteCache = new Map();
-function glowSprite(color, size = 64, core = .55) {
+function cachedGlow(color, size = 64, core = .55) {
   const key = `${color}|${size}|${core}`;
   let sprite = spriteCache.get(key);
   if (sprite) return sprite;
@@ -215,7 +220,7 @@ function drawBackdrop(ctx, game, image) {
     const x = ((cloud.x * span - game.elapsed * cloud.speed * speed) % span + span) % span - 310;
     const y = cloud.y * h + Math.sin(game.elapsed * .12 + cloud.phase) * 16;
     const pulse = (cloud.alpha / .12) * (.7 + Math.sin(game.elapsed * .5 + cloud.phase) * .3) * (1 + heat * .2);
-    blit(ctx, glowSprite(`rgba(${palette.tint}.16)`, Math.ceil(cloud.radius)), x, y, cloud.radius, Math.max(0, Math.min(1, pulse)));
+    blit(ctx, glowSprite(tintA(palette, .16), Math.ceil(cloud.radius)), x, y, cloud.radius, Math.max(0, Math.min(1, pulse)));
   }
   drawDecor(ctx, game, biome);
   // Parallax silhouettes.
@@ -255,7 +260,7 @@ function drawBackdrop(ctx, game, image) {
   }
   // Biome character: drifting shards, embers, dust or sparks.
   const ember = glowSprite('rgba(255,170,90,.95)', 16, .35);
-  const mote = glowSprite(`rgba(${palette.tint}.9)`, 14, .4);
+  const mote = glowSprite(tintA(palette, .9), 14, .4);
   for (const item of motes) {
     const span = w + 120;
     const x = ((item.x * span - game.elapsed * item.speed * speed) % span + span) % span - 60;
@@ -285,7 +290,7 @@ function drawBackdrop(ctx, game, image) {
     if (bolt > .4) {
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = `rgba(${palette.tint}${(Math.min(.12, bolt * .02)).toFixed(3)})`;
+      ctx.fillStyle = tintA(palette, Math.min(.12, bolt * .02).toFixed(3));
       ctx.fillRect(0, 0, w, h);
       ctx.strokeStyle = `rgba(255,255,255,${Math.min(.5, bolt * .08).toFixed(3)})`;
       ctx.lineWidth = 1.6;
@@ -345,8 +350,8 @@ function drawHazard(ctx, hazard, game) {
   switch (hazard.type) {
     case 'plasma': {
       const wobble = Math.sin(time * 1.4 + hazard.phase) * 6;
-      blit(ctx, glowSprite(`rgba(${palette.tint}.5)`, Math.ceil(hazard.radius)), 0, 0, hazard.radius + wobble, .75);
-      ctx.strokeStyle = `rgba(${palette.tint}.35)`;
+      blit(ctx, glowSprite(tintA(palette, .5), Math.ceil(hazard.radius)), 0, 0, hazard.radius + wobble, .75);
+      ctx.strokeStyle = tintA(palette, .35);
       ctx.lineWidth = 2;
       for (let i = 0; i < 3; i += 1) {
         const r = hazard.radius * (.45 + i * .18) + Math.sin(time * 2 + i + hazard.phase) * 5;
@@ -403,7 +408,7 @@ function drawHazard(ctx, hazard, game) {
     }
     case 'vortex': {
       ctx.rotate(time * .9);
-      ctx.strokeStyle = `rgba(${palette.tint}.42)`;
+      ctx.strokeStyle = tintA(palette, .42);
       for (let arm = 0; arm < 3; arm += 1) {
         ctx.lineWidth = 3 - arm * .6;
         ctx.beginPath();
@@ -416,7 +421,7 @@ function drawHazard(ctx, hazard, game) {
         }
         ctx.stroke();
       }
-      blit(ctx, glowSprite(`rgba(${palette.tint}.28)`, 40), 0, 0, 46, .7);
+      blit(ctx, glowSprite(tintA(palette, .28), 40), 0, 0, 46, .7);
       break;
     }
     case 'turret': {
@@ -984,7 +989,7 @@ export function renderGame(ctx, game, image) {
   for (const bullet of game.hostileBullets) {
     if (bullet.removed) continue;
     const palette = (BIOMES[bullet.biome ?? game.biomeIndex] || BIOMES[0]).palette;
-    blit(ctx, glowSprite(`rgba(${palette.tint}.9)`, 20, .4), bullet.x, bullet.y, bullet.radius * 2.8, .9);
+    blit(ctx, glowSprite(tintA(palette, .9), 20, .4), bullet.x, bullet.y, bullet.radius * 2.8, .9);
     ctx.fillStyle = bullet.chill ? '#dff6ff' : '#fff';
     ctx.beginPath(); ctx.arc(bullet.x, bullet.y, bullet.radius * .55, 0, TAU); ctx.fill();
   }
