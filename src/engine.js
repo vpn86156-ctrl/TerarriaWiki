@@ -190,8 +190,11 @@ function generateLevel(game, locationIndex, slot) {
       radius: 14 * boss.scale, health: boss.health, maxHealth: boss.health,
       speed: boss.speed, damage: boss.damage, scale: boss.scale, palette: boss.palette,
       attacks: boss.attacks, reward: boss.reward,
+      calm: boss.calm || [], rage: boss.rage || boss.attacks, abilities: boss.abilities || [],
+      mode: 'drowsy', baseSpeed: boss.speed,
       phase: 1, phaseCount: 3, attack: null, timer: 2, windup: 0, cooldown: 1.4,
       awake: false, flash: 0, vx: 0, vy: 0, facing: 0,
+      telegraph: null, chain: null, rageGlow: 0, bob: game.random() * 6,
     };
   }
 
@@ -223,6 +226,10 @@ function makePickup(random, room, kind) {
   };
 }
 
+// Мертвецы зарыты в землю и вылезают, когда игрок подходит близко.
+const DIGGERS = new Set(['zombie', 'skeleton']);
+export const DIG_TIME = 1.15;
+
 function spawnEnemy(game, type, x, y) {
   const data = ENEMIES[type];
   const scale = 1 + game.locationIndex * .12;
@@ -232,6 +239,7 @@ function spawnEnemy(game, type, x, y) {
     brain: data.brain, coins: data.coins, sight: data.sight, color: data.color,
     cooldown: Math.random() * .6, windup: 0, flash: 0, vx: 0, vy: 0, facing: 0, stagger: 0,
     state: 'idle',
+    buried: DIGGERS.has(type), emerge: 0,
   };
 }
 
@@ -254,7 +262,7 @@ export function createGame({ seed = Date.now(), locationIndex = 0, slot = 0, upg
     damageScale: 1 + (upgrades.damage || 0) * .25,
     facing: 0, melee: STARTER.melee, gun: null, grenades: 1 + (upgrades.grenades || 0),
     ammo: { pistol: 24, shells: 8, rifle: 0 },
-    magazine: 0, reload: 0, cooldown: 0, swing: null, invulnerable: 0, hurt: 0,
+    magazine: 0, reload: 0, cooldown: 0, swing: null, invulnerable: 0, hurt: 0, muzzle: 0, recoil: 0,
     walk: 0, moving: false, coins: 0,
   };
   game.level = generateLevel(game, locationIndex, slot);
@@ -512,6 +520,8 @@ function playerShoot(game) {
   light(game, player.x + Math.cos(aim) * 14, player.y + Math.sin(aim) * 14, 60, '#ffd48a', .08, 1.2);
   burst(game, player.x + Math.cos(aim) * 12, player.y + Math.sin(aim) * 12, '#ffcf7a', 3, 60, 1.4);
   game.shake = Math.max(game.shake, .1);
+  player.muzzle = .085;
+  player.recoil = 1;
   game.events.push('shoot');
   game.events.push(`gun:${player.gun}`);
 }
@@ -604,6 +614,36 @@ function updateEnemy(game, enemy, dt) {
   if (sees) enemy.state = 'chase'; else if (enemy.state === 'chase' && d > enemy.sight * 1.4) enemy.state = 'idle';
   enemy.facing = Math.atan2(player.y - enemy.y, player.x - enemy.x);
 
+  // Зарытый мертвец ждёт, пока игрок подойдёт, и вылезает из-под земли.
+  if (enemy.buried) {
+    if (d < 250 && lineOfSight(game, enemy.x, enemy.y, player.x, player.y)) {
+      enemy.buried = false;
+      enemy.emerge = DIG_TIME;
+      enemy.state = 'emerge';
+      game.events.push('enemy-dig');
+      light(game, enemy.x, enemy.y, 70, '#6b563a', .4, .8);
+      for (let i = 0; i < 10; i += 1) {
+        burst(game, enemy.x + (game.random() - .5) * 18, enemy.y + 2, '#6b563a', 2, 55, 1.8);
+      }
+    }
+    return;
+  }
+  if (enemy.emerge > 0) {
+    enemy.emerge -= dt;
+    if (game.random() < .55) {
+      burst(game, enemy.x + (game.random() - .5) * 14, enemy.y + 3, '#5a4a33', 1, 36, 1.3);
+    }
+    if (enemy.emerge <= 0) {
+      enemy.state = 'idle';
+      for (let i = 0; i < 12; i += 1) {
+        burst(game, enemy.x + (game.random() - .5) * 20, enemy.y + 4, '#6b563a', 2, 70, 1.8);
+      }
+      game.shake = Math.max(game.shake, .18);
+      game.events.push('enemy-emerge');
+    }
+    return;
+  }
+
   // Отбрасывание и оглушение сдвигают врага с места.
   applyKnockback(game, enemy, dt);
   enemy.vx *= Math.pow(.02, dt); enemy.vy *= Math.pow(.02, dt);
@@ -662,13 +702,34 @@ function updateEnemy(game, enemy, dt) {
   }
 }
 
+// Сколько босс «замахивается» перед атакой и как это показывается.
+const TELEGRAPH_TIME = { charge: .55, slam: .5, summon: .6, volley: .4, syringe: .4, chain: .5, shockwave: .7, flame: .65, shrapnel: .45, heal: .5, blink: .3 };
+const TELEGRAPH_RADIUS = { slam: 80, shockwave: 120, summon: 60, flame: 130, charge: 90, shrapnel: 100, chain: 150, heal: 50, blink: 60, volley: 70, syringe: 70 };
+const ATTACK_SHOUT = {
+  charge: 'РЫВОК!', slam: 'УДАР!', summon: 'ПОДМОГА!', volley: 'ЗАЛП!', syringe: 'ШПРИЦЫ!',
+  chain: 'ЦЕПЬ!', shockwave: 'ВОЛНА!', flame: 'ОГОНЬ!', shrapnel: 'ОСКОЛКИ!', heal: 'НАРКОЗ!', blink: 'ПЕРЕМЕЩЕНИЕ!',
+};
+// Атаки из приоритетных списков: в ярости босс чаще берёт свои коронные приёмы.
+function pickBossAttack(game, boss, pool) {
+  if (boss.mode !== 'rage') return pool[Math.floor(game.random() * pool.length)];
+  const signature = pool.filter((name) => (boss.abilities || []).includes(name));
+  if (signature.length && game.random() < .6) return signature[Math.floor(game.random() * signature.length)];
+  return pool[Math.floor(game.random() * pool.length)];
+}
+// В дремоте босс бьёт вполсилы — это тревожный звоночек, а не бой.
+function bossDamage(boss, base) {
+  return base * (boss.mode === 'drowsy' ? .6 : boss.mode === 'rage' ? 1.15 : 1);
+}
+
 function updateBoss(game, boss, dt) {
   const player = game.player;
   boss.flash = Math.max(0, boss.flash - dt);
+  boss.bob += dt;
   applyKnockback(game, boss, dt);
   boss.vx *= Math.pow(.05, dt); boss.vy *= Math.pow(.05, dt);
   const d = distance(boss.x, boss.y, player.x, player.y);
   boss.facing = Math.atan2(player.y - boss.y, player.x - boss.x);
+  updateBossChain(game, boss, dt);
   // Переход между фазами.
   const ratio = boss.health / boss.maxHealth;
   const wanted = ratio <= .33 ? 3 : ratio <= .66 ? 2 : 1;
@@ -676,17 +737,37 @@ function updateBoss(game, boss, dt) {
     boss.phase = wanted;
     boss.cooldown = .6;
     boss.attack = null;
+    boss.telegraph = null;
     light(game, boss.x, boss.y, 200, '#ff9a4a', .5, 1.5);
     game.shake = Math.max(game.shake, .5);
     game.events.push('boss-phase');
-    say(game, boss.x, boss.y - 30, `ФАЗА ${boss.phase}`, '#ff9d5c');
+    if (boss.phase >= 3) {
+      boss.mode = 'rage';
+      boss.speed = boss.baseSpeed * 1.3;
+      game.shake = Math.max(game.shake, 1);
+      game.flash = Math.max(game.flash, .45);
+      light(game, boss.x, boss.y, 320, '#ff4a3a', .9, 2);
+      say(game, boss.x, boss.y - 34, 'ЯРОСТЬ!', '#ff5a4a');
+      game.events.push('boss-rage');
+      for (let i = 0; i < 20; i += 1) {
+        const a = game.random() * TAU;
+        burst(game, boss.x + Math.cos(a) * 24, boss.y + Math.sin(a) * 24, '#ff6a3a', 1, 100, 2.2);
+      }
+    } else {
+      say(game, boss.x, boss.y - 30, `ФАЗА ${boss.phase}`, '#ff9d5c');
+    }
   }
+  if (boss.mode === 'rage') boss.rageGlow = Math.min(1, boss.rageGlow + dt * 1.5);
 
   if (boss.attack) {
     boss.timer -= dt;
+    if (boss.telegraph) boss.telegraph.t += dt;
     if (boss.windup > 0) {
       boss.windup -= dt;
-      if (boss.windup <= 0) runBossAttack(game, boss);
+      if (boss.windup <= 0) {
+        boss.telegraph = null;
+        runBossAttack(game, boss);
+      }
       return;
     }
     if (boss.attack === 'charge' && boss.timer > 0) {
@@ -694,9 +775,19 @@ function updateBoss(game, boss, dt) {
       if (d < boss.radius + player.radius + 4) damagePlayer(game, boss.damage, boss.x, boss.y);
       if (game.random() < .6) burst(game, boss.x, boss.y, boss.palette[1], 2, 40, 2);
     }
+    if (boss.attack === 'flame' && boss.timer > 0 && game.random() < .8) {
+      const a = boss.facing + (game.random() - .5) * .9;
+      const speed = 120 + game.random() * 90;
+      game.bullets.push({
+        x: boss.x + Math.cos(a) * 16, y: boss.y + Math.sin(a) * 16,
+        vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, damage: bossDamage(boss, .8), life: .5,
+        radius: 5, friendly: false, color: '#ff9a3a', knockback: 15,
+      });
+      burst(game, boss.x + Math.cos(a) * 20, boss.y + Math.sin(a) * 20, '#ff8a2a', 1, 60, 1.2);
+    }
     if (boss.timer <= 0) {
       boss.attack = null;
-      boss.cooldown = Math.max(.85, 2 - boss.phase * .35);
+      boss.cooldown = Math.max(.85, 2 - boss.phase * .35) * (boss.mode === 'rage' ? .75 : 1);
     }
     return;
   }
@@ -705,15 +796,78 @@ function updateBoss(game, boss, dt) {
   // Держат дистанцию, кроме рывка: боссы медленно идут к игроку.
   if (d > 60) moveEntity(game, boss, Math.cos(boss.facing) * boss.speed * .6 * dt, Math.sin(boss.facing) * boss.speed * .6 * dt);
   if (boss.cooldown <= 0) {
-    const pool = boss.attacks;
-    boss.attack = pool[Math.floor(game.random() * pool.length)];
-    boss.windup = boss.attack === 'charge' ? .55 : .4;
-    boss.timer = boss.attack === 'charge' ? .8 : .5;
+    const pool = boss.mode === 'rage' && boss.rage.length ? boss.rage : boss.attacks;
+    boss.attack = pickBossAttack(game, boss, pool);
+    boss.windup = TELEGRAPH_TIME[boss.attack] ?? .45;
+    boss.timer = boss.attack === 'charge' ? .8 : boss.attack === 'flame' ? 1.1 : boss.attack === 'heal' ? .4 : .5;
     if (boss.attack === 'charge') boss.chargeAngle = boss.facing;
+    boss.telegraph = { kind: boss.attack, t: 0, max: boss.windup, angle: boss.facing, radius: TELEGRAPH_RADIUS[boss.attack] ?? 70 };
     game.events.push('boss-telegraph');
-    say(game, boss.x, boss.y - 26, boss.attack === 'charge' ? 'РЫВОК!' : boss.attack === 'slam' ? 'УДАР!' : boss.attack === 'summon' ? 'ПОДМОГА!' : 'ЗАЛП!', '#ffb27a');
+    say(game, boss.x, boss.y - 26, ATTACK_SHOUT[boss.attack] || 'АТАКА!', '#ffb27a');
   }
 }
+
+// Босс ещё спит, но уже ворочается: редкие слабые выпады на шум.
+function updateDrowsyBoss(game, boss, dt) {
+  const player = game.player;
+  boss.bob += dt;
+  boss.flash = Math.max(0, boss.flash - dt);
+  updateBossChain(game, boss, dt);
+  if (boss.attack) {
+    boss.timer -= dt;
+    if (boss.telegraph) boss.telegraph.t += dt;
+    if (boss.windup > 0) {
+      boss.windup -= dt;
+      if (boss.windup <= 0) {
+        boss.telegraph = null;
+        runBossAttack(game, boss);
+      }
+      return;
+    }
+    if (boss.timer <= 0) { boss.attack = null; boss.cooldown = 3.4 + game.random() * 2.2; }
+    return;
+  }
+  boss.cooldown -= dt;
+  if (boss.cooldown <= 0) {
+    const pool = boss.calm.length ? boss.calm : boss.attacks;
+    boss.attack = pool[Math.floor(game.random() * pool.length)];
+    boss.facing = Math.atan2(player.y - boss.y, player.x - boss.x);
+    boss.windup = (TELEGRAPH_TIME[boss.attack] ?? .45) + .5;
+    boss.timer = .5;
+    boss.telegraph = { kind: boss.attack, t: 0, max: boss.windup, angle: boss.facing, radius: TELEGRAPH_RADIUS[boss.attack] ?? 70, weak: true };
+    game.events.push('boss-telegraph');
+  }
+}
+
+// Цепь-крюк: летит вперёд, при попадании притягивает игрока к боссу.
+function updateBossChain(game, boss, dt) {
+  const chain = boss.chain;
+  if (!chain) return;
+  const player = game.player;
+  chain.timer -= dt;
+  if (chain.state === 'out') {
+    chain.length = Math.min(chain.max, chain.length + dt * 620);
+    const tipX = boss.x + Math.cos(chain.angle) * chain.length;
+    const tipY = boss.y + Math.sin(chain.angle) * chain.length;
+    if (solidAt(game, tipX, tipY)) { chain.state = 'back'; return; }
+    if (distance(tipX, tipY, player.x, player.y) < player.radius + 10) {
+      damagePlayer(game, boss.damage * .5, boss.x, boss.y);
+      chain.state = 'pull';
+      chain.timer = .4;
+      game.events.push('chain-hit');
+      light(game, player.x, player.y, 90, '#ffd08a', .4, .5);
+    }
+    if (chain.length >= chain.max) chain.state = 'back';
+  } else if (chain.state === 'pull') {
+    chain.length = Math.max(24, chain.length - dt * 320);
+    moveEntity(game, player, (boss.x - player.x) * dt * 3.4, (boss.y - player.y) * dt * 3.4);
+    if (chain.timer <= 0) chain.state = 'back';
+  } else {
+    chain.length = Math.max(0, chain.length - dt * 780);
+    if (chain.length <= 0) boss.chain = null;
+  }
+}
+
 function runBossAttack(game, boss) {
   const player = game.player;
   if (boss.attack === 'slam') {
@@ -729,6 +883,9 @@ function runBossAttack(game, boss) {
       const x = boss.x + Math.cos(a) * 34, y = boss.y + Math.sin(a) * 34;
       if (solidAt(game, x, y)) continue;
       const minion = spawnEnemy(game, table[Math.floor(game.random() * table.length)], x, y);
+      minion.buried = false;
+      minion.emerge = .75;
+      minion.state = 'emerge';
       game.level.enemies.push(minion);
       burst(game, x, y, '#8f7', 6, 60, 2);
     }
@@ -746,6 +903,73 @@ function runBossAttack(game, boss) {
       });
     }
     game.events.push('boss-shoot');
+  } else if (boss.attack === 'chain') {
+    boss.chain = { angle: boss.facing, length: 0, max: 230, state: 'out', timer: 1.6 };
+    game.events.push('boss-chain');
+  } else if (boss.attack === 'shockwave') {
+    game.shake = Math.max(game.shake, .9);
+    for (let ring = 0; ring < 2; ring += 1) {
+      for (let i = 0; i < 14; i += 1) {
+        const a = (i / 14) * TAU + ring * .22;
+        const speed = 150 + ring * 70;
+        game.bullets.push({
+          x: boss.x + Math.cos(a) * 18, y: boss.y + Math.sin(a) * 18,
+          vx: Math.cos(a) * speed, vy: Math.sin(a) * speed,
+          damage: bossDamage(boss, 1.3), life: 1.7, radius: 4, friendly: false,
+          color: '#ffd08a', knockback: 70,
+        });
+      }
+    }
+    for (let i = 0; i < 22; i += 1) {
+      burst(game, boss.x + (game.random() - .5) * 46, boss.y + (game.random() - .5) * 46, '#8a7a5a', 2, 80, 2.2);
+    }
+    light(game, boss.x, boss.y, 160, '#ffb060', .6, .8);
+    game.events.push('boss-slam');
+  } else if (boss.attack === 'flame') {
+    for (let i = 0; i < 18; i += 1) {
+      const a = boss.facing + (game.random() - .5) * 1.1;
+      const speed = 120 + game.random() * 100;
+      game.bullets.push({
+        x: boss.x + Math.cos(a) * 16, y: boss.y + Math.sin(a) * 16,
+        vx: Math.cos(a) * speed, vy: Math.sin(a) * speed,
+        damage: bossDamage(boss, .8), life: .55, radius: 5, friendly: false,
+        color: '#ff9a3a', knockback: 15,
+      });
+    }
+    light(game, boss.x + Math.cos(boss.facing) * 34, boss.y + Math.sin(boss.facing) * 34, 130, '#ff7a2a', .6, .7);
+    game.events.push('boss-flame');
+  } else if (boss.attack === 'shrapnel') {
+    for (let wave = 0; wave < 2; wave += 1) {
+      for (let i = 0; i < 10; i += 1) {
+        const a = (i / 10) * TAU + wave * .32 + game.random() * .1;
+        const speed = 110 + wave * 70;
+        game.bullets.push({
+          x: boss.x, y: boss.y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed,
+          damage: bossDamage(boss, 1.2), life: 1.9, radius: 3, friendly: false,
+          color: '#cfd6dd', knockback: 55,
+        });
+      }
+    }
+    game.shake = Math.max(game.shake, .4);
+    game.events.push('boss-shoot');
+  } else if (boss.attack === 'heal') {
+    const amount = boss.maxHealth * (boss.mode === 'rage' ? .13 : .09);
+    boss.health = Math.min(boss.maxHealth, boss.health + amount);
+    light(game, boss.x, boss.y, 150, '#8fffa8', .7, 1.3);
+    for (let i = 0; i < 16; i += 1) {
+      burst(game, boss.x + (game.random() - .5) * 42, boss.y + (game.random() - .5) * 42, '#9fffb4', 1, 55, 2.4);
+    }
+    say(game, boss.x, boss.y - 30, 'РЕГЕНЕРАЦИЯ', '#9fffb4');
+    game.events.push('boss-heal');
+  } else if (boss.attack === 'blink') {
+    for (let i = 0; i < 14; i += 1) burst(game, boss.x, boss.y, '#bff6ff', 2, 90, 2);
+    const angle = game.random() * TAU;
+    const nx = player.x + Math.cos(angle) * 78, ny = player.y + Math.sin(angle) * 78;
+    if (!solidAt(game, nx, ny)) { boss.x = nx; boss.y = ny; }
+    else if (!solidAt(game, boss.x, boss.y + 40)) { boss.y += 40; }
+    for (let i = 0; i < 14; i += 1) burst(game, boss.x, boss.y, '#bff6ff', 2, 90, 2);
+    light(game, boss.x, boss.y, 130, '#bff6ff', .6, .9);
+    game.events.push('boss-blink');
   }
 }
 function killBoss(game, boss) {
@@ -825,6 +1049,8 @@ export function updateGame(game, dt, input = {}) {
   player.invulnerable = Math.max(0, player.invulnerable - dt);
   player.hurt = Math.max(0, player.hurt - dt);
   player.cooldown = Math.max(0, player.cooldown - dt);
+  player.muzzle = Math.max(0, (player.muzzle || 0) - dt);
+  player.recoil = Math.max(0, (player.recoil || 0) - dt * 5);
 
   if (player.reload > 0) {
     player.reload -= dt;
@@ -868,10 +1094,15 @@ export function updateGame(game, dt, input = {}) {
       const near = distance(player.x, player.y, boss.x, boss.y) < 230;
       if (near && lineOfSight(game, boss.x, boss.y, player.x, player.y)) {
         boss.awake = true;
+        boss.mode = 'combat';
+        boss.cooldown = .8;
         game.events.push('boss-wake');
-        game.shake = Math.max(game.shake, .5);
+        game.shake = Math.max(game.shake, .6);
         light(game, boss.x, boss.y, 260, '#ff8a5a', .5, 1.2);
         say(game, boss.x, boss.y - 34, boss.name.toUpperCase(), '#ff9a6a');
+      } else if (distance(player.x, player.y, boss.x, boss.y) < 380) {
+        // Спит, но слышит: ворочается и делает редкие выпады на шум.
+        updateDrowsyBoss(game, boss, dt);
       }
     }
     if (boss.awake) updateBoss(game, boss, dt);

@@ -263,7 +263,16 @@ function handleEvents(events) {
         break;
       case 'boss-telegraph': audio.play('growl', { volume: .8 }); break;
       case 'boss-shoot': audio.play('gun', { volume: .45, rate: .6 }); break;
-      case 'boss-phase': audio.play('boom', { volume: .5, rate: .7 }); toast('БОСС В ЯРОСТИ'); break;
+      case 'boss-phase': audio.play('boom', { volume: .5, rate: .7 }); toast('БОСС ЗЛИТСЯ'); break;
+      case 'boss-rage': audio.play('growl', { volume: 1, rate: .75 }); audio.play('boom', { volume: .6, rate: .6 }); toast('ЯРОСТЬ!'); break;
+      case 'boss-slam': audio.play('boom', { volume: .75, rate: .9 }); break;
+      case 'boss-chain': audio.play('swing', { volume: .6, rate: .8 }); break;
+      case 'boss-flame': audio.play('boom', { volume: .45, rate: 1.5 }); break;
+      case 'boss-heal': audio.play('pickup', { volume: .5, rate: .8 }); break;
+      case 'boss-blink': audio.play('door', { volume: .5, rate: 1.3 }); break;
+      case 'chain-hit': audio.play('hurt', { volume: .6, throttle: .2 }); combatTimer = Math.max(combatTimer, 3); break;
+      case 'enemy-dig': audio.play('hit', { volume: .4, rate: .6, throttle: .25 }); break;
+      case 'enemy-emerge': audio.play('growl', { volume: .5, rate: 1.3, throttle: .25 }); break;
       case 'boss-summon': audio.play('growl', { volume: .6, rate: 1.2 }); break;
       case 'boss-die':
         audio.play('boom', { volume: 1 });

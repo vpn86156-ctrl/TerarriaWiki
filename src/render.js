@@ -2,7 +2,7 @@
    и растягивается на экран без сглаживания — отсюда настоящий пиксельный вид. */
 
 import { TILE, WEAPONS } from './content.js';
-import { VOID, FLOOR, WALL, DOOR, EXIT } from './engine.js';
+import { VOID, FLOOR, WALL, DOOR, EXIT, DIG_TIME } from './engine.js';
 
 const TAU = Math.PI * 2;
 const VIEW_HEIGHT = 270;
@@ -527,12 +527,28 @@ export function renderGame(ctx, game, options = {}) {
       if (player.invulnerable > 0 && Math.floor(game.time * 20) % 2 === 0) continue;
       const lookX = Math.cos(player.facing), lookY = Math.sin(player.facing);
       const direction = lookX < -.35 ? 'left' : lookX > .35 ? 'right' : lookY > 0 ? 'down' : 'up';
-      drawCharacter(ctx, player.x - camera.x, player.y - camera.y, {
+      // Отдача: корпус слегка уходит назад в момент выстрела.
+      const kick = (player.recoil || 0) * 2.6;
+      const px = player.x - camera.x - lookX * kick;
+      const py = player.y - camera.y - lookY * kick * .6;
+      drawCharacter(ctx, px, py, {
         colors: player.hurt > 0 ? ['#ffdcdc', '#c9433f', '#7a2020'] : ['#f2c9a0', '#3f6fa8', '#2a3f52'],
         scale: 1, frame: player.moving ? player.walk : Math.sin(game.time * 2) * .4,
         facing: player.facing, swing, weapon: player.melee, flash: 0,
         sprite: `hero-${direction}`, spriteSize: 24,
       });
+      // Дуга удара холодным оружием.
+      if (player.swing) {
+        ctx.save();
+        ctx.globalAlpha = .32 * (1 - swing * .7);
+        ctx.fillStyle = '#fff3cd';
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.arc(px, py, 25, player.swing.angle - 1.1 + swing * 2.2, player.swing.angle + .15 + swing * 2.2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
       // Оружие во второй руке.
       if (player.gun) {
         const gx = player.x - camera.x + Math.cos(player.facing) * 5;
@@ -542,8 +558,61 @@ export function renderGame(ctx, game, options = {}) {
           ctx.fillStyle = '#2f3338';
           ctx.fillRect(Math.round(gx) - 1, Math.round(gy) - 1, player.gun === 'shotgun' ? 7 : 5, 2);
         }
+        // Вспышка из ствола.
+        if ((player.muzzle || 0) > 0) {
+          const mx = px + Math.cos(player.facing) * 13, my = py - 1 + Math.sin(player.facing) * 6;
+          const size = 5 + player.muzzle * 46;
+          const grd = ctx.createRadialGradient(mx, my, 0, mx, my, size);
+          grd.addColorStop(0, 'rgba(255,246,214,.95)');
+          grd.addColorStop(.45, 'rgba(255,186,92,.7)');
+          grd.addColorStop(1, 'rgba(255,120,40,0)');
+          ctx.fillStyle = grd;
+          ctx.beginPath();
+          ctx.arc(mx, my, size, 0, TAU);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255,224,160,.85)';
+          ctx.lineWidth = 1.2;
+          for (let i = -1; i <= 1; i += 1) {
+            const a = player.facing + i * .32;
+            ctx.beginPath();
+            ctx.moveTo(mx, my);
+            ctx.lineTo(mx + Math.cos(a) * size * 1.6, my + Math.sin(a) * size * 1.6);
+            ctx.stroke();
+          }
+        }
       }
     } else if (entry.kind === 'enemy') {
+      // Зарытый мертвец не виден, пока не начнёт вылезать.
+      if (item.buried) continue;
+      const digging = item.emerge > 0;
+      if (digging) {
+        // Вылезает из-под земли: видно только верхнюю часть, из-под низа летит грунт.
+        const progress = Math.min(1, 1 - item.emerge / DIG_TIME);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(item.x - camera.x - 16, item.y - camera.y - 20, 32, 20 + 14 * progress);
+        ctx.clip();
+        ctx.translate(0, (1 - progress) * 14);
+        drawCharacter(ctx, item.x - camera.x, item.y - camera.y, {
+          colors: item.color, scale: 1,
+          frame: game.time * 22, facing: item.facing, swing: 0,
+          weapon: 'crowbar', flash: item.flash,
+          sprite: `enemy-${item.type}`, spriteSize: 24,
+        });
+        ctx.restore();
+        // Края ямы и комья земли.
+        ctx.fillStyle = 'rgba(40,32,22,.85)';
+        ctx.beginPath();
+        ctx.ellipse(item.x - camera.x, item.y - camera.y + 6, 9, 3.2, 0, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = '#6b563a';
+        for (let i = 0; i < 3; i += 1) {
+          const a = game.time * 3 + i * 2.1;
+          ctx.fillRect(Math.round(item.x - camera.x + Math.cos(a) * 10) - 1,
+            Math.round(item.y - camera.y + 2 - Math.abs(Math.sin(a)) * 8) - 1, 2, 2);
+        }
+        continue;
+      }
       drawCharacter(ctx, item.x - camera.x, item.y - camera.y, {
         colors: item.color, scale: 1,
         frame: Math.hypot(item.vx, item.vy) > 5 ? game.time * 8 + item.x : Math.sin(game.time * 2 + item.x) * .5,
@@ -568,26 +637,124 @@ export function renderGame(ctx, game, options = {}) {
       }
     } else if (entry.kind === 'boss') {
       const boss = item;
-      if (boss.windup > 0) {
-        ctx.strokeStyle = `rgba(255,120,90,${(.4 + Math.sin(game.time * 30) * .3).toFixed(2)})`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(boss.x - camera.x, boss.y - camera.y, boss.radius + 8, 0, TAU);
-        ctx.stroke();
+      const bx = boss.x - camera.x, by = boss.y - camera.y;
+
+      // Ярость: багровое сияние и жар из-под ног.
+      if (boss.mode === 'rage' && boss.rageGlow > 0) {
+        const glow = (.22 + Math.sin(game.time * 6) * .1) * boss.rageGlow;
+        const grd = ctx.createRadialGradient(bx, by, 4, bx, by, boss.radius + 30);
+        grd.addColorStop(0, `rgba(255,72,40,${glow.toFixed(3)})`);
+        grd.addColorStop(1, 'rgba(255,72,40,0)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(bx - boss.radius - 32, by - boss.radius - 32, (boss.radius + 32) * 2, (boss.radius + 32) * 2);
       }
-      drawCharacter(ctx, boss.x - camera.x, boss.y - camera.y, {
-        colors: boss.palette, scale: boss.scale,
+
+      // Телеграф: заранее показываем, куда и чем ударит босс.
+      const tele = boss.telegraph;
+      if (tele) {
+        const progress = Math.min(1, tele.t / Math.max(.01, tele.max));
+        const alpha = .22 + progress * .5;
+        ctx.save();
+        ctx.lineWidth = 2;
+        const weak = tele.weak;
+        const red = Math.round(150 - progress * 70);
+        const green = Math.round(90 - progress * 20);
+        ctx.strokeStyle = weak ? `rgba(150,165,190,${alpha.toFixed(2)})`
+          : `rgba(255,${red},${green},${alpha.toFixed(2)})`;
+        ctx.fillStyle = weak ? `rgba(150,165,190,${(alpha * .14).toFixed(2)})`
+          : `rgba(255,120,60,${(alpha * .16).toFixed(2)})`;
+        if (tele.kind === 'charge') {
+          const len = tele.radius * 1.7;
+          ctx.beginPath();
+          ctx.moveTo(bx, by);
+          ctx.lineTo(bx + Math.cos(tele.angle) * len, by + Math.sin(tele.angle) * len);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(bx + Math.cos(tele.angle) * len, by + Math.sin(tele.angle) * len);
+          ctx.lineTo(bx + Math.cos(tele.angle + 2.5) * 8 + Math.cos(tele.angle) * len, by + Math.sin(tele.angle + 2.5) * 8 + Math.sin(tele.angle) * len);
+          ctx.lineTo(bx + Math.cos(tele.angle - 2.5) * 8 + Math.cos(tele.angle) * len, by + Math.sin(tele.angle - 2.5) * 8 + Math.sin(tele.angle) * len);
+          ctx.closePath();
+          ctx.fill();
+        } else if (tele.kind === 'flame') {
+          ctx.beginPath();
+          ctx.moveTo(bx, by);
+          ctx.arc(bx, by, tele.radius, tele.angle - .55, tele.angle + .55);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        } else if (tele.kind === 'chain') {
+          ctx.setLineDash([5, 4]);
+          ctx.beginPath();
+          ctx.moveTo(bx, by);
+          ctx.lineTo(bx + Math.cos(tele.angle) * tele.radius, by + Math.sin(tele.angle) * tele.radius);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        } else {
+          ctx.beginPath();
+          ctx.arc(bx, by, tele.radius, -Math.PI / 2, -Math.PI / 2 + TAU * progress);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(bx, by, tele.radius, 0, TAU);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // Цепь-крюк: летит вперёд и тянет игрока назад.
+      if (boss.chain) {
+        const chain = boss.chain;
+        const tipX = bx + Math.cos(chain.angle) * chain.length;
+        const tipY = by + Math.sin(chain.angle) * chain.length;
+        ctx.save();
+        ctx.strokeStyle = '#a9b0b8';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(tipX, tipY);
+        ctx.stroke();
+        ctx.strokeStyle = '#6c747c';
+        ctx.lineWidth = .8;
+        for (let i = 1; i * 7 < chain.length; i += 1) {
+          const lx = bx + Math.cos(chain.angle) * i * 7, ly = by + Math.sin(chain.angle) * i * 7;
+          ctx.beginPath();
+          ctx.arc(lx, ly, 1.6, 0, TAU);
+          ctx.stroke();
+        }
+        ctx.fillStyle = '#cfd6dd';
+        ctx.beginPath();
+        ctx.arc(tipX, tipY, 3, 0, TAU);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Замах: босс надувается перед ударом.
+      const winding = boss.windup > 0;
+      const pulse = winding ? 1 + Math.sin(game.time * 34) * .07 : 1;
+      drawCharacter(ctx, bx, by, {
+        colors: boss.palette, scale: boss.scale * pulse,
         frame: game.time * 4, facing: boss.facing,
-        swing: boss.windup > 0 ? 1 : 0, weapon: 'axe', flash: boss.flash,
+        swing: winding ? 1 : 0, weapon: 'axe', flash: boss.flash,
         sprite: `boss-${boss.id}`, spriteSize: 46,
       });
       const ratio = Math.max(0, boss.health / boss.maxHealth);
+      const barX = Math.round(bx) - 20, barY = Math.round(by) - (boss.mode === 'rage' ? 30 : 26);
       ctx.fillStyle = 'rgba(0,0,0,.65)';
-      ctx.fillRect(Math.round(boss.x - camera.x) - 20, Math.round(boss.y - camera.y) - 26, 40, 4);
-      ctx.fillStyle = '#e0523f';
-      ctx.fillRect(Math.round(boss.x - camera.x) - 20, Math.round(boss.y - camera.y) - 26, 40 * ratio, 4);
+      ctx.fillRect(barX, barY, 40, 4);
+      ctx.fillStyle = boss.mode === 'rage' ? '#ff3a2a' : '#e0523f';
+      ctx.fillRect(barX, barY, 40 * ratio, 4);
       ctx.fillStyle = 'rgba(255,255,255,.25)';
-      ctx.fillRect(Math.round(boss.x - camera.x) - 20, Math.round(boss.y - camera.y) - 26, 40 * ratio, 1);
+      ctx.fillRect(barX, barY, 40 * ratio, 1);
+      // Метки границ фаз — видно, когда босс озвереет.
+      ctx.fillStyle = 'rgba(255,255,255,.45)';
+      ctx.fillRect(barX + 40 * .33, barY, 1, 4);
+      ctx.fillRect(barX + 40 * .66, barY, 1, 4);
+      if (boss.mode === 'rage') {
+        ctx.fillStyle = `rgba(255,90,70,${(.6 + Math.sin(game.time * 8) * .35).toFixed(2)})`;
+        ctx.font = '5px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('ЯРОСТЬ', bx, barY - 2);
+        ctx.textAlign = 'left';
+      }
     }
   }
 
