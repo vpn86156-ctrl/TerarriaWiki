@@ -239,6 +239,10 @@ function drawHeldWeapon(ctx, weapon, handX, handY, facing, swing, scale = 1) {
 }
 
 /* ---------- props and pickups ---------- */
+const PROP_SPRITE = {
+  crate: 'prop-crate', barrel: 'prop-barrel', box: 'prop-box',
+  locker: 'prop-locker', tyres: 'prop-tyres',
+};
 function drawProp(ctx, prop, palette) {
   if (prop.broken) {
     ctx.fillStyle = 'rgba(0,0,0,.35)';
@@ -246,11 +250,34 @@ function drawProp(ctx, prop, palette) {
     return;
   }
   const x = Math.round(prop.x), y = Math.round(prop.y);
-  const spriteName = prop.kind === 'barrel' ? 'prop-barrel' : 'prop-crate';
-  if (drawSprite(ctx, spriteName, x, y - 3, 22, { flip: Math.floor(prop.x) % 2 === 0 })) return;
+  const spriteName = PROP_SPRITE[prop.kind] || 'prop-crate';
+  // Покрышки ниже ящика, поэтому сажаем их чуть ближе к земле.
+  const lift = prop.kind === 'tyres' ? 1 : 3;
+  if (drawSprite(ctx, spriteName, x, y - lift, 22, { flip: Math.floor(prop.x) % 2 === 0 })) return;
   ctx.fillStyle = 'rgba(0,0,0,.3)';
   ctx.fillRect(x - 7, y + 4, 14, 3);
-  if (prop.kind === 'barrel') {
+  if (prop.kind === 'tyres') {
+    ctx.fillStyle = '#22242a';
+    ctx.fillRect(x - 8, y - 4, 16, 9);
+    ctx.fillStyle = '#33363d';
+    ctx.fillRect(x - 6, y - 3, 12, 7);
+    ctx.fillStyle = '#141519';
+    ctx.fillRect(x - 4, y - 1, 8, 4);
+  } else if (prop.kind === 'locker') {
+    ctx.fillStyle = '#6d7a80';
+    ctx.fillRect(x - 6, y - 11, 12, 16);
+    ctx.fillStyle = '#8b989e';
+    ctx.fillRect(x - 5, y - 10, 10, 14);
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.fillRect(x - 1, y - 10, 1, 14);
+  } else if (prop.kind === 'box') {
+    ctx.fillStyle = palette.props[0];
+    ctx.fillRect(x - 6, y - 6, 12, 11);
+    ctx.fillStyle = 'rgba(255,255,255,.1)';
+    ctx.fillRect(x - 6, y - 6, 12, 2);
+    ctx.fillStyle = 'rgba(0,0,0,.25)';
+    ctx.fillRect(x - 1, y - 6, 2, 11);
+  } else if (prop.kind === 'barrel') {
     ctx.fillStyle = palette.props[0];
     ctx.fillRect(x - 5, y - 7, 10, 12);
     ctx.fillStyle = palette.props[1];

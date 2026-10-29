@@ -41,6 +41,21 @@ function carveCorridor(grid, w, ax, ay, bx, by, thickness = 1) {
 const overlaps = (a, b, pad) => a.x - pad < b.x + b.w && a.x + a.w + pad > b.x && a.y - pad < b.y + b.h && a.y + a.h + pad > b.y;
 const center = (room) => ({ x: Math.floor(room.x + room.w / 2), y: Math.floor(room.y + room.h / 2) });
 
+// Реквизит по локациям: в подвале ящики и покрышки, в больнице шкафчики,
+// на заводе бочки и металлолом. У каждого вида своя прочность.
+const PROP_KINDS = {
+  basement: ['crate', 'barrel', 'crate', 'box', 'tyres'],
+  hospital: ['crate', 'locker', 'box', 'barrel', 'locker'],
+  factory: ['barrel', 'tyres', 'crate', 'barrel', 'locker'],
+};
+const PROP_STATS = {
+  crate: { radius: 7, health: 3 },
+  barrel: { radius: 7, health: 3 },
+  box: { radius: 6, health: 1 },
+  locker: { radius: 7, health: 5 },
+  tyres: { radius: 8, health: 2 },
+};
+
 function generateLevel(game, locationIndex, slot) {
   const random = game.random;
   const location = LOCATIONS[locationIndex];
@@ -121,6 +136,7 @@ function generateLevel(game, locationIndex, slot) {
   };
 
   // Реквизит: в ящиках и бочках прячутся монеты, патроны, иногда ключи.
+  const propTable = PROP_KINDS[location.id] || PROP_KINDS.basement;
   const propRooms = rooms.filter((room) => !room.vault);
   for (const room of propRooms) {
     const count = 1 + Math.floor(random() * 4);
@@ -128,8 +144,9 @@ function generateLevel(game, locationIndex, slot) {
       const x = (room.x + 1 + Math.floor(random() * (room.w - 2))) * TILE + TILE / 2;
       const y = (room.y + 1 + Math.floor(random() * (room.h - 2))) * TILE + TILE / 2;
       if (distance(x, y, level.exit.x, level.exit.y) < 40) continue;
-      const kind = random() < .45 ? 'barrel' : 'crate';
-      level.props.push({ x, y, kind, radius: 7, health: 3, loot: random() });
+      const kind = propTable[Math.floor(random() * propTable.length)];
+      const stats = PROP_STATS[kind];
+      level.props.push({ x, y, kind, radius: stats.radius, health: stats.health, loot: random() });
     }
   }
 
@@ -564,7 +581,9 @@ function breakProp(game, prop) {
   if (prop.broken) return;
   prop.broken = true;
   burst(game, prop.x, prop.y, prop.kind === 'barrel' ? '#b3762f' : '#8a6a44', 12, 90, 2);
-  const roll = prop.loot;
+  // Шкафчик и коробка щедрее на полезное, покрышки чаще пустые.
+  const bias = prop.kind === 'locker' ? .25 : prop.kind === 'box' ? -.1 : prop.kind === 'tyres' ? .5 : 0;
+  const roll = Math.max(0, Math.min(1, prop.loot + bias));
   if (prop.key) game.level.pickups.push({ kind: 'key', x: prop.x, y: prop.y, bob: 0 });
   else if (roll < .3) for (let i = 0; i < 3; i += 1) game.level.pickups.push({ kind: 'coin', x: prop.x + (game.random() - .5) * 12, y: prop.y + (game.random() - .5) * 12, bob: game.random() * TAU });
   else if (roll < .55) game.level.pickups.push({ kind: 'ammo', x: prop.x, y: prop.y, bob: 0 });

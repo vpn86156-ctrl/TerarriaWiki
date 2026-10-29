@@ -156,6 +156,27 @@ test('смерть босса открывает выход и не роняет
   assert.equal(game.doorOpen, true, 'после смерти босса выход открыт');
 });
 
+test('реквизит зависит от локации и бывает разных видов', () => {
+  const seen = { basement: new Set(), hospital: new Set(), factory: new Set() };
+  for (let loc = 0; loc < LOCATIONS.length; loc += 1) {
+    for (const seed of [3, 17, 55, 91, 233]) {
+      const game = createGame({ seed, locationIndex: loc, slot: 0, upgrades: {} });
+      for (const prop of game.level.props) seen[LOCATIONS[loc].id].add(prop.kind);
+    }
+  }
+  // В подвале ящики и покрышки, в больнице шкафчики, на заводе бочки и покрышки.
+  assert.ok(seen.basement.has('crate'), 'в подвале должны быть ящики');
+  assert.ok(seen.basement.has('tyres'), 'в подвале должны быть покрышки');
+  assert.ok(seen.hospital.has('locker'), 'в больнице должны быть шкафчики');
+  assert.ok(seen.factory.has('barrel'), 'на заводе должны быть бочки');
+  assert.ok(seen.factory.has('tyres'), 'на заводе должны быть покрышки');
+  // У каждого вида своя прочность, иначе реквизит будет одинаковым.
+  const game = createGame({ seed: 77, locationIndex: 1, slot: 0, upgrades: {} });
+  const kinds = new Map(game.level.props.map((prop) => [prop.kind, prop.health]));
+  if (kinds.has('locker')) assert.ok(kinds.get('locker') > 3, 'шкафчик должен быть прочным');
+  if (kinds.has('box')) assert.equal(kinds.get('box'), 1, 'коробка ломается с одного удара');
+});
+
 test('босс спит и сохраняет полное здоровье, пока игрок не подошёл', () => {
   const game = createGame({ seed: 4242, locationIndex: 0, slot: LOCATIONS[0].levels - 1, upgrades: {} });
   const boss = game.level.boss;

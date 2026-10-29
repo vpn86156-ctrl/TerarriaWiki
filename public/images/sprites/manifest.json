@@ -149,14 +149,64 @@
   "fill": 0.245,
   "size": 24
  },
+ "item-ammo": {
+  "file": "item-ammo.png",
+  "fill": 0.714,
+  "size": 14
+ },
+ "item-coin": {
+  "file": "item-coin.png",
+  "fill": 0.699,
+  "size": 14
+ },
+ "item-coins": {
+  "file": "item-coins.png",
+  "fill": 0.577,
+  "size": 14
+ },
+ "item-grenade": {
+  "file": "item-grenade.png",
+  "fill": 0.526,
+  "size": 14
+ },
+ "item-key": {
+  "file": "item-key.png",
+  "fill": 0.224,
+  "size": 14
+ },
+ "item-medkit": {
+  "file": "item-medkit.png",
+  "fill": 0.796,
+  "size": 14
+ },
  "prop-barrel": {
   "file": "prop-barrel.png",
   "fill": 0.543,
   "size": 24
  },
+ "prop-box": {
+  "file": "prop-box.png",
+  "fill": 0.507,
+  "size": 24
+ },
  "prop-crate": {
   "file": "prop-crate.png",
   "fill": 0.627,
+  "size": 24
+ },
+ "prop-locker": {
+  "file": "prop-locker.png",
+  "fill": 0.427,
+  "size": 24
+ },
+ "prop-torch": {
+  "file": "prop-torch.png",
+  "fill": 0.516,
+  "size": 24
+ },
+ "prop-tyres": {
+  "file": "prop-tyres.png",
+  "fill": 0.658,
   "size": 24
  },
  "wall-basement": {
