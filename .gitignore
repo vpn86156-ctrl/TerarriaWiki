@@ -7,3 +7,7 @@ artifacts/
 playwright-report/
 test-results/
 *.log
+
+# APK больше 100 МБ: GitHub не пропускает такие файлы в git,
+# поэтому готовые сборки публикуются в релизах.
+downloads/*.apk

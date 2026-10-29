@@ -65,9 +65,11 @@ test('музыка разложена по ролям и подписана', ()
   const roles = new Set(manifest.music.map((track) => track.role));
   for (const role of ['explore', 'fight', 'boss']) assert.ok(roles.has(role), `нет музыки для роли ${role}`);
   for (const track of manifest.music) {
-    assert.match(track.file, /\.mp3$/, track.file);
-    assert.equal(track.license, 'CC0 1.0', 'лицензия трека');
+    // Треки бывают двух форматов: скачанные MP3 и наши собственные OGG.
+    assert.match(track.file, /\.(mp3|ogg)$/, track.file);
+    assert.ok(track.license.startsWith('CC0'), `лицензия трека ${track.file}`);
     assert.ok(track.title.length > 2, 'название трека');
+    assert.ok(track.source.length > 2, 'источник трека');
   }
 });
 
