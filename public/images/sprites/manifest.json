@@ -274,6 +274,11 @@
   "fill": 0.796,
   "size": 14
  },
+ "item-padlock": {
+  "file": "item-padlock.png",
+  "fill": 0.704,
+  "size": 14
+ },
  "prop-barrel": {
   "file": "prop-barrel.png",
   "fill": 0.543,

@@ -1,6 +1,7 @@
 """Compile and sign the self-contained game APK with aapt2, javac, D8 and apksigner."""
 import hashlib
 import json
+import re
 import os
 import pathlib
 import shutil
@@ -39,8 +40,20 @@ shutil.rmtree(OUT, ignore_errors=True)
 (OUT / 'dex').mkdir()
 DOWNLOADS.mkdir(exist_ok=True)
 
+# Версия живёт в package.json: оттуда же берутся versionName и versionCode,
+# иначе манифест Android отстаёт от имени файла и проверка ломается.
+version = json.loads((ROOT / 'package.json').read_text())['version']
+major, minor, patch = (int(part) for part in version.split('.'))
+version_code = major * 10000 + minor * 100 + patch
+manifest_text = (SOURCE / 'AndroidManifest.xml').read_text(encoding='utf-8')
+manifest_text = re.sub(r'android:versionName="[^"]*"', f'android:versionName="{version}"', manifest_text)
+manifest_text = re.sub(r'android:versionCode="[^"]*"', f'android:versionCode="{version_code}"', manifest_text)
+# Пишем прямо в исходник: по нему же потом идёт проверка сборки.
+manifest_path = SOURCE / 'AndroidManifest.xml'
+manifest_path.write_text(manifest_text, encoding='utf-8')
+
 run(AAPT, 'compile', '--dir', SOURCE / 'res', '-o', OUT / 'resources.zip')
-run(AAPT, 'link', '-I', PLATFORM, '--manifest', SOURCE / 'AndroidManifest.xml',
+run(AAPT, 'link', '-I', PLATFORM, '--manifest', manifest_path,
     '--min-sdk-version', '26', '--target-sdk-version', '35', '-A', ROOT / 'dist',
     OUT / 'resources.zip', '-o', OUT / 'resource.apk')
 java_sources = sorted(SOURCE.glob('java/**/*.java'))
@@ -73,7 +86,6 @@ with zipfile.ZipFile(OUT / 'resource.apk') as src, zipfile.ZipFile(unsigned, 'w'
         info.external_attr = 0o644 << 16
         dst.writestr(info, dex.read_bytes())
 
-version = json.loads((ROOT / 'package.json').read_text())['version']
 apk = DOWNLOADS / f'Zabroshka-{version}.apk'
 run(JAVA, '-jar', SIGNER, 'sign', '--ks', KEY, '--ks-key-alias', ALIAS,
     '--ks-pass', 'file:' + str(PASSWORD), '--v1-signing-enabled', 'true',

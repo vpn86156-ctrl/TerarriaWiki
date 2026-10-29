@@ -168,6 +168,39 @@ html, body {
 }
 .screen.active { display: flex; }
 
+/* Фоны экранов: нарисованные сцены, притемнённые сверху, чтобы текст читался.
+   Путь от собранного CSS (dist/assets/) до картинок из public/. */
+#screen-title, #screen-shop, #screen-death, #screen-clear, #screen-victory {
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+#screen-title {
+  background-image:
+    radial-gradient(circle at 50% 40%, rgba(24, 26, 34, .84), rgba(4, 5, 7, .93)),
+    url('../images/scenes/scene-title.png');
+}
+#screen-shop {
+  background-image:
+    radial-gradient(circle at 50% 40%, rgba(24, 26, 34, .86), rgba(4, 5, 7, .94)),
+    url('../images/scenes/scene-shop.png');
+}
+#screen-death {
+  background-image:
+    radial-gradient(circle at 50% 40%, rgba(24, 26, 34, .8), rgba(4, 5, 7, .92)),
+    url('../images/scenes/scene-gameover.png');
+}
+#screen-clear {
+  background-image:
+    radial-gradient(circle at 50% 40%, rgba(24, 26, 34, .86), rgba(4, 5, 7, .94)),
+    url('../images/scenes/scene-hospital.png');
+}
+#screen-victory {
+  background-image:
+    radial-gradient(circle at 50% 40%, rgba(24, 26, 34, .82), rgba(4, 5, 7, .93)),
+    url('../images/scenes/scene-factory.png');
+}
+
 .panel {
   width: min(560px, 96vw); max-height: 94vh; overflow: auto;
   padding: 18px 20px;
