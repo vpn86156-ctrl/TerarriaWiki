@@ -108,7 +108,7 @@ export class AudioEngine {
     this.synth(group, volume, rate);
   }
 
-  // A small synthesised fallback so the game is never silent.
+  // Синтезированный резерв: если файлы не загрузились, игра не остаётся без звука.
   synth(group, volume, rate) {
     const ctx = this.context;
     if (!ctx) return;
@@ -155,7 +155,7 @@ export class AudioEngine {
     else if (group === 'ambient') { tone(90, 60, 1.4, 'sine', .12); noise(1.2, .1, { type: 'lowpass', frequency: 500 }); }
   }
 
-  // Footsteps follow the walking rhythm of the player.
+  // Шаги идут в ритме ходьбы героя.
   footsteps(dt, moving) {
     if (!moving) { this.stepTimer = 0; return; }
     this.stepTimer -= dt;

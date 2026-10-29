@@ -64,7 +64,7 @@ function generateLevel(game, locationIndex, slot) {
     const a = center(rooms[i - 1]), b = center(rooms[i]);
     carveCorridor(grid, w, a.x, a.y, b.x, b.y, random() < .4 ? 2 : 1);
   }
-  // The vault: a small room with the exit, reached through a single locked door.
+  // Хранилище: маленькая комната с выходом за единственной запертой дверью.
   const vault = { w: 6, h: 6, x: 0, y: 0, vault: true };
   for (let attempt = 0; attempt < 300; attempt += 1) {
     vault.x = 2 + Math.floor(random() * (w - vault.w - 4));
@@ -77,7 +77,7 @@ function generateLevel(game, locationIndex, slot) {
   const vaultCenter = center(vault);
   carveCorridor(grid, w, last.x, last.y, vaultCenter.x, vaultCenter.y, 1);
   const doorTile = { x: 0, y: 0 };
-  // The corridor tile right at the vault wall becomes the locked door.
+  // Клетка коридора у стены хранилища становится запертой дверью.
   if (Math.abs(vaultCenter.x - last.x) > Math.abs(vaultCenter.y - last.y)) {
     doorTile.x = vaultCenter.x + (last.x > vaultCenter.x ? Math.floor(vault.w / 2) : -Math.ceil(vault.w / 2));
     doorTile.y = vaultCenter.y;
@@ -88,7 +88,7 @@ function generateLevel(game, locationIndex, slot) {
   grid[doorTile.y * w + doorTile.x] = DOOR;
   grid[vaultCenter.y * w + vaultCenter.x] = EXIT;
 
-  // Walls wrap every carved tile.
+  // Стены обрамляют всё вырезанное.
   for (let y = 0; y < h; y += 1) {
     for (let x = 0; x < w; x += 1) {
       if (grid[y * w + x] !== VOID) continue;
@@ -120,7 +120,7 @@ function generateLevel(game, locationIndex, slot) {
     keysNeeded: bossLevel ? 0 : 1 + slot,
   };
 
-  // Props: crates and barrels hide coins, ammo and sometimes keys.
+  // Реквизит: в ящиках и бочках прячутся монеты, патроны, иногда ключи.
   const propRooms = rooms.filter((room) => !room.vault);
   for (const room of propRooms) {
     const count = 1 + Math.floor(random() * 4);
@@ -133,7 +133,7 @@ function generateLevel(game, locationIndex, slot) {
     }
   }
 
-  // Keys: one is always in a prop, the rest lie on the floor of distant rooms.
+  // Ключи: один всегда в реквизите, остальные лежат на полу в дальних комнатах.
   const keyRooms = propRooms.slice(1);
   for (let i = 0; i < level.keysNeeded; i += 1) {
     if (i === 0 && level.props.length) {
@@ -145,7 +145,7 @@ function generateLevel(game, locationIndex, slot) {
     }
   }
 
-  // Enemies, scaled by the location and the depth. The spawn room stays safe.
+  // Враги с поправкой на локацию и глубину. Комната появления остаётся безопасной.
   const table = location.enemies;
   const arenaRoom = bossLevel ? rooms.reduce((best, room) => (
     room.vault || room === rooms[0] ? best : (best === rooms[0] || room.w * room.h > best.w * best.h ? room : best)
@@ -178,7 +178,7 @@ function generateLevel(game, locationIndex, slot) {
     };
   }
 
-  // On a boss level the arena always holds a medkit — the fight should be survivable.
+  // На этаже с боссом в арене всегда лежит аптечка — бой должен быть проходимым.
   if (bossLevel && arenaRoom) {
     level.pickups.push({
       kind: 'medkit', bob: 0,
@@ -190,7 +190,7 @@ function generateLevel(game, locationIndex, slot) {
     });
   }
 
-  // A bit of loose loot to reward exploring.
+  // Немного разбросанной добычи — награда за то, что облазил всё.
   for (const room of propRooms) {
     if (random() < .5) level.pickups.push(makePickup(random, room, 'coin'));
     if (random() < .3) level.pickups.push(makePickup(random, room, random() < .5 ? 'ammo' : 'medkit'));
@@ -243,7 +243,7 @@ export function createGame({ seed = Date.now(), locationIndex = 0, slot = 0, upg
   game.level = generateLevel(game, locationIndex, slot);
   game.player.x = game.level.spawn.x;
   game.player.y = game.level.spawn.y;
-  // Make sure the spawn tile is walkable.
+  // Проверяем, что точка появления проходима.
   if (solidAt(game, game.player.x, game.player.y)) {
     const first = game.level.rooms[0];
     for (let ty = first.y; ty < first.y + first.h; ty += 1) {
@@ -291,13 +291,13 @@ function moveEntity(game, entity, dx, dy) {
     if (!collides(game, entity, entity.x, ny)) entity.y = ny;
   }
 }
-// Knockback must respect walls, otherwise a hit can shove someone inside a wall for good.
+// Отбрасывание обязано считаться со стенами, иначе удар загонит героя в стену навсегда.
 function applyKnockback(game, entity, dt) {
   if (!entity.vx && !entity.vy) return;
   moveEntity(game, entity, entity.vx * dt, entity.vy * dt);
   if (collides(game, entity, entity.x, entity.y)) unstick(game, entity);
 }
-// Last resort: if an entity is inside a solid tile, place it on the nearest free one.
+// Крайний случай: если кто-то оказался внутри стены, ставим его на ближайшую свободную клетку.
 function unstick(game, entity) {
   const tx = Math.floor(entity.x / TILE), ty = Math.floor(entity.y / TILE);
   for (let radius = 1; radius <= 4; radius += 1) {
@@ -316,7 +316,7 @@ export function lineOfSight(game, ax, ay, bx, by, ignoreTargetTile = false) {
   for (let i = 1; i < steps; i += 1) {
     const t = i / steps;
     const x = ax + (bx - ax) * t, y = ay + (by - ay) * t;
-    // The target tile may itself be solid (a closed door) — that must not block the check.
+    // Сама клетка цели может быть твёрдой (закрытая дверь) — это не должно мешать проверке.
     if (ignoreTargetTile && `${Math.floor(x / TILE)},${Math.floor(y / TILE)}` === targetTile) continue;
     if (solidAt(game, x, y)) return false;
   }
@@ -412,7 +412,7 @@ function nearestEnemy(game, x, y, maxRange = 220) {
     if (d < bestDistance) { best = enemy; bestDistance = d; }
   }
   if (game.level.boss && !game.level.boss.dead) {
-    // The boss is the main threat, so it wins ties more easily.
+    // Босс — главная угроза, поэтому при прочих равных прицел выбирает его.
     const d = distance(x, y, game.level.boss.x, game.level.boss.y) * .75;
     if (d < bestDistance) { best = game.level.boss; bestDistance = d; }
   }
@@ -582,7 +582,7 @@ function updateEnemy(game, enemy, dt) {
   if (sees) enemy.state = 'chase'; else if (enemy.state === 'chase' && d > enemy.sight * 1.4) enemy.state = 'idle';
   enemy.facing = Math.atan2(player.y - enemy.y, player.x - enemy.x);
 
-  // Knockback and stagger slide the enemy around.
+  // Отбрасывание и оглушение сдвигают врага с места.
   applyKnockback(game, enemy, dt);
   enemy.vx *= Math.pow(.02, dt); enemy.vy *= Math.pow(.02, dt);
   if (Math.abs(enemy.vx) < 1) enemy.vx = 0;
@@ -590,7 +590,7 @@ function updateEnemy(game, enemy, dt) {
 
   if (enemy.stagger > 0) return;
   if (!sees) {
-    // Idle wander so the dungeon feels alive.
+    // Бесцельное брожение, чтобы заброшка казалась живой.
     if (enemy.state === 'idle') {
       enemy.wander = (enemy.wander ?? 0) - dt;
       if (enemy.wander <= 0) {
@@ -624,7 +624,7 @@ function updateEnemy(game, enemy, dt) {
     return;
   }
 
-  // Melee chase: walk to the player, wind up, then strike.
+  // Ближний бой: идти к игроку, замахнуться, ударить.
   if (d > enemy.reach * .8) {
     moveEntity(game, enemy, Math.cos(enemy.facing) * enemy.speed * dt, Math.sin(enemy.facing) * enemy.speed * dt);
   } else if (enemy.cooldown <= 0) {
@@ -647,7 +647,7 @@ function updateBoss(game, boss, dt) {
   boss.vx *= Math.pow(.05, dt); boss.vy *= Math.pow(.05, dt);
   const d = distance(boss.x, boss.y, player.x, player.y);
   boss.facing = Math.atan2(player.y - boss.y, player.x - boss.x);
-  // Escalate through phases.
+  // Переход между фазами.
   const ratio = boss.health / boss.maxHealth;
   const wanted = ratio <= .33 ? 3 : ratio <= .66 ? 2 : 1;
   if (wanted > boss.phase) {
@@ -680,7 +680,7 @@ function updateBoss(game, boss, dt) {
   }
 
   boss.cooldown -= dt;
-  // Keep the distance unless charging: bosses walk slowly toward the player.
+  // Держат дистанцию, кроме рывка: боссы медленно идут к игроку.
   if (d > 60) moveEntity(game, boss, Math.cos(boss.facing) * boss.speed * .6 * dt, Math.sin(boss.facing) * boss.speed * .6 * dt);
   if (boss.cooldown <= 0) {
     const pool = boss.attacks;
@@ -739,7 +739,7 @@ function killBoss(game, boss) {
     game.level.pickups.push({ kind: 'coin', x: boss.x + (game.random() - .5) * 70, y: boss.y + (game.random() - .5) * 70, bob: game.random() * TAU });
   }
   game.level.pickups.push({ kind: 'medkit', x: boss.x, y: boss.y, bob: 0 });
-  // The boss guards the way out: clearing the arena unlocks the door.
+  // Босс стережёт выход: зачистил арену — дверь открыта.
   game.level.grid[game.level.door.y * game.level.w + game.level.door.x] = FLOOR;
   game.doorOpen = true;
   say(game, boss.x, boss.y - 40, 'ВЫХОД ОТКРЫТ', '#ffd27a');
@@ -794,7 +794,7 @@ export function updateGame(game, dt, input = {}) {
     player.facing = Math.atan2(my, mx);
     player.walk += dt * 9;
   }
-  // Knockback from explosions and hits.
+  // Отбрасывание от взрывов и ударов.
   applyKnockback(game, player, dt);
   player.vx *= Math.pow(.02, dt); player.vy *= Math.pow(.02, dt);
   if (Math.abs(player.vx) < 2) player.vx = 0;

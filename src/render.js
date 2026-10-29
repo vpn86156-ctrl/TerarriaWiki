@@ -47,7 +47,7 @@ function floorCanvas(palette, index) {
   return tileCanvas(`floor|${palette.floor[0]}|${index}`, palette, (ctx, colors) => {
     ctx.fillStyle = colors.floor[index % colors.floor.length];
     ctx.fillRect(0, 0, TILE, TILE);
-    // Concrete speckles and a couple of cracks, deterministic per variant.
+    // Бетонные крапинки и пара трещин, одинаковые для каждого варианта.
     let seed = index * 9301 + 49297;
     const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
     for (let i = 0; i < 14; i += 1) {
@@ -84,7 +84,7 @@ function drawCharacter(ctx, x, y, options) {
   const px = Math.round(x);
   const py = Math.round(y);
   ctx.save();
-  // Shadow.
+  // Тень.
   ctx.fillStyle = 'rgba(0,0,0,.32)';
   ctx.beginPath();
   ctx.ellipse(px, py + 6 * scale, 6 * scale, 2.6 * scale, 0, 0, TAU);
@@ -92,29 +92,29 @@ function drawCharacter(ctx, x, y, options) {
   const body = flash > 0 ? '#ffffff' : colors[1];
   const skin = flash > 0 ? '#ffffff' : colors[0];
   const dark = flash > 0 ? '#ffdddd' : colors[2] || colors[1];
-  // Legs with a small walk cycle.
+  // Ноги с простым циклом ходьбы.
   const legSwing = Math.round(Math.sin(frame * 2) * 1.4);
   ctx.fillStyle = dark;
   ctx.fillRect(px - 3 * scale, py + 1 * scale - squash, 2 * scale, 4 * scale);
   ctx.fillRect(px + 1 * scale, py + 1 * scale - squash, 2 * scale, 4 * scale);
   ctx.fillRect(px - 3 * scale + legSwing, py + 4 * scale, 2 * scale, 2 * scale);
   ctx.fillRect(px + 1 * scale - legSwing, py + 4 * scale, 2 * scale, 2 * scale);
-  // Torso.
+  // Торс.
   ctx.fillStyle = body;
   ctx.fillRect(px - 4 * scale, py - 4 * scale + bob - squash, 8 * scale, 6 * scale);
   ctx.fillStyle = 'rgba(255,255,255,.12)';
   ctx.fillRect(px - 4 * scale, py - 4 * scale + bob - squash, 8 * scale, 1 * scale);
-  // Head.
+  // Голова.
   ctx.fillStyle = skin;
   ctx.fillRect(px - 3 * scale, py - 9 * scale + bob - squash, 6 * scale, 5 * scale);
   ctx.fillStyle = 'rgba(0,0,0,.55)';
   ctx.fillRect(px - 3 * scale, py - 5 * scale + bob - squash, 6 * scale, 1 * scale);
-  // Eyes look where the character is heading.
+  // Глаза смотрят туда, куда идёт персонаж.
   const lookX = Math.cos(facing), lookY = Math.sin(facing);
   ctx.fillStyle = '#141018';
   ctx.fillRect(px - 2 * scale + Math.round(lookX * 1.4), py - 8 * scale + bob - squash + Math.round(lookY * .8), 1 * scale, 1 * scale);
   ctx.fillRect(px + 1 * scale + Math.round(lookX * 1.4), py - 8 * scale + bob - squash + Math.round(lookY * .8), 1 * scale, 1 * scale);
-  // Arms and weapon.
+  // Руки и оружие.
   const reach = 5 * scale;
   const handX = px + Math.cos(facing) * reach;
   const handY = py - 2 * scale + Math.sin(facing) * reach * .7;
@@ -235,13 +235,13 @@ function drawLighting(game, camera, palette) {
   ctx.globalAlpha = .96;
   ctx.fillRect(0, 0, w, h);
   ctx.globalAlpha = 1;
-  // Remembered rooms stay faintly visible.
+  // Запомненные комнаты остаются слабо видимыми.
   ctx.globalCompositeOperation = 'destination-out';
   ctx.globalAlpha = .42;
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(state.explored, -camera.x, -camera.y, game.level.w * TILE, game.level.h * TILE);
   ctx.globalAlpha = 1;
-  // Punch holes for every light source.
+  // Прорезаем темноту вокруг каждого источника света.
   const punch = (x, y, radius, intensity = 1) => {
     if (radius <= 0) return;
     const sx = x - camera.x, sy = y - camera.y;
@@ -256,7 +256,7 @@ function drawLighting(game, camera, palette) {
     ctx.fill();
   };
   punch(game.player.x, game.player.y, 96, 1);
-  // The torch of the location flickers slightly.
+  // Факелы локации слегка мерцают.
   for (const torch of game.level.torches) {
     const flicker = 1 + Math.sin(game.time * 7 + torch.phase) * .08;
     punch(torch.x, torch.y, 74 * flicker, .92);
@@ -298,7 +298,7 @@ export function renderGame(ctx, game, options = {}) {
   const minY = Math.max(0, Math.floor(camera.y / TILE));
   const maxY = Math.min(level.h - 1, Math.ceil((camera.y + h) / TILE));
 
-  // Floors.
+  // Пол.
   for (let ty = minY; ty <= maxY; ty += 1) {
     for (let tx = minX; tx <= maxX; tx += 1) {
       const tile = level.grid[ty * level.w + tx];
@@ -307,7 +307,7 @@ export function renderGame(ctx, game, options = {}) {
       ctx.drawImage(floorCanvas(palette, variant), tx * TILE - camera.x, ty * TILE - camera.y);
     }
   }
-  // Blood and burn decals under everything else.
+  // Пятна крови и гари — под всем остальным.
   for (const decal of game.decals) {
     ctx.globalAlpha = decal.a;
     ctx.fillStyle = decal.color;
@@ -316,7 +316,7 @@ export function renderGame(ctx, game, options = {}) {
     ctx.fill();
     ctx.globalAlpha = 1;
   }
-  // Exit marker.
+  // Отметка выхода.
   const exitPulse = .5 + Math.sin(game.time * 3) * .2;
   ctx.fillStyle = `rgba(255,210,120,${(.25 + exitPulse * .3).toFixed(2)})`;
   ctx.fillRect(level.exit.x - 9 - camera.x, level.exit.y - 9 - camera.y, 18, 18);
@@ -324,7 +324,7 @@ export function renderGame(ctx, game, options = {}) {
   ctx.fillRect(level.exit.x - 7 - camera.x, level.exit.y - 7 - camera.y, 14, 14);
   ctx.fillStyle = palette.shadow;
   for (let i = 0; i < 4; i += 1) ctx.fillRect(level.exit.x - 5 - camera.x + i * 3, level.exit.y - 5 - camera.y + i * 4, 2, 3);
-  // Locked door.
+  // Запертая дверь.
   if (!game.doorOpen) {
     const dx = level.door.x * TILE - camera.x, dy = level.door.y * TILE - camera.y;
     ctx.fillStyle = '#6b4a2a';
@@ -335,7 +335,7 @@ export function renderGame(ctx, game, options = {}) {
     ctx.fillRect(dx + 6, dy + 7, 4, 4);
   }
 
-  // Props, pickups, actors sorted by their y so overlaps look right.
+  // Реквизит, предметы и персонажи сортируются по Y, чтобы перекрытия выглядели верно.
   const drawables = [];
   for (const prop of level.props) drawables.push({ y: prop.y, kind: 'prop', item: prop });
   for (const pickup of level.pickups) drawables.push({ y: pickup.y, kind: 'pickup', item: pickup });
@@ -344,7 +344,7 @@ export function renderGame(ctx, game, options = {}) {
   drawables.push({ y: player.y, kind: 'player', item: player });
   drawables.sort((a, b) => a.y - b.y);
 
-  // Walls are drawn after the floor but before the actors that stand in front of them.
+  // Стены рисуются после пола, но перед теми, кто стоит рядом с ними.
   const wallTile = wallCanvas(palette);
   for (let ty = minY; ty <= maxY; ty += 1) {
     for (let tx = minX; tx <= maxX; tx += 1) {
@@ -352,7 +352,7 @@ export function renderGame(ctx, game, options = {}) {
       ctx.drawImage(wallTile, tx * TILE - camera.x, ty * TILE - camera.y);
     }
   }
-  // Torches burn on the walls.
+  // Факелы горят на стенах.
   for (const torch of level.torches) {
     const x = torch.x - camera.x, y = torch.y - camera.y;
     if (x < -20 || y < -20 || x > w + 20 || y > h + 20) continue;
@@ -377,7 +377,7 @@ export function renderGame(ctx, game, options = {}) {
         scale: 1, frame: player.moving ? player.walk : Math.sin(game.time * 2) * .4,
         facing: player.facing, swing, weapon: player.melee, flash: 0,
       });
-      // The gun in the second hand.
+      // Оружие во второй руке.
       if (player.gun) {
         const gx = player.x - camera.x + Math.cos(player.facing) * 5;
         const gy = player.y - camera.y - 1 + Math.sin(player.facing) * 3;
@@ -398,7 +398,7 @@ export function renderGame(ctx, game, options = {}) {
         ctx.arc(item.x - camera.x, item.y - camera.y, 11, 0, TAU * (1 - item.windup / .35));
         ctx.stroke();
       }
-      // Health bar over damaged enemies.
+      // Полоса здоровья над ранеными врагами.
       if (item.health < item.maxHealth) {
         const ratio = Math.max(0, item.health / item.maxHealth);
         ctx.fillStyle = 'rgba(0,0,0,.6)';
@@ -430,7 +430,7 @@ export function renderGame(ctx, game, options = {}) {
     }
   }
 
-  // Grenades, bullets, particles.
+  // Гранаты, пули, частицы.
   for (const grenade of game.grenades) {
     const x = Math.round(grenade.x - camera.x), y = Math.round(grenade.y - camera.y);
     ctx.fillStyle = '#3f5c38';
@@ -451,7 +451,7 @@ export function renderGame(ctx, game, options = {}) {
     ctx.globalAlpha = 1;
   }
 
-  // Lighting and vignette.
+  // Свет и виньетка.
   ctx.drawImage(drawLighting(game, camera, palette), 0, 0);
   if (game.flash > 0) {
     ctx.fillStyle = `rgba(255,220,190,${(game.flash * .5).toFixed(2)})`;
@@ -469,7 +469,7 @@ export function renderGame(ctx, game, options = {}) {
   }
   ctx.drawImage(state.vignette, 0, 0);
 
-  // Floating words.
+  // Всплывающие надписи.
   ctx.font = '8px "Russo One", monospace';
   ctx.textAlign = 'center';
   for (const text of game.texts) {

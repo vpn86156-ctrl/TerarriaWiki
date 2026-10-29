@@ -3,7 +3,7 @@
 import { createGame, updateGame, applyPurchase, equipWeapon } from './engine.js';
 import { renderGame, renderMinimap, resize } from './render.js';
 import {
-  LOCATIONS, SHOP_ITEMS, SHOP_WEAPONS, TUTORIAL, WEAPONS, AMMO_LABEL, TILE,
+  LOCATIONS, SHOP_ITEMS, SHOP_WEAPONS, TUTORIAL, WEAPONS, AMMO_LABEL,
 } from './content.js';
 import { AudioEngine } from './audio.js';
 import { TouchControls } from './input.js';
@@ -78,7 +78,7 @@ function startLevel(locationIndex, slot, { freshRun = false } = {}) {
 
 function applyLoadout(target) {
   const player = target.player;
-  player.maxHealth = 6 + (progress.upgrades.maxhp || 0);
+  player.maxHealth = 8 + (progress.upgrades.maxhp || 0);
   player.health = Math.max(1, Math.min(player.maxHealth, progress.health || player.maxHealth));
   player.grenades = progress.grenades ?? 1;
   player.melee = progress.melee || 'crowbar';
@@ -128,7 +128,7 @@ function advanceAfterClear() {
 }
 
 function nextLevel() {
-  // Everything bought in the shop has to travel into the next level.
+  // Всё купленное в магазине должно переехать в следующий этаж.
   if (game) {
     progress.health = game.player.health;
     progress.ammo = { ...game.player.ammo };
@@ -433,7 +433,7 @@ function drawTutorialArt(key) {
   g.clearRect(0, 0, art.width, art.height);
   g.fillStyle = '#14161d';
   g.fillRect(0, 0, art.width, art.height);
-  // floor
+  // пол
   for (let y = 74; y < art.height; y += 8) {
     for (let x = 0; x < art.width; x += 8) {
       g.fillStyle = ((x / 8 + y / 8) % 2 === 0) ? '#242832' : '#1e212a';
