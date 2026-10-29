@@ -9,9 +9,9 @@ import '@fontsource/manrope/latin-800.css';
 import '@fontsource/russo-one/cyrillic-400.css';
 import '@fontsource/russo-one/latin-400.css';
 import './style.css';
-import { createGame, resizeGame, setTarget, updateGame, useWave, WORLD_HEIGHT, SECTOR_FLIGHT_TIME } from './engine.js';
-import { CASES, MAX_UPGRADE, MISSIONS, SECTORS, SKINS, UPGRADES } from './content.js';
-import { claimMission, exportProgress, importProgress, missionValue, newProgress, normalizeProgress, openCase, purchaseUpgrade, settleFlight, STORAGE_KEY, upgradeCost } from './progress.js';
+import { createGame, evaluateStars, resizeGame, setTarget, updateGame, useWave, WORLD_HEIGHT, MINI_BOSS_DELAY, SECTOR_FLIGHT_TIME } from './engine.js';
+import { BIOMES, CASES, LEVELS, LEVELS_BY_ID, MAX_UPGRADE, MISSIONS, OBJECTIVE_LABEL, SKINS, UPGRADES, biomeStars, isLevelUnlocked } from './content.js';
+import { claimMission, exportProgress, importProgress, levelStars, missionValue, newProgress, normalizeProgress, openCase, purchaseUpgrade, settleFlight, STORAGE_KEY, upgradeCost } from './progress.js';
 import { renderGame } from './render.js';
 import { GameAudio } from './audio.js';
 
@@ -24,7 +24,8 @@ const screens = {
   hub: $('hub-overlay'), case: $('case-overlay'), import: $('import-overlay'),
 };
 const images = new Map();
-function sectorImage(file) {
+function biomeImage(file) {
+  if (!file) return null;
   if (!images.has(file)) {
     const image = new Image();
     image.src = `${import.meta.env.BASE_URL}images/${file}`;
@@ -32,6 +33,7 @@ function sectorImage(file) {
   }
   return images.get(file);
 }
+const backgroundFor = (game) => biomeImage(BIOMES[game.biomeIndex]?.image);
 let progress;
 try { progress = normalizeProgress(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')); } catch { progress = newProgress(); }
 if (progress === null) progress = newProgress();
@@ -47,12 +49,14 @@ let frame = 0;
 let lastTime = 0;
 let viewportWidth = 0, viewportHeight = 0, pixelRatio = 1, worldScale = 1;
 let dragging = null;
-let planned = { mode: 'campaign', sectorIndex: 0 };
+let planned = { mode: 'campaign', levelId: 'lyra-1', biomeIndex: 0 };
 let hubTab = 'upgrades';
 let announcementTimer = 0;
 const keys = new Set();
 const portraitQuery = window.matchMedia('(orientation: portrait)');
 const isPortrait = () => portraitQuery.matches;
+
+const starRow = (count) => '★★★'.slice(0, count) + '☆☆☆'.slice(0, 3 - count);
 
 function soundUI() {
   for (const button of sounds) {
@@ -71,6 +75,7 @@ function homeUI() {
   $('home-credits').textContent = number.format(progress.credits);
   $('hub-credits').textContent = number.format(progress.credits);
   $('hub-parts').textContent = number.format(progress.parts);
+  $('home-stars').textContent = `${Object.values(progress.campaign.stars).reduce((total, value) => total + value, 0)}/72`;
 }
 function showMode(next) {
   mode = next;
@@ -101,18 +106,36 @@ function resize() {
   canvas.height = Math.max(1, Math.round(viewportHeight * pixelRatio));
   worldScale = viewportHeight / WORLD_HEIGHT;
   ctx.setTransform(worldScale * pixelRatio, 0, 0, worldScale * pixelRatio, 0, 0);
-  if (game) { resizeGame(game, viewportWidth / worldScale); renderGame(ctx, game, sectorImage(SECTORS[game.sectorIndex].image)); }
+  if (game) { resizeGame(game, viewportWidth / worldScale); renderGame(ctx, game, backgroundFor(game)); }
   if (isPortrait() && mode === 'playing') pauseGame();
+}
+function objectiveText() {
+  if (!game) return '';
+  if (game.level) {
+    const level = game.level;
+    if (level.kind === 'boss') return game.boss ? 'БОЙ СО СТРАЖЕМ' : `СТРАЖ ЧЕРЕЗ ${Math.max(0, Math.ceil(game.timers.boss))} С`;
+    return `${OBJECTIVE_LABEL[level.kind](level)} · ${Math.min(game.objective.progress, level.target)}/${level.target}`;
+  }
+  return `ДО БОССА ${Math.max(0, Math.ceil(game.timers.boss))} СЕК`;
+}
+function objectiveFraction() {
+  if (!game) return 0;
+  if (game.level) {
+    const level = game.level;
+    if (level.kind === 'boss') return game.boss ? 1 - game.boss.health / game.boss.maxHealth : Math.max(0, Math.min(1, 1 - game.timers.boss / MINI_BOSS_DELAY));
+    return Math.min(1, game.objective.progress / level.target);
+  }
+  return Math.max(0, Math.min(1, 1 - game.timers.boss / SECTOR_FLIGHT_TIME));
 }
 function updateHUD() {
   if (!game) return;
-  const sector = SECTORS[game.sectorIndex];
+  const biome = BIOMES[game.biomeIndex];
+  const level = game.level;
   $('score-value').textContent = number.format(game.score);
   $('stars-value').textContent = number.format(game.stars);
-  $('sector-name').textContent = sector.short;
-  const cycle = SECTOR_FLIGHT_TIME + Math.min(game.sectorCycle * 2, 10);
-  $('sector-fill').style.width = `${Math.max(0, Math.min(1, 1 - game.timers.boss / cycle)) * 100}%`;
-  $('sector-progress').textContent = game.boss ? 'БОЙ СО СТРАЖЕМ' : `ДО БОССА ${Math.max(0, Math.ceil(game.timers.boss))} СЕК`;
+  $('sector-name').textContent = level ? `${level.name} · ${biome.short}` : biome.short;
+  $('sector-fill').style.width = `${objectiveFraction() * 100}%`;
+  $('sector-progress').textContent = objectiveText();
   const health = $('health-indicator');
   const maxHealth = game.player.maxHealth;
   if (health.children.length !== maxHealth) {
@@ -130,38 +153,91 @@ function updateHUD() {
   const bossStatus = $('boss-status');
   bossStatus.hidden = !game.boss;
   if (game.boss) {
-    $('boss-name').textContent = sector.boss;
+    $('boss-name').textContent = game.boss.name || biome.guardian;
     $('boss-health').style.width = `${Math.max(0, (game.boss.health / game.boss.maxHealth) * 100)}%`;
-    $('boss-phase').hidden = game.boss.phase !== 2;
+    $('boss-phase').hidden = game.boss.phase !== 2 && !(game.boss.phasing > 0);
+    $('boss-phase').textContent = game.boss.phasing > 0 ? 'ФАЗА' : 'ЯРОСТЬ';
   }
   $('first-flight-tip').classList.toggle('fade', game.elapsed > 6 || dragging !== null);
   $('control-hint').classList.toggle('dimmed', game.elapsed > 10 || dragging !== null);
 }
 
-/* ---------- flight planning ---------- */
-function renderFlight() {
-  $('mode-campaign').classList.toggle('active', planned.mode === 'campaign');
-  $('mode-endless').classList.toggle('active', planned.mode === 'endless');
-  const grid = $('sector-grid');
-  grid.replaceChildren(...SECTORS.map((sector, index) => {
-    const locked = planned.mode === 'campaign' && index >= progress.unlockedSectors;
-    const done = progress.completedSectors.includes(sector.id);
+/* ---------- campaign map ---------- */
+function nextLevelId(level) {
+  const next = LEVELS_BY_ID[`${level.biome}-${level.slot + 2}`];
+  if (next && isLevelUnlocked(progress, next)) return next.id;
+  const biome = BIOMES[level.biomeIndex + 1];
+  if (biome && level.biomeIndex + 1 < progress.campaign.unlockedBiomes) return `${biome.id}-1`;
+  return null;
+}
+function renderCampaign() {
+  const level = LEVELS_BY_ID[planned.levelId] || LEVELS[0];
+  planned.biomeIndex = level.biomeIndex;
+  const list = $('biome-list');
+  list.replaceChildren(...BIOMES.map((biome, index) => {
+    const locked = index >= progress.campaign.unlockedBiomes;
+    const stars = biomeStars(progress, biome.id);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `biome-row accent-${biome.accent}${locked ? ' locked' : ''}${level.biomeIndex === index ? ' selected' : ''}`;
+    button.innerHTML = `<span class="biome-index">${String(index + 1).padStart(2, '0')}</span>
+      <span class="biome-text"><strong>${biome.short}</strong><small>${locked ? 'ЗАКРЫТ' : `★ ${stars}/9`}</small></span>
+      <span class="biome-mark">${locked ? '🔒' : stars === 27 ? '✦' : '▸'}</span>`;
+    button.disabled = locked;
+    if (!locked) button.addEventListener('click', () => {
+      const first = LEVELS.find((entry) => entry.biome === biome.id && !levelStars(progress, entry.id)) || LEVELS.find((entry) => entry.biome === biome.id);
+      planned.levelId = first.id;
+      renderCampaign();
+    });
+    return button;
+  }));
+  const biome = BIOMES[level.biomeIndex];
+  $('biome-detail').innerHTML = `<span class="dialog-kicker"><i></i> ${biome.subtitle}</span>
+    <h3>${biome.name}</h3><p>${biome.description}</p>
+    <small>СТРАЖ БИОМА: <b>${biome.guardian}</b></small>`;
+  const levels = $('level-list');
+  levels.replaceChildren(...LEVELS.filter((entry) => entry.biome === biome.id).map((entry) => {
+    const unlocked = isLevelUnlocked(progress, entry);
+    const stars = levelStars(progress, entry.id);
     const card = document.createElement('button');
     card.type = 'button';
-    card.className = `sector-card accent-${sector.accent}${locked ? ' locked' : ''}${planned.sectorIndex === index ? ' selected' : ''}`;
-    card.innerHTML = `
-      <span class="sector-art" style="background-image:url('${import.meta.env.BASE_URL}images/${sector.image}')"></span>
-      <span class="sector-meta"><span class="sector-sub">${sector.subtitle}</span><strong>${sector.name}</strong><small>${sector.description}</small></span>
-      <span class="sector-flag">${done ? '✦ ПРОЙДЕН' : locked ? '🔒 ЗАКРЫТ' : 'БОСС: ' + sector.boss}</span>`;
-    if (!locked) card.addEventListener('click', () => { planned.sectorIndex = index; renderFlight(); });
-    else card.disabled = true;
+    card.className = `level-card kind-${entry.kind}${unlocked ? '' : ' locked'}${planned.levelId === entry.id ? ' selected' : ''}`;
+    card.innerHTML = `<span class="level-slot">${entry.slot + 1}</span>
+      <span class="level-body"><strong>${entry.name}</strong><small>${entry.brief}</small>
+      <em>${OBJECTIVE_LABEL[entry.kind](entry)} · ПАР ${entry.par} С</em></span>
+      <span class="level-stars">${unlocked ? starRow(stars) : '🔒'}</span>`;
+    card.disabled = !unlocked;
+    if (unlocked) card.addEventListener('click', () => { planned.levelId = entry.id; renderCampaign(); });
     return card;
   }));
-  const sector = SECTORS[planned.sectorIndex];
-  $('flight-note').textContent = planned.mode === 'campaign'
-    ? (progress.completedSectors.includes(sector.id) ? `Сектор «${sector.name}» уже пройден. Можно пролететь снова.` : `Победи «${sector.boss}», чтобы открыть следующий сектор.`)
-    : 'Бесконечный полёт: сектора сменяются после каждого стража, награды растут.';
-  $('launch-button').disabled = planned.mode === 'campaign' && planned.sectorIndex >= progress.unlockedSectors;
+  $('campaign-note').textContent = isLevelUnlocked(progress, level)
+    ? (levelStars(progress, level.id) ? `Уровень «${level.name}» уже пройден — можно улучшить результат.` : 'Цель выполнена — уровень открывается со звездой.')
+    : 'Пройди предыдущий уровень, чтобы открыть этот.';
+  $('launch-button').disabled = !isLevelUnlocked(progress, level);
+}
+function renderEndless() {
+  const grid = $('sector-grid');
+  grid.replaceChildren(...BIOMES.map((biome, index) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = `sector-card accent-${biome.accent}${planned.biomeIndex === index ? ' selected' : ''}`;
+    card.innerHTML = `
+      <span class="sector-art"${biome.image ? ` style="background-image:url('${import.meta.env.BASE_URL}images/${biome.image}')"` : ` data-art="${biome.accent}"`}></span>
+      <span class="sector-meta"><span class="sector-sub">${biome.subtitle}</span><strong>${biome.name}</strong><small>${biome.description}</small></span>
+      <span class="sector-flag">СТАРТОВЫЙ БИОМ</span>`;
+    card.addEventListener('click', () => { planned.biomeIndex = index; renderEndless(); });
+    return card;
+  }));
+  $('endless-note').textContent = 'Бесконечный полёт: биомы сменяются после каждого стража, награды растут.';
+  $('launch-button').disabled = false;
+}
+function renderFlight() {
+  const campaign = planned.mode === 'campaign';
+  $('mode-campaign').classList.toggle('active', campaign);
+  $('mode-endless').classList.toggle('active', !campaign);
+  $('campaign-map').hidden = !campaign;
+  $('endless-map').hidden = campaign;
+  if (campaign) renderCampaign(); else renderEndless();
 }
 
 /* ---------- hub: upgrades, ships, cases, missions, backup ---------- */
@@ -257,7 +333,7 @@ function renderHub() {
   } else {
     const card = document.createElement('article');
     card.className = 'hub-card backup-card';
-    card.innerHTML = `<div class="card-info"><h3>СОХРАНИТЬ ПРОГРЕСС</h3><p>Скопируй код в надёжное место. Он восстанавливает корабли, улучшения, кредиты и рекорд.</p>
+    card.innerHTML = `<div class="card-info"><h3>СОХРАНИТЬ ПРОГРЕСС</h3><p>Скопируй код в надёжное место. Он восстанавливает корабли, улучшения, кредиты, рекорд и звёзды кампании.</p>
       <p class="backup-note">Бесплатные игровые деньги и награды. Покупок за реальные деньги в игре нет.</p>
       <textarea id="backup-code" readonly rows="3"></textarea></div>`;
     const copyButton = document.createElement('button');
@@ -311,16 +387,18 @@ function showCaseReward(reward) {
 /* ---------- flight lifecycle ---------- */
 function startGame() {
   if (isPortrait()) return;
-  if (planned.mode === 'campaign' && planned.sectorIndex >= progress.unlockedSectors) return;
+  const level = planned.mode === 'campaign' ? LEVELS_BY_ID[planned.levelId] : null;
+  if (level && !isLevelUnlocked(progress, level)) return;
   progress.tutorialSeen = true; save(); audio.unlock();
   keys.clear(); dragging = null;
   game = createGame({
-    width: viewportWidth / worldScale, mode: planned.mode, sectorIndex: planned.sectorIndex,
-    upgrades: progress.upgrades, skin: progress.selectedSkin,
+    width: viewportWidth / worldScale, mode: planned.mode, biomeIndex: planned.biomeIndex,
+    upgrades: progress.upgrades, skin: progress.selectedSkin, level,
   });
   showMode('playing'); updateHUD(); audio.setMode('calm'); audio.startMusic();
-  if (planned.mode === 'campaign') announce(`${SECTORS[game.sectorIndex].name} · страж: ${SECTORS[game.sectorIndex].boss}`, 3);
-  renderGame(ctx, game, sectorImage(SECTORS[game.sectorIndex].image));
+  if (level) announce(`${BIOMES[level.biomeIndex].name} · ${level.name}`, 3);
+  else announce(`${BIOMES[game.biomeIndex].name} · бесконечный полёт`, 3);
+  renderGame(ctx, game, backgroundFor(game));
   lastTime = performance.now(); cancelAnimationFrame(frame); frame = requestAnimationFrame(loop);
 }
 function keyboardMovement(dt) {
@@ -333,13 +411,18 @@ function keyboardMovement(dt) {
 }
 const ANNOUNCEMENTS = {
   'boss-warning': () => 'ОПАСНОСТЬ: СТРАЖ БЛИЗКО',
-  'boss-arrives': (game) => `СТРАЖ СЕКТОРА: ${SECTORS[game.sectorIndex].boss}`,
+  'boss-arrives': (game) => `СТРАЖ БИОМА: ${game.boss?.name || BIOMES[game.biomeIndex].guardian}`,
   'boss-rage': () => 'СТРАЖ В ЯРОСТИ!',
   'boss-defeated': () => 'СТРАЖ РАСПАДАЕТСЯ!',
-  victory: () => 'СЕКТОР ЗАЧИЩЕН!',
-  'sector-change': (game) => `КУРС: ${SECTORS[game.sectorIndex].name}`,
+  'boss-phase': () => 'СТРАЖ УШЁЛ В ФАЗУ',
+  'boss-charge': () => 'ЛУЧ ЗАРЯЖАЕТСЯ!',
+  'boss-swarm': () => 'РОЙ ВЫПУЩЕН!',
+  'boss-frost': () => 'ЛЕДЯНОЙ ЗАЛП!',
+  'level-complete': () => 'ЦЕЛЬ ВЫПОЛНЕНА!',
+  victory: () => 'УРОВЕНЬ ПРОЙДЕН!',
+  'sector-change': (game) => `КУРС: ${BIOMES[game.biomeIndex].name}`,
 };
-const MUSIC_SWITCH = { 'boss-warning': 'boss', 'boss-arrives': 'boss', 'boss-defeated': 'calm', 'sector-change': 'calm' };
+const MUSIC_SWITCH = { 'boss-warning': 'boss', 'boss-arrives': 'boss', 'boss-defeated': 'calm', 'sector-change': 'calm', 'level-complete': 'calm' };
 function loop(now) {
   if (mode !== 'playing' || !game) return;
   const dt = Math.min(.05, Math.max(0, (now - lastTime) / 1000));
@@ -351,7 +434,7 @@ function loop(now) {
     if (ANNOUNCEMENTS[event]) announce(ANNOUNCEMENTS[event](game), 2.2);
     if (MUSIC_SWITCH[event]) audio.setMode(MUSIC_SWITCH[event]);
   }
-  updateHUD(); renderGame(ctx, game, sectorImage(SECTORS[game.sectorIndex].image));
+  updateHUD(); renderGame(ctx, game, backgroundFor(game));
   if (game.gameOver) { finishGame(); return; }
   frame = requestAnimationFrame(loop);
 }
@@ -367,11 +450,18 @@ function resumeGame() {
 function finishGame() {
   if (!game) return;
   cancelAnimationFrame(frame); keys.clear(); dragging = null; audio.stopMusic(); audio.suspend();
-  const outcome = settleFlight(progress, game) || { credits: 0, parts: 0, newRecord: false, isFirstClear: false };
+  const level = game.level;
+  const stars = level ? evaluateStars(level, game) : 0;
+  const outcome = settleFlight(progress, game) || { credits: 0, parts: 0, newRecord: false, isFirstClear: false, stars: 0, unlockedBiome: null };
   save();
   const title = $('result-title');
-  if (game.victory) title.innerHTML = 'СТРАЖ<br />ПОВЕРЖЕН!';
+  if (level && game.levelComplete) title.innerHTML = 'УРОВЕНЬ<br />ПРОЙДЕН!';
+  else if (game.victory) title.innerHTML = 'СТРАЖ<br />ПОВЕРЖЕН!';
   else title.innerHTML = 'ОТЛИЧНЫЙ<br />ПОЛЁТ!';
+  const starRowElement = $('result-stars-row');
+  starRowElement.hidden = !level;
+  starRowElement.textContent = level ? starRow(stars) : '';
+  starRowElement.setAttribute('aria-label', level ? `Звёзд получено: ${stars} из 3` : '');
   $('result-score').textContent = number.format(game.score);
   $('result-distance').textContent = `${number.format(Math.floor(game.distance))} м`;
   $('result-stars').textContent = number.format(game.stars);
@@ -380,7 +470,14 @@ function finishGame() {
   $('result-credits').textContent = number.format(outcome.credits);
   $('result-parts').textContent = number.format(outcome.parts);
   $('new-record').hidden = !outcome.newRecord;
-  $('result-unlock').hidden = !outcome.isFirstClear;
+  const unlock = $('result-unlock');
+  if (outcome.unlockedBiome) { unlock.hidden = false; unlock.textContent = `✦ ОТКРЫТ БИОМ: ${outcome.unlockedBiome}`; }
+  else if (outcome.stars >= 3) { unlock.hidden = false; unlock.textContent = '✦ ВСЕ ЗВЁЗДЫ УРОВНЯ'; }
+  else unlock.hidden = true;
+  const next = level ? nextLevelId(level) : null;
+  const nextButton = $('next-level-button');
+  nextButton.hidden = !next;
+  if (next) nextButton.onclick = () => { planned.levelId = next; planned.mode = 'campaign'; startGame(); };
   updateHUD(); showMode('result');
   if (game.victory) audio.play('victory');
 }
@@ -390,7 +487,7 @@ function returnHome() {
 }
 function activateWave() {
   if (mode !== 'playing' || !game) return;
-  if (useWave(game)) { audio.play('wave'); updateHUD(); renderGame(ctx, game, sectorImage(SECTORS[game.sectorIndex].image)); }
+  if (useWave(game)) { audio.play('wave'); updateHUD(); renderGame(ctx, game, backgroundFor(game)); }
 }
 
 /* ---------- intro ---------- */
@@ -423,7 +520,7 @@ $('missions-button').addEventListener('click', () => { hubTab = 'missions'; rend
 $('hub-close').addEventListener('click', () => showMode('home'));
 for (const button of document.querySelectorAll('[data-hub-tab]')) button.addEventListener('click', () => { hubTab = button.dataset.hubTab; renderHub(); });
 $('flight-close').addEventListener('click', () => showMode('home'));
-$('mode-campaign').addEventListener('click', () => { planned.mode = 'campaign'; planned.sectorIndex = Math.min(planned.sectorIndex, progress.unlockedSectors - 1); renderFlight(); });
+$('mode-campaign').addEventListener('click', () => { planned.mode = 'campaign'; renderFlight(); });
 $('mode-endless').addEventListener('click', () => { planned.mode = 'endless'; renderFlight(); });
 $('launch-button').addEventListener('click', startGame);
 $('case-close').addEventListener('click', () => { screens.case.hidden = true; });
@@ -445,7 +542,7 @@ for (const button of musicButtons) button.addEventListener('click', () => {
   progress.music = !progress.music; audio.setMusicEnabled(progress.music); save(); soundUI();
   if (progress.music && mode === 'playing') { audio.unlock(); audio.startMusic(); }
 });
-for (const button of document.querySelectorAll('.button, .home-nav button, .card-buy, .mode-tabs button, .hub-tabs button, .sector-card')) {
+for (const button of document.querySelectorAll('.button, .home-nav button, .card-buy, .mode-tabs button, .hub-tabs button, .sector-card, .biome-row, .level-card')) {
   button.addEventListener('click', () => audio.play('ui'));
 }
 for (const button of document.querySelectorAll('.card-buy')) button.addEventListener('click', () => audio.play('buy'));
@@ -492,5 +589,8 @@ window.__cosmoBack = () => {
   if (['result', 'flight', 'hub'].includes(mode)) { returnHome(); return true; }
   return false;
 };
-for (const sector of SECTORS) sectorImage(sector.image).addEventListener('load', () => { if (game) renderGame(ctx, game, sectorImage(SECTORS[game.sectorIndex].image)); });
+for (const biome of BIOMES) {
+  const image = biomeImage(biome.image);
+  if (image) image.addEventListener('load', () => { if (game) renderGame(ctx, game, backgroundFor(game)); });
+}
 soundUI(); showMode('home'); resize(); playIntro();

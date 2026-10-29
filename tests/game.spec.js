@@ -270,26 +270,49 @@ test('music and sound can be switched independently and both persist', async ({ 
   await expect(page.getByRole('button', { name: 'Включить звук' })).toBeVisible();
 });
 
-test('campaign map locks sectors until their boss is defeated', async ({ page }) => {
+test('the campaign map shows eight biomes and locks everything but the first level', async ({ page }) => {
   await open(page);
-  await page.evaluate(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, credits: 500, parts: 5 })));
+  await page.evaluate(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 3, tutorialSeen: true, credits: 500, parts: 5 })));
   await page.reload();
   await page.getByRole('button', { name: 'В ПОЛЁТ', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'КУДА ЛЕТИМ?' })).toBeVisible();
-  const cards = page.locator('.sector-card');
-  await expect(cards).toHaveCount(3);
-  await expect(cards.nth(0)).not.toBeDisabled();
-  await expect(cards.nth(1)).toBeDisabled();
-  await expect(cards.nth(2)).toBeDisabled();
-  await expect(cards.nth(1)).toContainText('ЗАКРЫТ');
+  const biomes = page.locator('.biome-row');
+  await expect(biomes).toHaveCount(8);
+  await expect(biomes.nth(0)).not.toBeDisabled();
+  await expect(biomes.nth(1)).toBeDisabled();
+  await expect(biomes.nth(1)).toContainText('ЗАКРЫТ');
+  const levels = page.locator('.level-card');
+  await expect(levels).toHaveCount(3);
+  await expect(levels.nth(0)).not.toBeDisabled();
+  await expect(levels.nth(1)).toBeDisabled();
+  await expect(levels.nth(2)).toContainText('СТРАЖ ПУСТОТЫ');
+  await expect(page.locator('#biome-detail')).toContainText('ТУМАННОСТЬ ЛИРЫ');
   await page.locator('#mode-endless').click();
-  await expect(cards.nth(2)).not.toBeDisabled();
+  const cards = page.locator('.sector-card');
+  await expect(cards).toHaveCount(8);
+  await expect(cards.nth(7)).not.toBeDisabled();
   await page.locator('#mode-campaign').click();
   await page.locator('#launch-button').click();
   await expect(page.getByRole('button', { name: 'Пауза' })).toBeVisible();
-  await expect(page.locator('#sector-name')).toHaveText('ТУМАННОСТЬ');
+  await expect(page.locator('#sector-name')).toContainText('РАЗВЕДКА');
   await expect(page.locator('#boss-status')).toBeHidden();
-  await expect(page.locator('#sector-progress')).toContainText('ДО БОССА');
+  await expect(page.locator('#sector-progress')).toContainText('ПРОДЕРЖАТЬСЯ');
+});
+
+test('clearing a level opens the next one and pays stars on the result screen', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 3, tutorialSeen: true, campaign: { stars: { 'lyra-1': 2 }, unlockedBiomes: 1 } })));
+  await open(page);
+  await page.getByRole('button', { name: 'В ПОЛЁТ', exact: true }).click();
+  const levels = page.locator('.level-card');
+  await expect(levels.nth(0)).toContainText('★★☆');
+  await expect(levels.nth(1)).not.toBeDisabled();
+  await levels.nth(1).click();
+  await page.locator('#launch-button').click();
+  await page.getByRole('button', { name: 'Пауза' }).click();
+  await page.getByRole('button', { name: 'ЗАВЕРШИТЬ ПОЛЁТ' }).click();
+  await expect(page.locator('#result-stars-row')).toHaveText('☆☆☆');
+  await page.getByRole('button', { name: 'В ГЛАВНОЕ МЕНЮ' }).click();
+  await expect(page.locator('#home-stars')).toHaveText('2/72');
 });
 
 test('the hangar spends credits on upgrades and applies them to the next flight', async ({ page }) => {
@@ -342,17 +365,17 @@ test('case rewards are granted once per purchase and cannot be bought without cr
 
 test('missions pay out only when completed and the backup code restores progress', async ({ page }) => {
   await open(page);
-  await page.evaluate(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, credits: 100, parts: 1, metrics: { stars: 3 } })));
+  await page.evaluate(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 3, tutorialSeen: true, credits: 100, parts: 1, metrics: { stars: 20 } })));
   await page.reload();
   await page.getByRole('button', { name: /^✦ ИСПЫТАНИЯ/ }).click();
   const mission = page.locator('.mission-card').filter({ hasText: 'ЛОВЕЦ ЗВЁЗД' });
   await expect(mission.locator('.card-buy')).toHaveText('ЗАБРАТЬ');
   await mission.locator('.card-buy').click();
   await expect(mission.locator('.card-buy')).toHaveText('ПОЛУЧЕНО');
-  await expect(page.locator('#hub-credits')).toHaveText('220');
+  await expect(page.locator('#hub-credits')).toHaveText('240');
   await page.locator('[data-hub-tab="backup"]').click();
   const code = await page.locator('#backup-code').inputValue();
-  expect(code).toContain('kosmopilot-backup-v2');
+  expect(code).toContain('kosmopilot-backup-v3');
   await page.evaluate((saved) => {
     localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, credits: 1, parts: 0 }));
     window.__savedCode = saved;
@@ -365,7 +388,7 @@ test('missions pay out only when completed and the backup code restores progress
   await page.locator('#restore-input').dispatchEvent('change');
   await expect(page.locator('[aria-labelledby="import-title"]')).toBeVisible();
   await page.locator('#import-confirm').click();
-  await expect(page.locator('#hub-credits')).toHaveText('220');
+  await expect(page.locator('#hub-credits')).toHaveText('240', { timeout: 5000 });
 });
 
 test('finishing a flight pays credits and parts that survive a reload', async ({ page }) => {
@@ -383,17 +406,18 @@ test('finishing a flight pays credits and parts that survive a reload', async ({
   expect(Number((await page.locator('#home-credits').innerText()).replace(/\s/g, ''))).toBe(home);
 });
 
-test('a campaign flight reaches the sector boss and a victory unlocks the next sector', async ({ page }) => {
+test('a guardian level reaches the boss and a victory opens the next biome', async ({ page }) => {
   // The clock fast-forwards ~40 simulated seconds of 60 fps rendering, which costs real time.
   test.setTimeout(240000);
-  await page.addInitScript(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, upgrades: { weapon: 5, hull: 2, engine: 3, wave: 2 } })));
+  await page.addInitScript(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 3, tutorialSeen: true, campaign: { stars: { 'lyra-1': 3, 'lyra-2': 3 }, unlockedBiomes: 1 }, upgrades: { weapon: 5, hull: 2, engine: 3, wave: 2 } })));
   await page.clock.install();
   await open(page);
   await page.getByRole('button', { name: 'В ПОЛЁТ', exact: true }).click();
+  await page.locator('.level-card').nth(2).click();
   await page.locator('#launch-button').click();
   await expect(page.locator('#boss-status')).toBeHidden();
-  await expect(page.locator('#sector-progress')).toContainText('ДО БОССА');
-  await page.clock.runFor(25000);
+  await expect(page.locator('#sector-progress')).toContainText('СТРАЖ ЧЕРЕЗ');
+  await page.clock.runFor(7500);
   await expect(page.locator('#boss-status')).toBeVisible();
   await expect(page.locator('#boss-name')).toHaveText('СТРАЖ ПУСТОТЫ');
   await expect(page.locator('#boss-health')).toHaveAttribute('style', /width:/);
@@ -406,11 +430,12 @@ test('a campaign flight reaches the sector boss and a victory unlocks the next s
     await page.keyboard.down(key);
   }
   await page.keyboard.up(key);
-  await expect(page.locator('#result-title')).toHaveText(/СТРАЖ/);
-  await expect(page.locator('#result-unlock')).toBeVisible();
+  await expect(page.locator('#result-title')).toHaveText(/УРОВЕНЬ/);
+  await expect(page.locator('#result-stars-row')).toBeVisible();
+  await expect(page.locator('#result-unlock')).toContainText('ОТКРЫТ БИОМ');
   await page.getByRole('button', { name: 'В ГЛАВНОЕ МЕНЮ' }).click();
   await page.getByRole('button', { name: 'В ПОЛЁТ', exact: true }).click();
-  await expect(page.locator('.sector-card').nth(1)).not.toBeDisabled();
+  await expect(page.locator('.biome-row').nth(1)).not.toBeDisabled();
 });
 
 test('new screens fit compact phones, wide phones and tablets without overflow', async ({ page }) => {
@@ -442,18 +467,19 @@ test('new screens fit compact phones, wide phones and tablets without overflow',
 
 test('the boss telegraph warns the pilot and the shatter plays before the results', async ({ page }) => {
   test.setTimeout(240000);
-  await page.addInitScript(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 2, tutorialSeen: true, upgrades: { weapon: 5, hull: 5, engine: 3, wave: 3 } })));
+  await page.addInitScript(() => localStorage.setItem('kosmopilot.v2', JSON.stringify({ version: 3, tutorialSeen: true, campaign: { stars: { 'lyra-1': 3, 'lyra-2': 3 }, unlockedBiomes: 1 }, upgrades: { weapon: 5, hull: 5, engine: 3, wave: 3 } })));
   await page.clock.install();
   await page.goto('/');
   await page.locator('#intro-skip').click();
   await page.getByRole('button', { name: 'В ПОЛЁТ', exact: true }).click();
+  await page.locator('.level-card').nth(2).click();
   await page.locator('#launch-button').click();
-  await page.clock.runFor(21200);
+  await page.clock.runFor(4600);
   await expect(page.locator('#announcement')).toContainText(/СТРАЖ/);
   await expect(page.locator('#boss-status')).toBeHidden();
   await page.clock.runFor(3400);
   await expect(page.locator('#boss-status')).toBeVisible();
-  await expect(page.locator('#announcement')).toContainText(/СТРАЖ СЕКТОРА/);
+  await expect(page.locator('#announcement')).toContainText(/СТРАЖ БИОМА/);
   // Wear the guardian down and watch it break apart before the result screen appears.
   let key = 'ArrowDown';
   await page.keyboard.down(key);
@@ -467,5 +493,5 @@ test('the boss telegraph warns the pilot and the shatter plays before the result
   }
   await page.keyboard.up(key);
   await expect(page.locator('#result-overlay')).toBeVisible({ timeout: 20000 });
-  await expect(page.locator('#result-title')).toHaveText(/СТРАЖ/);
+  await expect(page.locator('#result-title')).toHaveText(/УРОВЕНЬ/);
 });

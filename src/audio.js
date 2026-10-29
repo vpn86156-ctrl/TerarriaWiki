@@ -186,6 +186,52 @@ export class GameAudio {
       case 'sector-change':
         [392, 494, 587, 740].forEach((frequency, index) => this.tone(frequency, frequency * 1.5, now + index * .08, .3, 'sine', .22));
         break;
+      case 'alarm':
+        this.tone(880, 880, now, .08, 'square', .16); this.tone(660, 660, now + .13, .1, 'square', .16);
+        break;
+      case 'zap':
+        this.sweep(now, 1500, 180, .35, .35, 'sawtooth');
+        this.noise(now, .3, .22, 2200, 'bandpass', 1.4);
+        break;
+      case 'freeze':
+        this.tone(1760, 880, now, .3, 'sine', .3); this.noise(now, .35, .16, 4200, 'highpass');
+        this.tone(120, 60, now, .3, 'triangle', .35);
+        break;
+      case 'beam':
+        this.sweep(now, 240, 1500, .5, .4, 'sawtooth');
+        this.tone(70, 90, now, .7, 'sine', .4);
+        this.noise(now, .6, .18, 1600, 'bandpass', 1.1);
+        break;
+      case 'phase':
+        this.tone(520, 1300, now, .5, 'sine', .2); this.tone(1300, 520, now + .2, .5, 'sine', .14);
+        this.noise(now, .5, .08, 3400, 'bandpass', .8);
+        break;
+      case 'blink':
+        this.sweep(now, 900, 260, .18, .3, 'triangle');
+        this.noise(now, .18, .14, 2600, 'highpass');
+        break;
+      case 'swarm':
+        for (let i = 0; i < 4; i += 1) this.tone(1200 + i * 220, 700 + i * 120, now + i * .05, .12, 'square', .1);
+        this.noise(now, .3, .12, 2800, 'bandpass', 1.6);
+        break;
+      case 'frost':
+        this.tone(1568, 1046, now, .3, 'sine', .22); this.tone(2093, 1568, now + .1, .3, 'sine', .12);
+        this.noise(now, .4, .1, 5200, 'highpass');
+        break;
+      case 'mine-blast':
+        this.noise(now, .55, .5, 800);
+        this.tone(180, 45, now, .5, 'sine', .5);
+        break;
+      case 'crystal-pulse':
+        this.tone(1244, 1864, now, .25, 'sine', .16); this.tone(2489, 3100, now + .06, .22, 'sine', .07);
+        break;
+      case 'hazard-break':
+        this.tone(330, 120, now, .18, 'triangle', .2); this.noise(now, .2, .18, 1900, 'bandpass', 1.1);
+        break;
+      case 'level-complete':
+        [523, 784, 1046].forEach((frequency, index) => this.tone(frequency, frequency * 1.01, now + index * .1, .4, 'sine', .32));
+        this.tone(261, 261, now, .7, 'triangle', .16);
+        break;
       case 'ui':
         this.tone(720, 900, now, .07, 'triangle', .18);
         break;

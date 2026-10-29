@@ -20,7 +20,7 @@
             <span><strong>КОСМОПИЛОТ</strong><small>КОСМИЧЕСКАЯ АРКАДА</small></span>
           </div>
           <div class="header-actions">
-            <div class="home-record"><span>РЕКОРД <b id="home-best">0</b></span><strong><span class="coin-symbol">◈</span> <span id="home-credits">200</span></strong></div>
+            <div class="home-record"><span>РЕКОРД <b id="home-best">0</b></span><span>ЗВЁЗДЫ <b id="home-stars">0/72</b></span><strong><span class="coin-symbol">◈</span> <span id="home-credits">200</span></strong></div>
             <button type="button" class="icon-button sound-button" aria-label="Выключить звук" title="Звук">
               <svg class="sound-on" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 9a4.5 4.5 0 0 1 0 6m2-9a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
               <svg class="sound-off" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m16 9 5 6m0-6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -47,7 +47,7 @@
           </div>
         </div>
 
-        <footer class="home-footer"><span><i></i> ИГРАЙ БЕЗ ИНТЕРНЕТА</span><span class="footer-right">КАМПАНИЯ И БЕСКОНЕЧНЫЙ ПОЛЁТ <b>✦</b> 02</span></footer>
+        <footer class="home-footer"><span><i></i> ИГРАЙ БЕЗ ИНТЕРНЕТА</span><span class="footer-right">8 БИОМОВ · 24 УРОВНЯ <b>✦</b> 03</span></footer>
       </section>
 
       <section id="game-hud" class="hud" aria-label="Управление игрой" hidden>
@@ -87,7 +87,7 @@
             <article class="lesson"><div class="lesson-icon cyan"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="1.7" stroke-dasharray="3 3"/><circle cx="16" cy="16" r="4" fill="currentColor"/><path d="M16 2v3m0 22v3M2 16h3m22 0h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div><div><h3>УПРАВЛЯЙ</h3><p>Зажми левую часть экрана и веди корабль пальцем. Пушка стреляет сама.</p></div></article>
             <article class="lesson"><div class="lesson-icon gold"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2c1 8 3 11 13 14-10 3-12 6-13 14-1-8-3-11-13-14C13 13 15 10 16 2Z" fill="currentColor"/></svg></div><div><h3>СОБИРАЙ</h3><p>Звёзды дают очки. Монеты <b>◈</b> и детали <b>⬡</b> идут на прокачку. Крест лечит корпус.</p></div></article>
             <article class="lesson"><div class="lesson-icon coral"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="m19 3-11 15h7l-2 11 11-15h-7l2-11Z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div><div><h3>ЗАЩИЩАЙСЯ</h3><p>Кнопка «Волна» очищает пространство и бьёт по стражу. Её можно жать вторым пальцем.</p></div></article>
-            <article class="lesson"><div class="lesson-icon violet"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M6 16h20M16 6v20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M16 4c4 4 9 3 12 0-1 6-5 9-12 12C9 13 5 10 4 4c3 3 8 4 12 0Z" fill="currentColor" opacity=".85"/></svg></div><div><h3>ПОБЕЖДАЙ СТРАЖА</h3><p>Через 24 секунды выходит страж сектора. Победи его — откроется новый сектор.</p></div></article>
+            <article class="lesson"><div class="lesson-icon violet"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M6 16h20M16 6v20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M16 4c4 4 9 3 12 0-1 6-5 9-12 12C9 13 5 10 4 4c3 3 8 4 12 0Z" fill="currentColor" opacity=".85"/></svg></div><div><h3>ПОБЕЖДАЙ СТРАЖА</h3><p>В каждом биоме три уровня, в третьем выходит страж. До трёх звёзд за уровень.</p></div></article>
           </div>
           <div class="dialog-footer"><span class="dialog-footnote"><span>✦</span> ЗА ПОЛЁТ ПЛАТЯТ КРЕДИТАМИ</span><button id="tutorial-start" class="button button-primary compact" type="button"><span>НАЧАТЬ ПОЛЁТ</span><span class="button-arrow" aria-hidden="true">↗</span></button></div>
         </section>
@@ -108,12 +108,12 @@
         <section class="dialog result-dialog" role="dialog" aria-modal="true" aria-labelledby="result-title">
           <div class="dialog-top"><span class="dialog-kicker"><i></i> ПОЛЁТ ЗАВЕРШЁН</span><span class="result-spark" aria-hidden="true">✦</span></div>
           <div class="result-content">
-            <div class="result-main"><h2 id="result-title">ОТЛИЧНЫЙ<br />ПОЛЁТ!</h2><p class="dialog-intro">Каждое путешествие приближает к звёздам.</p></div>
+            <div class="result-main"><h2 id="result-title">ОТЛИЧНЫЙ<br />ПОЛЁТ!</h2><p class="dialog-intro">Каждое путешествие приближает к звёздам.</p><div id="result-stars-row" class="result-stars-row" hidden></div></div>
             <div class="result-score"><span class="hud-label">ВАШ РЕЗУЛЬТАТ</span><strong id="result-score">0</strong><span id="new-record" class="new-record" hidden>✦ НОВЫЙ РЕКОРД</span></div>
           </div>
           <div class="result-stats"><span>ПУТЬ <b id="result-distance">0 м</b></span><span>ЗВЁЗДЫ <b id="result-stars">0</b></span><span>СТРАЖИ <b id="result-bosses">0</b></span><span>РЕКОРД <b id="result-best">0</b></span></div>
           <div class="result-rewards"><span>НАГРАДА ЗА ПОЛЁТ</span><strong>◈ +<b id="result-credits">0</b></strong><strong>⬡ +<b id="result-parts">0</b></strong><span id="result-unlock" hidden>✦ НОВЫЙ СЕКТОР ОТКРЫТ</span></div>
-          <div class="result-actions"><button id="retry-button" class="button button-primary compact" type="button">ЕЩЁ РАЗ <span class="button-arrow">↗</span></button><button id="menu-button" class="button button-quiet" type="button">В ГЛАВНОЕ МЕНЮ</button></div>
+          <div class="result-actions"><button id="next-level-button" class="button button-primary compact" type="button" hidden>СЛЕДУЮЩИЙ УРОВЕНЬ <span class="button-arrow">↗</span></button><button id="retry-button" class="button button-primary compact" type="button">ЕЩЁ РАЗ <span class="button-arrow">↗</span></button><button id="menu-button" class="button button-quiet" type="button">В ГЛАВНОЕ МЕНЮ</button></div>
         </section>
       </div>
 
@@ -121,9 +121,19 @@
       <div id="flight-overlay" class="overlay" hidden>
         <section class="dialog flight-dialog" role="dialog" aria-modal="true" aria-labelledby="flight-title">
           <div class="dialog-top"><span class="dialog-kicker"><i></i> КАРТА ПОЛЁТОВ</span><button id="flight-close" class="close-button" type="button" aria-label="Закрыть выбор полёта">×</button></div>
-          <div class="flight-heading"><div><h2 id="flight-title">КУДА ЛЕТИМ?</h2><p class="dialog-intro">Выбирай маршрут и отправляйся навстречу звёздам.</p></div><div class="mode-tabs" role="group" aria-label="Режим игры"><button id="mode-campaign" class="active" type="button">КАМПАНИЯ</button><button id="mode-endless" type="button">БЕСКОНЕЧНЫЙ</button></div></div>
-          <div id="sector-grid" class="sector-grid"></div>
-          <div class="flight-bottom"><span id="flight-note">Победи стража, чтобы открыть следующий сектор.</span><button id="launch-button" class="button button-primary compact" type="button">НАЧАТЬ ПОЛЁТ <span class="button-arrow">↗</span></button></div>
+          <div class="flight-heading"><div><h2 id="flight-title">КУДА ЛЕТИМ?</h2><p class="dialog-intro">Кампания: 8 биомов, 24 уровня, у каждого свой страж.</p></div><div class="mode-tabs" role="group" aria-label="Режим игры"><button id="mode-campaign" class="active" type="button">КАМПАНИЯ</button><button id="mode-endless" type="button">БЕСКОНЕЧНЫЙ</button></div></div>
+          <div id="campaign-map" class="campaign-map">
+            <div id="biome-list" class="biome-list" role="group" aria-label="Биомы кампании"></div>
+            <div class="campaign-side">
+              <div id="biome-detail" class="biome-detail"></div>
+              <div id="level-list" class="level-list" role="group" aria-label="Уровни биома"></div>
+            </div>
+          </div>
+          <div id="endless-map" class="endless-map" hidden>
+            <div id="sector-grid" class="sector-grid"></div>
+            <p id="endless-note" class="endless-note">Бесконечный полёт: биомы сменяются после каждого стража, награды растут.</p>
+          </div>
+          <div class="flight-bottom"><span id="campaign-note">Пройди уровень, чтобы открыть следующий.</span><button id="launch-button" class="button button-primary compact" type="button">НАЧАТЬ ПОЛЁТ <span class="button-arrow">↗</span></button></div>
         </section>
       </div>
 

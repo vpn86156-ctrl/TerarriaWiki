@@ -1,14 +1,14 @@
-import { WORLD_HEIGHT } from './engine.js';
-import { SKINS } from './content.js';
-import { bossPalette } from './engine.js';
+import { WORLD_HEIGHT, bossPalette } from './engine.js';
+import { BIOMES, SKINS } from './content.js';
 
 const TAU = Math.PI * 2;
 const lcg = (seed) => () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+const paletteOf = (game) => (BIOMES[game.biomeIndex] || BIOMES[0]).palette;
 
-/* ---------- deterministic per-sector backdrop layers ---------- */
+/* ---------- deterministic per-biome backdrop layers ---------- */
 const fields = new Map();
-function buildField(sector) {
-  const random = lcg(9173 + sector * 7919);
+function buildField(biome) {
+  const random = lcg(9173 + biome * 7919);
   const stars = [];
   for (const [count, min, max, size] of [[96, 5, 18, .7], [46, 46, 92, 1.5]]) {
     for (let i = 0; i < count; i += 1) {
@@ -19,30 +19,33 @@ function buildField(sector) {
     x: random(), y: random(), radius: 110 + random() * 90, speed: 3 + random() * 9,
     alpha: .05 + random() * .07, phase: random() * TAU,
   }));
-  const motes = Array.from({ length: sector === 2 ? 30 : sector === 1 ? 26 : 22 }, () => ({
-    x: random(), y: random(), size: 1.6 + random() * (sector === 1 ? 4.6 : 3.2),
+  const motes = Array.from({ length: 24 + biome % 4 * 3 }, () => ({
+    x: random(), y: random(), size: 1.6 + random() * 3.6,
     speed: 26 + random() * 78, phase: random() * TAU, spin: (random() - .5) * 2.4, drift: (random() - .5) * 26,
   }));
   const silhouettes = Array.from({ length: 5 }, () => ({
     x: random(), y: random(), radius: 9 + random() * 26, speed: 34 + random() * 46, phase: random() * TAU, shape: random() * 100,
   }));
-  return { stars, clouds, motes, silhouettes };
+  const decor = Array.from({ length: 7 }, () => ({
+    x: random(), y: random(), size: 30 + random() * 70, speed: 18 + random() * 40, phase: random() * TAU, shape: random(),
+  }));
+  return { stars, clouds, motes, silhouettes, decor };
 }
-const field = (sector) => {
-  if (!fields.has(sector)) fields.set(sector, buildField(sector));
-  return fields.get(sector);
+const field = (biome) => {
+  if (!fields.has(biome)) fields.set(biome, buildField(biome));
+  return fields.get(biome);
 };
-// The starfield is static: it is painted once per sector/size and then only blitted with an offset.
+// The starfield is static: it is painted once per biome/size and then only blitted with an offset.
 const layers = new Map();
-function starLayer(sector, index, w, h) {
-  const key = `${sector}|${index}|${Math.round(w)}|${Math.round(h)}`;
+function starLayer(biome, index, w, h) {
+  const key = `${biome}|${index}|${Math.round(w)}|${Math.round(h)}`;
   let canvas = layers.get(key);
   if (canvas) return canvas;
   canvas = document.createElement('canvas');
   canvas.width = Math.ceil(w + 80); canvas.height = Math.ceil(h);
   const painter = canvas.getContext('2d');
-  const { stars } = field(sector);
-  const [, , , baseSize] = [[0, 0, 0, .7], [0, 0, 0, 1.2], [0, 0, 0, 1.9]][index];
+  const { stars } = field(biome);
+  const baseSize = index === 0 ? .7 : 1.5;
   for (const star of stars) {
     if (star.layer !== baseSize) continue;
     painter.globalAlpha = star.alpha;
@@ -51,11 +54,10 @@ function starLayer(sector, index, w, h) {
     painter.arc(star.x * canvas.width, star.y * h, star.size, 0, TAU);
     painter.fill();
   }
-  if (layers.size > 12) layers.clear();
+  if (layers.size > 16) layers.clear();
   layers.set(key, canvas);
   return canvas;
 }
-const SECTOR_TINT = ['rgba(120,240,235,', 'rgba(150,205,255,', 'rgba(255,150,96,'];
 
 // Radial glow sprites are drawn once and blitted, which keeps the frame free of gradient allocations.
 const spriteCache = new Map();
@@ -102,15 +104,105 @@ function cover(ctx, image, w, h, phase) {
   return true;
 }
 
+/* Biome-specific scenery: everything is drawn with vectors, per biome palette. */
+function drawDecor(ctx, game, biome) {
+  const w = game.width, h = WORLD_HEIGHT;
+  const palette = paletteOf(game);
+  const { decor } = field(biome);
+  const time = game.elapsed;
+  for (const item of decor) {
+    const span = w + 260;
+    const x = ((item.x * span - time * item.speed) % span + span) % span - 130;
+    const y = item.y * h;
+    ctx.save();
+    ctx.translate(x, y);
+    switch (BIOMES[biome].id) {
+      case 'ice': // Ice spires growing from the top and bottom.
+        ctx.fillStyle = 'rgba(150,205,255,.14)';
+        ctx.strokeStyle = 'rgba(190,235,255,.22)';
+        ctx.lineWidth = 1.4;
+        for (const dir of [-1, 1]) {
+          const base = dir < 0 ? -h * .04 : h * 1.04;
+          ctx.beginPath();
+          ctx.moveTo(-item.size * .5, base);
+          ctx.lineTo(0, base + dir * item.size * 1.5);
+          ctx.lineTo(item.size * .5, base);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
+        break;
+      case 'debris': // Tumbling wreck plates.
+        ctx.rotate(time * .3 + item.phase);
+        ctx.fillStyle = 'rgba(60,48,40,.5)';
+        ctx.strokeStyle = 'rgba(255,214,158,.18)';
+        ctx.fillRect(-item.size * .5, -item.size * .16, item.size, item.size * .32);
+        ctx.strokeRect(-item.size * .5, -item.size * .16, item.size, item.size * .32);
+        break;
+      case 'gas': // Slow rolling gas billows.
+        blit(ctx, glowSprite(`rgba(120,255,196,.10)`, Math.ceil(item.size * 1.4)), 0, Math.sin(time * .5 + item.phase) * 22, item.size * 1.6, .8);
+        break;
+      case 'graveyard': { // Broken hulls of lost ships.
+        ctx.rotate(Math.sin(item.phase) * .3);
+        ctx.fillStyle = 'rgba(40,28,52,.65)';
+        ctx.strokeStyle = 'rgba(224,166,255,.22)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-item.size * .6, 0); ctx.lineTo(-item.size * .2, -item.size * .22); ctx.lineTo(item.size * .5, -item.size * .12);
+        ctx.lineTo(item.size * .7, item.size * .1); ctx.lineTo(item.size * .1, item.size * .24); ctx.lineTo(-item.size * .5, item.size * .12);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        break;
+      }
+      case 'sun': // Corona rays.
+        ctx.globalAlpha = .16 + Math.sin(time * 1.6 + item.phase) * .06;
+        ctx.strokeStyle = palette.glow;
+        ctx.lineWidth = 2 + item.size * .04;
+        for (let i = 0; i < 5; i += 1) {
+          const a = item.phase + i * (TAU / 5) + time * .2;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a) * item.size * .4, Math.sin(a) * item.size * .4);
+          ctx.lineTo(Math.cos(a) * item.size * 1.6, Math.sin(a) * item.size * 1.6);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        break;
+      case 'caves': // Crystal arches.
+        ctx.strokeStyle = 'rgba(186,160,255,.24)';
+        ctx.fillStyle = 'rgba(120,100,220,.12)';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-item.size * .6, item.size * .8);
+        ctx.lineTo(-item.size * .1, -item.size * .9);
+        ctx.lineTo(item.size * .3, item.size * .2);
+        ctx.lineTo(item.size * .7, -item.size * .5);
+        ctx.lineTo(item.size * .5, item.size * .9);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        break;
+      case 'singularity': { // Accretion arcs around a dark core.
+        ctx.strokeStyle = 'rgba(255,140,220,.22)';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 3; i += 1) {
+          ctx.beginPath();
+          ctx.ellipse(0, 0, item.size * (.5 + i * .3), item.size * (.14 + i * .08), Math.sin(time * .2 + i) * .3, 0, TAU);
+          ctx.stroke();
+        }
+        break;
+      }
+      default: // Lyra: drifting plasma veils.
+        blit(ctx, glowSprite(`rgba(120,240,235,.09)`, Math.ceil(item.size * 1.5)), 0, Math.sin(time * .4 + item.phase) * 18, item.size * 1.7, .9);
+    }
+    ctx.restore();
+  }
+}
+
 function drawBackdrop(ctx, game, image) {
   const w = game.width, h = WORLD_HEIGHT;
-  const sector = game.sectorIndex;
+  const biome = game.biomeIndex;
+  const palette = paletteOf(game);
   const heat = game.boss ? 1 : game.warning > 0 ? game.warning / 2.6 : 0;
   const speed = 1 + heat * .8;
-  const { clouds, motes, silhouettes } = field(sector);
+  const { clouds, motes, silhouettes } = field(biome);
   if (!cover(ctx, image, w, h, game.elapsed)) {
     const bg = ctx.createLinearGradient(0, 0, w, h);
-    bg.addColorStop(0, '#091427'); bg.addColorStop(.6, '#080c24'); bg.addColorStop(1, '#1a1035');
+    bg.addColorStop(0, palette.deep); bg.addColorStop(.6, palette.mid); bg.addColorStop(1, palette.deep);
     ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
   }
   // Drifting nebula clouds give the still image depth.
@@ -119,8 +211,9 @@ function drawBackdrop(ctx, game, image) {
     const x = ((cloud.x * span - game.elapsed * cloud.speed * speed) % span + span) % span - 310;
     const y = cloud.y * h + Math.sin(game.elapsed * .12 + cloud.phase) * 16;
     const pulse = (cloud.alpha / .12) * (.7 + Math.sin(game.elapsed * .5 + cloud.phase) * .3) * (1 + heat * .5);
-    blit(ctx, glowSprite(`${SECTOR_TINT[sector]}.16)`, Math.ceil(cloud.radius)), x, y, cloud.radius, Math.max(0, Math.min(1, pulse)));
+    blit(ctx, glowSprite(`rgba(${palette.tint}.16)`, Math.ceil(cloud.radius)), x, y, cloud.radius, Math.max(0, Math.min(1, pulse)));
   }
+  drawDecor(ctx, game, biome);
   // Parallax silhouettes.
   for (const shape of silhouettes) {
     const span = w + 200;
@@ -138,7 +231,7 @@ function drawBackdrop(ctx, game, image) {
   }
   // Two cached parallax star layers; the near one streaks during a boss fight.
   for (let index = 0; index < 2; index += 1) {
-    const layer = starLayer(sector, index, w, h);
+    const layer = starLayer(biome, index, w, h);
     const rates = [12, 62];
     const span = layer.width;
     const offset = ((game.elapsed * rates[index] * speed) % span + span) % span;
@@ -156,26 +249,29 @@ function drawBackdrop(ctx, game, image) {
       }
     }
   }
-  // Sector character: drifting ice shards, rising embers or cold dust.
+  // Biome character: drifting shards, embers, dust or sparks.
   const ember = glowSprite('rgba(255,170,90,.95)', 16, .35);
-  for (const mote of motes) {
+  const mote = glowSprite(`rgba(${palette.tint}.9)`, 14, .4);
+  for (const item of motes) {
     const span = w + 120;
-    const x = ((mote.x * span - game.elapsed * mote.speed * speed) % span + span) % span - 60;
-    const drift = Math.sin(game.elapsed * .8 + mote.phase) * mote.drift;
-    const y = (mote.y * h + drift + (sector === 2 ? -((game.elapsed * 26) % h) : 0) + h) % h;
-    const alpha = .35 + Math.sin(game.elapsed * 1.6 + mote.phase) * .25;
-    if (sector === 1) {
-      ctx.save(); ctx.translate(x, y); ctx.rotate(game.elapsed * mote.spin + mote.phase);
+    const x = ((item.x * span - game.elapsed * item.speed * speed) % span + span) % span - 60;
+    const drift = Math.sin(game.elapsed * .8 + item.phase) * item.drift;
+    const y = (item.y * h + drift + h) % h;
+    const alpha = .35 + Math.sin(game.elapsed * 1.6 + item.phase) * .25;
+    if (BIOMES[biome].id === 'ice') {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(game.elapsed * item.spin + item.phase);
       ctx.globalAlpha = alpha;
       ctx.fillStyle = 'rgba(196,238,255,.85)';
-      ctx.beginPath(); ctx.moveTo(0, -mote.size * 2); ctx.lineTo(mote.size, 0); ctx.lineTo(0, mote.size * 2); ctx.lineTo(-mote.size, 0); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0, -item.size * 2); ctx.lineTo(item.size, 0); ctx.lineTo(0, item.size * 2); ctx.lineTo(-item.size, 0); ctx.closePath(); ctx.fill();
       ctx.restore();
-    } else if (sector === 2) {
-      blit(ctx, ember, x, y, mote.size * 5, alpha * .8);
+    } else if (BIOMES[biome].id === 'sun') {
+      blit(ctx, ember, x, y, item.size * 5, alpha * .8);
+    } else if (BIOMES[biome].id === 'gas' || BIOMES[biome].id === 'caves' || BIOMES[biome].id === 'singularity') {
+      blit(ctx, mote, x, y, item.size * 3.4, alpha * .7);
     } else {
       ctx.globalAlpha = alpha * .7;
       ctx.fillStyle = 'rgba(178,214,255,.75)';
-      ctx.beginPath(); ctx.arc(x, y, mote.size * .7, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, item.size * .7, 0, TAU); ctx.fill();
       ctx.globalAlpha = 1;
     }
   }
@@ -185,7 +281,7 @@ function drawBackdrop(ctx, game, image) {
     if (bolt > .4) {
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = `${SECTOR_TINT[sector]}${(Math.min(.2, bolt * .03)).toFixed(3)})`;
+      ctx.fillStyle = `rgba(${palette.tint}${(Math.min(.2, bolt * .03)).toFixed(3)})`;
       ctx.fillRect(0, 0, w, h);
       ctx.strokeStyle = `rgba(255,255,255,${Math.min(.5, bolt * .08).toFixed(3)})`;
       ctx.lineWidth = 1.6;
@@ -208,7 +304,7 @@ function vignette(kind, w, h) {
   const painter = cached.getContext('2d');
   const gradient = painter.createRadialGradient(w * .5, h * .5, Math.min(w, h) * .28, w * .5, h * .5, Math.max(w, h) * .72);
   gradient.addColorStop(0, 'rgba(0,0,0,0)');
-  gradient.addColorStop(1, kind === 'danger' ? 'rgba(56,4,12,.9)' : 'rgba(2,4,16,.62)');
+  gradient.addColorStop(1, kind === 'danger' ? 'rgba(56,4,12,.9)' : kind === 'frost' ? 'rgba(20,70,130,.85)' : 'rgba(2,4,16,.62)');
   painter.fillStyle = gradient;
   painter.fillRect(0, 0, w, h);
   if (kind === 'danger') {
@@ -229,15 +325,185 @@ function drawVignette(ctx, game) {
     ctx.drawImage(vignette('danger', w, h), 0, 0);
     ctx.globalAlpha = 1;
   }
+  if (game.chill > .05) {
+    ctx.globalAlpha = Math.min(.75, game.chill * .7);
+    ctx.drawImage(vignette('frost', w, h), 0, 0);
+    ctx.globalAlpha = 1;
+  }
+}
+
+/* ---------- hazards ---------- */
+function drawHazard(ctx, hazard, game) {
+  const palette = paletteOf(game);
+  const time = game.elapsed;
+  ctx.save();
+  ctx.translate(hazard.x, hazard.y);
+  switch (hazard.type) {
+    case 'plasma': {
+      const wobble = Math.sin(time * 1.4 + hazard.phase) * 6;
+      blit(ctx, glowSprite(`rgba(${palette.tint}.5)`, Math.ceil(hazard.radius)), 0, 0, hazard.radius + wobble, .75);
+      ctx.strokeStyle = `rgba(${palette.tint}.35)`;
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 3; i += 1) {
+        const r = hazard.radius * (.45 + i * .18) + Math.sin(time * 2 + i + hazard.phase) * 5;
+        ctx.beginPath();
+        for (let a = 0; a <= 20; a += 1) {
+          const angle = (a / 20) * TAU;
+          const wob = r + Math.sin(angle * 3 + time * 2 + i) * 7;
+          const x = Math.cos(angle) * wob, y = Math.sin(angle) * wob * .7;
+          if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath(); ctx.stroke();
+      }
+      break;
+    }
+    case 'mine': {
+      ctx.rotate(time * .6 + hazard.phase);
+      ctx.fillStyle = hazard.state === 'arming' ? '#ff8b6b' : '#3b3550';
+      ctx.strokeStyle = '#e5d7ff'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(0, 0, hazard.radius * .6, 0, TAU); ctx.fill(); ctx.stroke();
+      for (let i = 0; i < 8; i += 1) {
+        const a = i * TAU / 8;
+        ctx.beginPath(); ctx.moveTo(Math.cos(a) * hazard.radius * .6, Math.sin(a) * hazard.radius * .6);
+        ctx.lineTo(Math.cos(a) * hazard.radius, Math.sin(a) * hazard.radius); ctx.stroke();
+      }
+      const blink = hazard.state === 'arming' ? (Math.sin(time * 22) > 0 ? 1 : .2) : .55 + Math.sin(time * 6) * .25;
+      ctx.fillStyle = `rgba(255,90,80,${blink})`;
+      ctx.shadowColor = '#ff6a5a'; ctx.shadowBlur = 14 * blink;
+      ctx.beginPath(); ctx.arc(0, 0, 5, 0, TAU); ctx.fill();
+      ctx.shadowBlur = 0;
+      break;
+    }
+    case 'frost': {
+      blit(ctx, glowSprite('rgba(150,205,255,.4)', Math.ceil(hazard.radius)), 0, 0, hazard.radius, .8);
+      ctx.strokeStyle = 'rgba(210,245,255,.5)'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      for (let i = 0; i <= 6; i += 1) {
+        const a = (i / 6) * TAU + time * .2;
+        const r = hazard.radius * .8 + Math.sin(time * 1.2 + i) * 6;
+        const x = Math.cos(a) * r, y = Math.sin(a) * r * .8;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath(); ctx.stroke();
+      ctx.fillStyle = 'rgba(235,250,255,.55)';
+      for (let i = 0; i < 6; i += 1) {
+        const a = i * TAU / 6 + time * .4;
+        const r = hazard.radius * .55;
+        ctx.save();
+        ctx.translate(Math.cos(a) * r, Math.sin(a) * r * .8);
+        ctx.rotate(a);
+        ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(4, 0); ctx.lineTo(0, 7); ctx.lineTo(-4, 0); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+      break;
+    }
+    case 'vortex': {
+      ctx.rotate(time * .9);
+      ctx.strokeStyle = `rgba(${palette.tint}.42)`;
+      for (let arm = 0; arm < 3; arm += 1) {
+        ctx.lineWidth = 3 - arm * .6;
+        ctx.beginPath();
+        for (let i = 0; i <= 26; i += 1) {
+          const t = i / 26;
+          const angle = arm * (TAU / 3) + t * 3.4;
+          const r = hazard.radius * (1 - t) * .95;
+          const x = Math.cos(angle) * r, y = Math.sin(angle) * r * .8;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      blit(ctx, glowSprite(`rgba(${palette.tint}.28)`, 40), 0, 0, 46, .7);
+      break;
+    }
+    case 'turret': {
+      const aim = Math.atan2(game.player.y - hazard.y, game.player.x - hazard.x);
+      ctx.fillStyle = '#4a3f5e'; ctx.strokeStyle = '#e0a6ff'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(-24, 16); ctx.lineTo(-16, -12); ctx.lineTo(16, -12); ctx.lineTo(24, 16); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.save(); ctx.rotate(aim);
+      ctx.fillStyle = '#8d76a8'; ctx.fillRect(0, -4, 26, 8);
+      const charge = Math.max(0, 1 - hazard.fire * .6);
+      ctx.fillStyle = `rgba(255,180,255,${.4 + charge})`;
+      ctx.beginPath(); ctx.arc(26, 0, 3 + charge * 3, 0, TAU); ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = hazard.hitFlash > 0 ? '#ffffff' : '#ff9de0';
+      ctx.beginPath(); ctx.arc(0, 0, 7, 0, TAU); ctx.fill();
+      if (hazard.health < hazard.maxHealth) {
+        ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(-20, -24, 40, 5);
+        ctx.fillStyle = '#ff9de0'; ctx.fillRect(-20, -24, 40 * (hazard.health / hazard.maxHealth), 5);
+      }
+      break;
+    }
+    case 'flare': {
+      if (hazard.state === 'warn') {
+        const pulse = 1 - hazard.timer / 1.3;
+        ctx.strokeStyle = `rgba(255,190,110,${.25 + pulse * .6})`;
+        ctx.lineWidth = 2 + pulse * 4;
+        ctx.setLineDash([14, 10]);
+        ctx.beginPath(); ctx.moveTo(0, -WORLD_HEIGHT); ctx.lineTo(0, WORLD_HEIGHT); ctx.stroke();
+        ctx.setLineDash([]);
+        blit(ctx, glowSprite('rgba(255,150,96,.7)', 30), 0, 0, 40 * pulse, pulse);
+      } else if (hazard.state === 'fire') {
+        const width = 62 * (.6 + Math.sin(time * 40) * .05);
+        const beam = ctx.createLinearGradient(-width / 2, 0, width / 2, 0);
+        beam.addColorStop(0, 'rgba(255,120,60,0)');
+        beam.addColorStop(.5, 'rgba(255,246,214,.95)');
+        beam.addColorStop(1, 'rgba(255,120,60,0)');
+        ctx.fillStyle = beam;
+        ctx.fillRect(-width / 2, -WORLD_HEIGHT, width, WORLD_HEIGHT * 2);
+      }
+      break;
+    }
+    case 'crystal': {
+      const charge = hazard.state === 'warn' ? 1 - hazard.timer / .7 : 0;
+      ctx.rotate(Math.sin(time * .8 + hazard.phase) * .2);
+      ctx.shadowColor = '#c8b6ff'; ctx.shadowBlur = 12 + charge * 24;
+      const facet = ctx.createLinearGradient(0, -hazard.radius, 0, hazard.radius);
+      facet.addColorStop(0, '#efe6ff'); facet.addColorStop(.5, '#8f7ce0'); facet.addColorStop(1, '#3b3168');
+      ctx.fillStyle = hazard.hitFlash > 0 ? '#ffffff' : facet;
+      ctx.strokeStyle = `rgba(220,205,255,${.6 + charge * .4})`; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(0, -hazard.radius); ctx.lineTo(hazard.radius * .6, 0); ctx.lineTo(0, hazard.radius); ctx.lineTo(-hazard.radius * .6, 0);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.shadowBlur = 0;
+      if (charge > 0) {
+        ctx.strokeStyle = `rgba(200,182,255,${charge})`; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, 0, hazard.radius * (1 + charge * .8), 0, TAU); ctx.stroke();
+      }
+      break;
+    }
+    case 'well': {
+      blit(ctx, glowSprite('rgba(255,140,220,.45)', Math.ceil(hazard.radius * 1.6)), 0, 0, hazard.radius * 1.7, .8);
+      ctx.fillStyle = '#05030c';
+      ctx.beginPath(); ctx.arc(0, 0, hazard.radius * .55, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,157,224,.7)'; ctx.lineWidth = 2.4;
+      for (let i = 0; i < 3; i += 1) {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, hazard.radius * (.8 + i * .35), hazard.radius * (.24 + i * .1), time * .6 + i, 0, TAU);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(255,220,250,.35)'; ctx.lineWidth = 1.4;
+      for (let i = 0; i < 6; i += 1) {
+        const a = i * TAU / 6 - time * 1.4;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * hazard.radius * 2.2, Math.sin(a) * hazard.radius * 2.2);
+        ctx.lineTo(Math.cos(a) * hazard.radius * .9, Math.sin(a) * hazard.radius * .9);
+        ctx.stroke();
+      }
+      break;
+    }
+    default: break;
+  }
+  ctx.restore();
 }
 
 /* ---------- entities ---------- */
 function drawRock(ctx, rock, time) {
+  const palette = (BIOMES[rock.biome] || BIOMES[0]).palette.rock;
   ctx.save();
   ctx.translate(rock.x, rock.y);
   if (rock.comet) {
     const trail = ctx.createLinearGradient(0, 0, rock.radius * 3.6, 0);
-    const color = rock.sector === 1 ? '150,220,255' : rock.sector === 2 ? '255,140,80' : '150,236,247';
+    const color = rock.biome === 2 ? '150,220,255' : rock.biome === 5 ? '255,140,80' : '150,236,247';
     trail.addColorStop(0, `rgba(${color},.65)`); trail.addColorStop(.45, `rgba(${color},.22)`); trail.addColorStop(1, `rgba(${color},0)`);
     ctx.fillStyle = trail;
     ctx.beginPath(); ctx.moveTo(0, -rock.radius * .75); ctx.quadraticCurveTo(rock.radius * 2, 0, rock.radius * 3.6, 0); ctx.quadraticCurveTo(rock.radius * 2, 0, 0, rock.radius * .75); ctx.fill();
@@ -256,9 +522,7 @@ function drawRock(ctx, rock, time) {
   };
   if (rock.comet) { ctx.shadowColor = 'rgba(150,235,255,.6)'; ctx.shadowBlur = 18; }
   const fill = ctx.createRadialGradient(-r * .38, -r * .43, 1, 0, 0, r * 1.1);
-  if (rock.sector === 1) { fill.addColorStop(0, '#e6fbff'); fill.addColorStop(.4, '#7caec7'); fill.addColorStop(.75, '#4b6e93'); fill.addColorStop(1, '#283854'); }
-  else if (rock.sector === 2) { fill.addColorStop(0, '#ffd2b0'); fill.addColorStop(.4, '#a65e58'); fill.addColorStop(.75, '#613d4b'); fill.addColorStop(1, '#332935'); }
-  else { fill.addColorStop(0, '#d2a38e'); fill.addColorStop(.4, '#9c6f79'); fill.addColorStop(.75, '#624b67'); fill.addColorStop(1, '#33334e'); }
+  fill.addColorStop(0, palette[0]); fill.addColorStop(.4, palette[1]); fill.addColorStop(.75, palette[2]); fill.addColorStop(1, palette[3]);
   ctx.fillStyle = fill; outline(); ctx.fill(); ctx.shadowBlur = 0;
   ctx.strokeStyle = rock.comet ? 'rgba(210,245,255,.7)' : 'rgba(245,190,170,.48)'; ctx.lineWidth = 1.3; ctx.stroke();
   ctx.save(); outline(); ctx.clip();
@@ -279,7 +543,8 @@ function drawRock(ctx, rock, time) {
 }
 
 function drawDrone(ctx, drone, time) {
-  ctx.save(); ctx.translate(drone.x, drone.y); ctx.rotate(Math.sin(time * 2 + drone.phase) * .1);
+  const scale = drone.small ? .72 : 1;
+  ctx.save(); ctx.translate(drone.x, drone.y); ctx.scale(scale, scale); ctx.rotate(Math.sin(time * 2 + drone.phase) * .1);
   const charge = Math.max(0, 1 - Math.max(0, drone.fire) * 1.4);
   ctx.shadowBlur = 20 + charge * 16; ctx.shadowColor = `rgba(255,120,220,${.35 + charge * .4})`;
   const hull = ctx.createLinearGradient(0, -20, 0, 20);
@@ -366,15 +631,38 @@ function drawPickup(ctx, pickup) {
 /* ---------- boss ---------- */
 function drawBoss(ctx, game) {
   const boss = game.boss;
-  const palette = bossPalette(boss.sector);
+  const palette = bossPalette(boss.biome);
   const rage = boss.phase === 2;
   const hot = rage ? ['#ffd0a2', '#ff7a4d', '#5c1f33'] : palette;
   const enter = boss.entering > 0 ? 1 - boss.entering / 1.6 : 1;
-  const scale = .55 + enter * .45;
+  const scale = (.55 + enter * .45) * (boss.radius / 70);
   const pulse = 1 + Math.sin(boss.age * (rage ? 5.2 : 2.6)) * (rage ? .07 : .04);
+  // Solar beam: a charged lance across the whole arena.
+  if (boss.beam) {
+    const width = 62 * (.7 + Math.sin(game.elapsed * 40) * .06);
+    const beam = ctx.createLinearGradient(0, boss.beam.y - width / 2, 0, boss.beam.y + width / 2);
+    beam.addColorStop(0, 'rgba(255,120,60,0)');
+    beam.addColorStop(.5, 'rgba(255,248,220,.95)');
+    beam.addColorStop(1, 'rgba(255,120,60,0)');
+    ctx.fillStyle = beam;
+    ctx.fillRect(0, boss.beam.y - width / 2, game.width, width);
+  } else if (boss.charge > 0) {
+    const strength = 1 - Math.min(1, boss.charge / 1.25);
+    ctx.strokeStyle = `rgba(255,190,120,${(.2 + strength * .6).toFixed(2)})`;
+    ctx.lineWidth = 1 + strength * 3;
+    ctx.setLineDash([16, 12]);
+    ctx.beginPath(); ctx.moveTo(0, game.player.y); ctx.lineTo(game.width, game.player.y); ctx.stroke();
+    ctx.setLineDash([]);
+  }
   ctx.save();
   ctx.translate(boss.x, boss.y);
   if (boss.entering > 0) ctx.globalAlpha = Math.min(1, enter * 1.6);
+  if (boss.phasing > 0) ctx.globalAlpha = (ctx.globalAlpha ?? 1) * .35;
+  if (boss.blink > 0) {
+    ctx.strokeStyle = 'rgba(190,245,255,.8)'; ctx.lineWidth = 2; ctx.setLineDash([8, 8]);
+    ctx.beginPath(); ctx.arc(0, 0, boss.radius * (1.4 - boss.blink), 0, TAU); ctx.stroke();
+    ctx.setLineDash([]);
+  }
   // Aura.
   const aura = ctx.createRadialGradient(0, 0, boss.radius * .3, 0, 0, boss.radius * (2.1 + Math.sin(boss.age * 3) * .12));
   aura.addColorStop(0, `${rage ? 'rgba(255,110,70,.42)' : 'rgba(120,220,255,.28)'}`);
@@ -552,6 +840,13 @@ function drawShip(ctx, game) {
   ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1.4;
   ctx.beginPath(); ctx.arc(-1,-2.5,5.5,Math.PI*1.08,Math.PI*1.68); ctx.stroke();
   ctx.fillStyle = skin.fin; ctx.fillRect(-23,-10,8,2.4); ctx.fillRect(-23,7.6,8,2.4);
+  // Frost crust while chilled.
+  if (game.chill > .15) {
+    ctx.globalAlpha = Math.min(.65, game.chill * .6);
+    ctx.strokeStyle = '#dff6ff'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.ellipse(1, 0, 30, 15, 0, 0, TAU); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
   // Damage smoke on the last hull point.
   if (player.health === 1) {
     ctx.fillStyle = `rgba(120,120,140,${.25 + Math.sin(time * 9) * .12})`;
@@ -603,6 +898,7 @@ export function renderGame(ctx, game, image) {
     }
   }
   for (const pickup of game.pickups) if (!pickup.removed) drawPickup(ctx, pickup);
+  for (const hazard of game.hazards) if (!hazard.removed) drawHazard(ctx, hazard, game);
   for (const rock of game.rocks) if (!rock.removed) drawRock(ctx, rock, game.elapsed);
   for (const drone of game.drones) if (!drone.removed) drawDrone(ctx, drone, game.elapsed);
   if (game.boss) drawBoss(ctx, game);
@@ -619,8 +915,9 @@ export function renderGame(ctx, game, image) {
   }
   for (const bullet of game.hostileBullets) {
     if (bullet.removed) continue;
-    blit(ctx, hostileGlow[bullet.sector ?? 0], bullet.x, bullet.y, bullet.radius * 2.8, .9);
-    ctx.fillStyle = '#fff';
+    const palette = (BIOMES[bullet.biome ?? game.biomeIndex] || BIOMES[0]).palette;
+    blit(ctx, glowSprite(`rgba(${palette.tint}.9)`, 20, .4), bullet.x, bullet.y, bullet.radius * 2.8, .9);
+    ctx.fillStyle = bullet.chill ? '#dff6ff' : '#fff';
     ctx.beginPath(); ctx.arc(bullet.x, bullet.y, bullet.radius * .55, 0, TAU); ctx.fill();
   }
   if (!game.gameOver || game.victory) drawShip(ctx, game);
