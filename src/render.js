@@ -1,4 +1,4 @@
-import { WORLD_HEIGHT, bossPalette } from './engine.js';
+import { WORLD_HEIGHT, bossPalette, weakPointOf } from './engine.js';
 import { BIOMES, SKINS } from './content.js';
 
 const TAU = Math.PI * 2;
@@ -137,8 +137,12 @@ function drawDecor(ctx, game, biome) {
         ctx.fillRect(-item.size * .5, -item.size * .16, item.size, item.size * .32);
         ctx.strokeRect(-item.size * .5, -item.size * .16, item.size, item.size * .32);
         break;
-      case 'gas': // Slow rolling gas billows.
-        blit(ctx, glowSprite(`rgba(120,255,196,.10)`, Math.ceil(item.size * 1.4)), 0, Math.sin(time * .5 + item.phase) * 22, item.size * 1.6, .8);
+      case 'gas': // Slow rolling gas billows, half of them dark, so the fog keeps its depth.
+        if (item.shape < .5) {
+          blit(ctx, glowSprite(`rgba(120,255,196,.10)`, Math.ceil(item.size * 1.4)), 0, Math.sin(time * .5 + item.phase) * 22, item.size * 1.6, .7);
+        } else {
+          blit(ctx, glowSprite('rgba(4,14,11,.62)', Math.ceil(item.size * 1.5)), 0, Math.sin(time * .4 + item.phase) * 26, item.size * 1.9, .8);
+        }
         break;
       case 'graveyard': { // Broken hulls of lost ships.
         ctx.rotate(Math.sin(item.phase) * .3);
@@ -210,7 +214,7 @@ function drawBackdrop(ctx, game, image) {
     const span = w + 620;
     const x = ((cloud.x * span - game.elapsed * cloud.speed * speed) % span + span) % span - 310;
     const y = cloud.y * h + Math.sin(game.elapsed * .12 + cloud.phase) * 16;
-    const pulse = (cloud.alpha / .12) * (.7 + Math.sin(game.elapsed * .5 + cloud.phase) * .3) * (1 + heat * .5);
+    const pulse = (cloud.alpha / .12) * (.7 + Math.sin(game.elapsed * .5 + cloud.phase) * .3) * (1 + heat * .2);
     blit(ctx, glowSprite(`rgba(${palette.tint}.16)`, Math.ceil(cloud.radius)), x, y, cloud.radius, Math.max(0, Math.min(1, pulse)));
   }
   drawDecor(ctx, game, biome);
@@ -281,7 +285,7 @@ function drawBackdrop(ctx, game, image) {
     if (bolt > .4) {
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = `rgba(${palette.tint}${(Math.min(.2, bolt * .03)).toFixed(3)})`;
+      ctx.fillStyle = `rgba(${palette.tint}${(Math.min(.12, bolt * .02)).toFixed(3)})`;
       ctx.fillRect(0, 0, w, h);
       ctx.strokeStyle = `rgba(255,255,255,${Math.min(.5, bolt * .08).toFixed(3)})`;
       ctx.lineWidth = 1.6;
@@ -629,11 +633,69 @@ function drawPickup(ctx, pickup) {
 }
 
 /* ---------- boss ---------- */
+// Phase colours shift from the biome palette toward embers as the guardian escalates.
+function mixHex(from, to, amount) {
+  const parse = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const a = parse(from), b = parse(to);
+  const mixed = a.map((value, i) => Math.round(value + (b[i] - value) * amount));
+  return `#${mixed.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+}
+const FINAL_PHASE_COLORS = ['#ffd0a2', '#ff7a4d', '#5c1f33'];
+function drawWeakPoint(ctx, game, boss) {
+  const spot = weakPointOf(boss);
+  const open = boss.weakOpen > 0;
+  const arm = !open && boss.weakTimer < .8;
+  ctx.save();
+  ctx.translate(spot.x, spot.y);
+  if (!open) {
+    const wake = arm ? .38 + Math.sin(game.elapsed * 16) * .22 : .14;
+    ctx.strokeStyle = `rgba(255,236,196,${wake.toFixed(2)})`;
+    ctx.lineWidth = arm ? 2.4 : 1.4;
+    ctx.setLineDash([5, 6]);
+    ctx.beginPath(); ctx.arc(0, 0, spot.radius * (arm ? .72 + Math.sin(game.elapsed * 12) * .12 : .8), 0, TAU); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+    return;
+  }
+  const beat = boss.weakFlash > 0 ? 1 : .55 + Math.sin(game.elapsed * 14) * .25;
+  const glow = ctx.createRadialGradient(0, 0, 1, 0, 0, spot.radius * 1.6);
+  glow.addColorStop(0, `rgba(255,255,240,${(.85 * beat).toFixed(2)})`);
+  glow.addColorStop(.45, `rgba(255,214,120,${(.5 * beat).toFixed(2)})`);
+  glow.addColorStop(1, 'rgba(255,150,50,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(0, 0, spot.radius * 1.6, 0, TAU); ctx.fill();
+  ctx.strokeStyle = `rgba(255,246,216,${(.5 + .45 * beat).toFixed(2)})`;
+  ctx.lineWidth = 2.6;
+  ctx.beginPath(); ctx.arc(0, 0, spot.radius * (.6 + .08 * Math.sin(game.elapsed * 9)), 0, TAU); ctx.stroke();
+  // A draining arc shows how much of the damage window is left.
+  ctx.strokeStyle = 'rgba(255,176,88,.9)'; ctx.lineWidth = 3.4;
+  const left = Math.max(0, Math.min(1, boss.weakOpen / 2.9));
+  ctx.beginPath(); ctx.arc(0, 0, spot.radius * 1.12, -Math.PI / 2, -Math.PI / 2 + TAU * left); ctx.stroke();
+  ctx.restore();
+}
+function drawPhaseShift(ctx, game, boss) {
+  const t = 1 - Math.max(0, boss.phaseShift) / 1.15;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const radius = Math.max(6, boss.radius * (2.7 - t * 2));
+  ctx.strokeStyle = `rgba(255,${Math.round(210 - t * 70)},${Math.round(150 - t * 60)},${(.9 - t * .25).toFixed(2)})`;
+  ctx.lineWidth = 3 + t * 7;
+  ctx.beginPath(); ctx.arc(boss.x, boss.y, radius, 0, TAU); ctx.stroke();
+  for (let i = 0; i < 10; i += 1) {
+    const a = (i / 10) * TAU + boss.age * 2;
+    ctx.beginPath();
+    ctx.moveTo(boss.x + Math.cos(a) * radius, boss.y + Math.sin(a) * radius);
+    ctx.lineTo(boss.x + Math.cos(a) * radius * .55, boss.y + Math.sin(a) * radius * .55);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
 function drawBoss(ctx, game) {
   const boss = game.boss;
   const palette = bossPalette(boss.biome);
-  const rage = boss.phase === 2;
-  const hot = rage ? ['#ffd0a2', '#ff7a4d', '#5c1f33'] : palette;
+  const tier = (boss.phase - 1) / Math.max(1, (boss.phaseCount || 2) - 1);
+  const rage = tier > 0;
+  const hot = rage ? palette.map((color, index) => mixHex(color, FINAL_PHASE_COLORS[Math.min(2, index)], tier)) : palette;
   const enter = boss.entering > 0 ? 1 - boss.entering / 1.6 : 1;
   const scale = (.55 + enter * .45) * (boss.radius / 70);
   const pulse = 1 + Math.sin(boss.age * (rage ? 5.2 : 2.6)) * (rage ? .07 : .04);
@@ -646,6 +708,7 @@ function drawBoss(ctx, game) {
     beam.addColorStop(1, 'rgba(255,120,60,0)');
     ctx.fillStyle = beam;
     ctx.fillRect(0, boss.beam.y - width / 2, game.width, width);
+    if (boss.beam.second != null) ctx.fillRect(0, boss.beam.second - width / 2, game.width, width);
   } else if (boss.charge > 0) {
     const strength = 1 - Math.min(1, boss.charge / 1.25);
     ctx.strokeStyle = `rgba(255,190,120,${(.2 + strength * .6).toFixed(2)})`;
@@ -770,6 +833,8 @@ function drawBoss(ctx, game) {
   const slit = rage ? 5.5 : 8;
   ctx.beginPath(); ctx.ellipse(-6 + dx / distance * 12 * eye, dy / distance * 9 * eye, 4.6, slit, 0, 0, TAU); ctx.fill();
   ctx.restore();
+  drawWeakPoint(ctx, game, boss);
+  if (boss.phaseShift > 0) drawPhaseShift(ctx, game, boss);
 }
 
 function drawDebris(ctx, game) {
@@ -887,14 +952,17 @@ export function renderGame(ctx, game, image) {
   }
   drawBackdrop(ctx, game, image);
   for (const ring of game.rings) {
-    const progress = Math.min(1, ring.age / ring.duration);
+    const progress = Math.max(0, Math.min(1, ring.age / ring.duration));
+    // `shrink` rings collapse inward — used by the singularity death and implosions.
+    const radius = ring.shrink ? ring.maxRadius * (1.9 - progress * 1.6) : ring.maxRadius * progress;
+    if (radius <= 0) continue;
     ctx.strokeStyle = `rgba(${ring.color},${((1 - progress) * .8).toFixed(3)})`;
     ctx.lineWidth = 2 + (1 - progress) * 5;
-    ctx.beginPath(); ctx.arc(ring.x, ring.y, ring.maxRadius * progress, 0, TAU); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ring.x, ring.y, radius, 0, TAU); ctx.stroke();
     if (ring.maxRadius > 140) {
       ctx.strokeStyle = `rgba(${ring.color},${((1 - progress) * .3).toFixed(3)})`;
       ctx.lineWidth = 1 + (1 - progress) * 2;
-      ctx.beginPath(); ctx.arc(ring.x, ring.y, ring.maxRadius * progress * .7, 0, TAU); ctx.stroke();
+      ctx.beginPath(); ctx.arc(ring.x, ring.y, radius * .7, 0, TAU); ctx.stroke();
     }
   }
   for (const pickup of game.pickups) if (!pickup.removed) drawPickup(ctx, pickup);

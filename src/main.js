@@ -9,7 +9,7 @@ import '@fontsource/manrope/latin-800.css';
 import '@fontsource/russo-one/cyrillic-400.css';
 import '@fontsource/russo-one/latin-400.css';
 import './style.css';
-import { createGame, evaluateStars, resizeGame, setTarget, updateGame, useWave, WORLD_HEIGHT, MINI_BOSS_DELAY, SECTOR_FLIGHT_TIME } from './engine.js';
+import { createGame, evaluateStars, phaseThresholds, resizeGame, setTarget, updateGame, useWave, WORLD_HEIGHT, MINI_BOSS_DELAY, SECTOR_FLIGHT_TIME } from './engine.js';
 import { BIOMES, CASES, LEVELS, LEVELS_BY_ID, MAX_UPGRADE, MISSIONS, OBJECTIVE_LABEL, SKINS, UPGRADES, biomeStars, isLevelUnlocked } from './content.js';
 import { claimMission, exportProgress, importProgress, levelStars, missionValue, newProgress, normalizeProgress, openCase, purchaseUpgrade, settleFlight, STORAGE_KEY, upgradeCost } from './progress.js';
 import { renderGame } from './render.js';
@@ -153,10 +153,23 @@ function updateHUD() {
   const bossStatus = $('boss-status');
   bossStatus.hidden = !game.boss;
   if (game.boss) {
-    $('boss-name').textContent = game.boss.name || biome.guardian;
+    $('boss-name').textContent = game.boss.name || biome.guardian.name;
     $('boss-health').style.width = `${Math.max(0, (game.boss.health / game.boss.maxHealth) * 100)}%`;
-    $('boss-phase').hidden = game.boss.phase !== 2 && !(game.boss.phasing > 0);
-    $('boss-phase').textContent = game.boss.phasing > 0 ? 'ФАЗА' : 'ЯРОСТЬ';
+    const boss = game.boss;
+    const shifting = boss.phaseShift > 0;
+    $('boss-phase').hidden = boss.phase < 2 && !shifting;
+    $('boss-phase').textContent = shifting
+      ? 'СМЕНА ФАЗЫ'
+      : `ФАЗА ${['I', 'II', 'III'][Math.min(2, boss.phase - 1)]} / ${['I', 'II', 'III'][Math.min(2, boss.phaseCount - 1)]}`;
+    $('boss-phase').classList.toggle('shift', shifting);
+    $('boss-status').classList.toggle('exposed', boss.weakOpen > 0);
+    // Ticks on the health bar show where the next phase begins.
+    const marks = phaseThresholds(boss);
+    for (const [index, mark] of bossMarks.entries()) {
+      if (index >= marks.length) { mark.hidden = true; continue; }
+      mark.hidden = false;
+      mark.style.left = `${(1 - marks[index]) * 100}%`;
+    }
   }
   $('first-flight-tip').classList.toggle('fade', game.elapsed > 6 || dragging !== null);
   $('control-hint').classList.toggle('dimmed', game.elapsed > 10 || dragging !== null);
@@ -194,7 +207,7 @@ function renderCampaign() {
   const biome = BIOMES[level.biomeIndex];
   $('biome-detail').innerHTML = `<span class="dialog-kicker"><i></i> ${biome.subtitle}</span>
     <h3>${biome.name}</h3><p>${biome.description}</p>
-    <small>СТРАЖ БИОМА: <b>${biome.guardian}</b></small>`;
+    <small>СТРАЖ БИОМА: <b>${biome.guardian.name}</b> · ${biome.guardian.phases} фазы · слабое место: ${({ core: 'ядро', claw: 'клешня', eye: 'глаз', ring: 'кольцо' })[biome.guardian.weak]}</small>`;
   const levels = $('level-list');
   levels.replaceChildren(...LEVELS.filter((entry) => entry.biome === biome.id).map((entry) => {
     const unlocked = isLevelUnlocked(progress, entry);
@@ -409,12 +422,15 @@ function keyboardMovement(dt) {
     setTarget(game, game.player.targetX + horizontal * 360 * dt * normal, game.player.targetY + vertical * 360 * dt * normal);
   }
 }
+const bossMarks = [...document.querySelectorAll('.boss-mark')];
 const ANNOUNCEMENTS = {
   'boss-warning': () => 'ОПАСНОСТЬ: СТРАЖ БЛИЗКО',
-  'boss-arrives': (game) => `СТРАЖ БИОМА: ${game.boss?.name || BIOMES[game.biomeIndex].guardian}`,
-  'boss-rage': () => 'СТРАЖ В ЯРОСТИ!',
+  'boss-arrives': (game) => `СТРАЖ БИОМА: ${game.boss?.name || BIOMES[game.biomeIndex].guardian.name}`,
+  'boss-rage': () => 'СТРАЖ МЕНЯЕТ ФАЗУ!',
+  'boss-ascend': (game) => `ФАЗА ${['I', 'II', 'III'][(game.boss?.phase ?? 2) - 1] || 'II'} — СТРАЖ СИЛЬНЕЕ`,
+  'weak-open': () => 'СЛАБАЯ ТОЧКА ОТКРЫТА',
   'boss-defeated': () => 'СТРАЖ РАСПАДАЕТСЯ!',
-  'boss-phase': () => 'СТРАЖ УШЁЛ В ФАЗУ',
+  'boss-vanish': () => 'СТРАЖ УШЁЛ В ФАЗУ',
   'boss-charge': () => 'ЛУЧ ЗАРЯЖАЕТСЯ!',
   'boss-swarm': () => 'РОЙ ВЫПУЩЕН!',
   'boss-frost': () => 'ЛЕДЯНОЙ ЗАЛП!',
@@ -579,6 +595,11 @@ portraitQuery.addEventListener('change', (event) => { if (event.matches && mode 
 window.addEventListener('blur', () => { if (mode === 'playing') pauseGame(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && mode === 'playing') pauseGame(); });
 window.addEventListener('cosmopilot:background', () => { if (mode === 'playing') pauseGame(); else audio.suspend(); });
+// A tiny read-only hook so automated UI tests can inspect and drive the running game.
+window.__kosmopilot = {
+  get game() { return game; },
+  get mode() { return mode; },
+};
 window.__cosmoBack = () => {
   if (!$('intro').hidden) { window.__cosmoSkipIntro?.(); return true; }
   if (!screens.case.hidden) { screens.case.hidden = true; return true; }

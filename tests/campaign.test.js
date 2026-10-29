@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, evaluateStars, updateGame, useWave, BOSS_WARNING, MINI_BOSS_DELAY, SECTOR_FLIGHT_TIME, MAX_HEALTH } from '../src/engine.js';
+import { createGame, evaluateStars, updateGame, useWave, weakPointOf, BOSS_WARNING, MINI_BOSS_DELAY, SECTOR_FLIGHT_TIME, MAX_HEALTH } from '../src/engine.js';
 import { BIOMES, LEVELS, LEVELS_BY_ID } from '../src/content.js';
 
 function seeded(seed = 7) {
@@ -140,19 +140,86 @@ test('a guardian level telegraphs the arrival and ends the level with the shatte
   assert.equal(game.timeScale, 1);
 });
 
-test('a guardian becomes enraged below half health and fires more', () => {
+test('a guardian telegraphs a phase change and comes back stronger', () => {
   const game = still(createGame({ width: 900, random: seeded(22), level: 'sun-3' }));
   run(game, MINI_BOSS_DELAY + 1);
   assert.equal(game.boss.pattern, 'beam');
-  game.boss.health = Math.floor(game.boss.maxHealth * .5);
+  assert.equal(game.boss.phaseCount, 3);
+  game.boss.health = Math.floor(game.boss.maxHealth * .66) + 1;
   game.bullets.push({ x: game.boss.x - 40, y: game.boss.y, radius: 5, vx: 560, damage: 1, removed: false });
   const events = updateGame(game, 1 / 60);
-  assert.ok(events.includes('boss-rage'));
-  assert.equal(game.boss.phase, 2);
+  assert.ok(events.includes('boss-rage'), 'crossing the threshold warns the player');
+  assert.equal(game.boss.phase, 1, 'the guardian is still in the first phase during the telegraph');
+  assert.ok(game.boss.phaseShift > 0, 'the shift is a visible, invulnerable pause');
   assert.ok(game.shake > .5);
+  // The guardian cannot be damaged while it braces for the new phase.
+  const health = game.boss.health;
+  game.bullets.push({ x: game.boss.x - 40, y: game.boss.y, radius: 5, vx: 560, damage: 1, removed: false });
+  updateGame(game, 1 / 60);
+  assert.equal(game.boss.health, health);
+  const shifted = run(game, 1.4);
+  assert.ok(shifted.includes('boss-ascend'));
+  assert.equal(game.boss.phase, 2);
+  assert.ok(game.boss.weakOpen > 0, 'the new phase opens with a damage window');
   run(game, 6);
-  assert.ok(game.hostileBullets.length + game.boss?.burst >= 0);
   assert.ok(game.boss, 'the fight continues while the guardian lives');
+});
+
+test('every guardian reaches its last phase and dies in its own way', () => {
+  const styles = {};
+  for (const level of LEVELS.filter((item) => item.kind === 'boss')) {
+    const game = still(createGame({ width: 900, random: seeded(5), level: level.id, upgrades: { weapon: 5 } }));
+    run(game, MINI_BOSS_DELAY + 1);
+    const boss = game.boss;
+    assert.ok(boss, `${level.id} spawns its guardian`);
+    assert.ok(['fan', 'slag', 'frost', 'swarm', 'phase', 'beam', 'lead', 'pull'].includes(boss.pattern));
+    assert.equal(boss.phaseCount, boss.phaseCount >= 3 ? 3 : 2);
+    // Drain the health step by step: every threshold must produce a telegraphed phase shift.
+    let guard = 0;
+    while (game.boss && game.boss.phase < game.boss.phaseCount && guard < 400) {
+      game.boss.health = Math.floor(game.boss.health - 1);
+      game.bullets.push({ x: game.boss.x - 40, y: game.boss.y, radius: 5, vx: 560, damage: 1, removed: false });
+      run(game, 1.4);
+      guard += 1;
+    }
+    assert.ok(!game.boss || game.boss.phase === (level.boss.phases || 2), `${level.id} reaches its final phase`);
+    while (game.boss && guard < 600) {
+      game.boss.health = 1;
+      game.bullets.push({ x: game.boss.x - 40, y: game.boss.y, radius: 5, vx: 560, damage: 2, removed: false });
+      run(game, .2);
+      guard += 1;
+    }
+    assert.ok(game.finale || game.bossesDefeated === 1, `${level.id} kills its guardian`);
+    styles[level.id] = game.finale?.style || level.boss.death;
+    assert.ok(game.debris.length > 20, `${level.id} scatters debris`);
+  }
+  const unique = new Set(Object.values(styles));
+  assert.ok(unique.size >= 6, `guardians die differently: ${[...unique].join(', ')}`);
+});
+
+test('an exposed weak point multiplies the damage', () => {
+  const game = still(createGame({ width: 900, random: seeded(9), level: 'caves-3' }));
+  run(game, MINI_BOSS_DELAY + 1);
+  const boss = game.boss;
+  const spot = weakPointOf(boss);
+  const shoot = (x, y, open = true) => {
+    boss.weakOpen = open ? 2 : 0;
+    boss.health = boss.maxHealth;
+    const before = boss.health;
+    game.bullets.push({ x: boss.x - 40, y, radius: 5, vx: 560, damage: 1, removed: false });
+    // Place the bullet right on the weak point by overriding the hit test position.
+    game.bullets[game.bullets.length - 1].x = x - 5;
+    game.bullets[game.bullets.length - 1].y = y;
+    run(game, 1 / 60);
+    return before - boss.health;
+  };
+  const centre = shoot(spot.x, spot.y);
+  const edge = shoot(spot.x + spot.radius * 4, spot.y);
+  assert.ok(centre > edge * 2, `the core takes far more damage (${centre} vs ${edge})`);
+  assert.ok(centre >= 2, 'a weak-point hit is worth several ordinary shots');
+  // With the weak point closed the bonus disappears.
+  const closed = shoot(spot.x, spot.y, false);
+  assert.ok(closed < centre, 'a closed weak point only takes normal damage');
 });
 
 test('frost fields chill the ship and bite after a while', () => {

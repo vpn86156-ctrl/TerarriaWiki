@@ -116,14 +116,28 @@ function spawnHazard(game, config) {
     fire: definition.fire ?? 0, removed: false, biome: game.biomeIndex,
   });
 }
+// Where the guardian's weak point sits right now. Hitting it while it is exposed deals bonus damage.
+export function weakPointOf(boss) {
+  const r = boss.radius;
+  let ox = -r * .16, oy = Math.sin(boss.age * .9) * r * .1, size = 30;
+  if (boss.weak === 'claw') { ox = -r * .74; oy = Math.sin(boss.age * 1.7) * r * .28; size = 24; }
+  else if (boss.weak === 'eye') { ox = -r * .42; oy = -r * .3; size = 25; }
+  else if (boss.weak === 'ring') { const a = boss.age * 1.15; ox = Math.cos(a) * r * .82; oy = Math.sin(a) * r * .82; size = 26; }
+  return { x: boss.x + ox, y: boss.y + oy, radius: size };
+}
+// Health fractions at which a guardian switches to the next phase: 2 phases -> 50 %, 3 phases -> 66 % / 33 %.
+export const phaseThresholds = (boss) => (boss.phaseCount >= 3 ? [.66, .33] : [.5]);
 function spawnBoss(game) {
   const biome = biomeOf(game);
   const level = game.level;
   const maxHealth = level?.boss ? level.boss.health : 28 + game.biomeIndex * 9 + Math.min(game.sectorCycle * 5, 30);
+  const phaseCount = level?.boss?.phases || 2;
   game.boss = {
     x: game.width + 120, y: 270, radius: level?.boss ? 62 : 70, health: maxHealth, maxHealth, age: 0, fire: 2.1,
-    hitFlash: 0, biome: game.biomeIndex, phase: 1, burst: 3.4, entering: 1.6, breath: 0,
-    pattern: level?.boss ? level.boss.pattern : biome.pattern, name: level?.boss?.name || biome.guardian,
+    hitFlash: 0, biome: game.biomeIndex, phase: 1, phaseCount, phaseShift: 0, burst: 3.4, entering: 1.6, breath: 0,
+    pattern: level?.boss ? level.boss.pattern : biome.pattern, name: level?.boss?.name || biome.guardian.name,
+    death: level?.boss?.death || 'shatter', weak: level?.boss?.weak || 'core',
+    weakOpen: 0, weakTimer: 3.4, weakFlash: 0,
     patternTimer: 3.2, charge: 0, beam: null, phasing: 0, blink: 0,
   };
   // No surprise asteroid can strike the player during the boss introduction.
@@ -155,40 +169,69 @@ function destroyHazard(game, hazard) {
   game.shake = Math.max(game.shake, .22);
   game.events.push('hazard-break');
 }
-// The killing blow starts a slow-motion shatter: debris, a chain of blasts and a screen shake.
+// Every guardian dies in its own way: shards, slag, implosion, supernova or collapse.
+const DEATH_STYLES = {
+  shatter: { speed: [60, 290], pieces: 30, gravity: 30, color: ['#fff2c9', '#ffd7a0'], blast: 5, spread: 1 },
+  ice: { speed: [95, 330], pieces: 34, gravity: 12, color: ['#e8fbff', '#b8ecff'], blast: 6, spread: 1.15 },
+  slag: { speed: [45, 210], pieces: 28, gravity: 240, color: ['#ffb26b', '#ff7a3d'], blast: 7, spread: .8 },
+  dissolve: { speed: [30, 150], pieces: 36, gravity: -18, color: ['#d9fff2', '#8bffcf'], blast: 4, spread: 1.3 },
+  supernova: { speed: [140, 430], pieces: 40, gravity: 0, color: ['#fff6d8', '#ffd166'], blast: 8, spread: 1 },
+  crystal: { speed: [80, 260], pieces: 32, gravity: 40, color: ['#d8c7ff', '#a27bff'], blast: 5, spread: .95 },
+  collapse: { speed: [-260, -70], pieces: 34, gravity: 0, color: ['#b7a6ff', '#6fe9ff'], blast: 3, spread: .7 },
+};
 function beginBossDeath(game, boss) {
   const palette = bossPalette(boss.biome);
+  const style = DEATH_STYLES[boss.death] || DEATH_STYLES.shatter;
   game.debris = [];
-  const pieces = 30;
-  for (let i = 0; i < pieces; i += 1) {
-    const angle = (i / pieces) * TAU + randomBetween(game, -.12, .12);
+  for (let i = 0; i < style.pieces; i += 1) {
+    const angle = (i / style.pieces) * TAU + randomBetween(game, -.12, .12);
     const distance = boss.radius * randomBetween(game, .2, .85);
-    const speed = 60 + game.random() * 230;
+    const speed = randomBetween(game, style.speed[0], style.speed[1]) * style.spread;
+    const colors = i % 3 === 0 ? style.color : palette;
     game.debris.push({
       x: boss.x + Math.cos(angle) * distance, y: boss.y + Math.sin(angle) * distance,
       vx: Math.cos(angle) * speed + 55, vy: Math.sin(angle) * speed,
       rotation: randomBetween(game, 0, TAU), spin: randomBetween(game, -6, 6),
       size: randomBetween(game, 7, 21), life: BOSS_DEATH_TIME, maxLife: BOSS_DEATH_TIME,
-      color: palette[Math.min(palette.length - 1, Math.floor(game.random() * palette.length))],
-      shape: Math.floor(game.random() * 3),
+      color: colors[Math.min(colors.length - 1, Math.floor(game.random() * colors.length))],
+      shape: Math.floor(game.random() * 3), gravity: style.gravity,
     });
   }
-  game.finale = { x: boss.x, y: boss.y, biome: boss.biome, radius: boss.radius, timer: BOSS_DEATH_TIME, next: .1, blast: 0 };
+  game.finale = {
+    x: boss.x, y: boss.y, biome: boss.biome, radius: boss.radius, timer: BOSS_DEATH_TIME,
+    next: .1, blast: 0, style: boss.death,
+  };
   game.shake = 1; game.flash = .85; game.timeScale = .35;
   game.hostileBullets = [];
-  emit(game, boss.x, boss.y, '#fff2c9', 40, 1.9);
+  emit(game, boss.x, boss.y, style.color[0], 40, 1.9);
   game.rings.push({ x: boss.x, y: boss.y, age: 0, duration: .9, maxRadius: 190, color: '255,214,158' });
+  if (boss.death === 'collapse') game.rings.push({ x: boss.x, y: boss.y, age: 0, duration: 1.6, maxRadius: 30, color: '120,160,255', shrink: true });
 }
-function damageBoss(game, damage) {
+function damageBoss(game, damage, point) {
   const boss = game.boss;
-  if (!boss || boss.health <= 0 || boss.phasing > 0) return;
-  boss.health = Math.max(0, boss.health - damage); boss.hitFlash = .09;
+  if (!boss || boss.health <= 0 || boss.phasing > 0 || boss.phaseShift > 0) return;
+  let amount = damage;
+  if (point && boss.weakOpen > 0) {
+    const spot = weakPointOf(boss);
+    if (Math.hypot(point.x - spot.x, point.y - spot.y) <= spot.radius) {
+      amount *= 2.4; boss.weakFlash = .18;
+      game.shake = Math.max(game.shake, .3);
+      emit(game, spot.x, spot.y, '#fff6d8', 12, 1.4);
+      game.events.push('weak-hit');
+    }
+  }
+  boss.health = Math.max(0, boss.health - amount); boss.hitFlash = .09;
   if (boss.health > 0) {
-    if (boss.phase === 1 && boss.health <= boss.maxHealth * .5) {
-      boss.phase = 2; boss.burst = 1.2;
-      game.shake = Math.max(game.shake, .7); game.flash = Math.max(game.flash, .3);
-      emit(game, boss.x, boss.y, '#ffb27a', 24, 1.5);
-      game.rings.push({ x: boss.x, y: boss.y, age: 0, duration: .7, maxRadius: 150, color: '255,150,110' });
+    const thresholds = phaseThresholds(boss);
+    const next = thresholds[boss.phase - 1];
+    if (next && boss.health <= boss.maxHealth * next) {
+      // The guardian braces, turns invulnerable for a moment and comes back angrier.
+      boss.phaseShift = 1.15;
+      boss.weakOpen = 0;
+      game.shake = Math.max(game.shake, .8); game.flash = Math.max(game.flash, .35);
+      game.hostileBullets = [];
+      emit(game, boss.x, boss.y, '#ffb27a', 26, 1.5);
+      game.rings.push({ x: boss.x, y: boss.y, age: 0, duration: 1.1, maxRadius: 210, color: '255,150,110' });
       game.events.push('boss-rage');
     }
     return;
@@ -241,7 +284,7 @@ export function useWave(game) {
   for (const drone of game.drones) if (!drone.removed && overlaps(player, drone, reach)) destroyDrone(game, drone);
   for (const hazard of game.hazards) if (!hazard.removed && hazard.health && overlaps(player, hazard, reach)) destroyHazard(game, hazard);
   for (const bullet of game.hostileBullets) if (!bullet.removed && overlaps(player, bullet, reach)) bullet.removed = true;
-  if (game.boss && overlaps(player, game.boss, reach)) damageBoss(game, 5 + game.upgrades.wave * 2);
+  if (game.boss && overlaps(player, game.boss, reach)) damageBoss(game, 5 + game.upgrades.wave * 2, { x: player.x + 26, y: player.y });
   game.score = calculateScore(game);
   return true;
 }
@@ -285,15 +328,21 @@ function bossFire(game, boss, angle, speed, radius, options = {}) {
 function runBossPattern(game, boss, dt) {
   const player = game.player;
   const aimed = Math.atan2(player.y - boss.y, player.x - boss.x);
-  const rage = boss.phase === 2;
+  const rage = boss.phase >= 2;
+  // Attacks speed up and grow with every phase; `tempo` blends the calm value into the furious one.
+  const tier = (boss.phase - 1) / Math.max(1, boss.phaseCount - 1);
+  const tempo = (calm, furious) => calm - (calm - furious) * tier;
+  const beats = (low, high) => Math.round(low + (high - low) * tier);
+  const top = boss.phase >= boss.phaseCount;
+  const expose = (seconds) => { boss.weakOpen = Math.max(boss.weakOpen, seconds); };
   boss.patternTimer -= dt;
   switch (boss.pattern) {
     case 'fan': {
       boss.fire -= dt;
       if (boss.fire <= 0) {
-        const count = rage ? 7 : 5;
+        const count = beats(5, 7);
         for (let i = 0; i < count; i += 1) bossFire(game, boss, aimed + (i - (count - 1) / 2) * .16, 195, 8);
-        boss.fire = rage ? 1.15 : 1.75;
+        boss.fire = tempo(1.75, 1.15);
       }
       // Blink: a short telegraph, then the guardian jumps to another row.
       if (boss.blink > 0) {
@@ -301,11 +350,12 @@ function runBossPattern(game, boss, dt) {
         if (boss.blink <= 0) {
           boss.y = clamp(boss.y < 270 ? boss.y + 200 : boss.y - 200, 150, WORLD_HEIGHT - 150);
           boss.x = Math.min(game.width - 90, boss.x + 40);
+          if (boss.phase >= 2) for (let i = 0; i < 3; i += 1) bossFire(game, boss, aimed + (i - 1) * .18, 200, 8);
           emit(game, boss.x, boss.y, '#bff6ff', 18, 1.2);
           game.events.push('boss-blink');
         }
       } else if (boss.patternTimer <= 0) {
-        boss.blink = .45; boss.patternTimer = rage ? 4 : 5.5;
+        boss.blink = .45; boss.patternTimer = tempo(5.5, 4); expose(1.6);
         game.rings.push({ x: boss.x, y: boss.y, age: 0, duration: .45, maxRadius: 110, color: '170,240,255' });
       }
       break;
@@ -314,8 +364,8 @@ function runBossPattern(game, boss, dt) {
       boss.fire -= dt;
       if (boss.fire <= 0) {
         for (let i = 0; i < 3; i += 1) bossFire(game, boss, aimed + (i - 1) * .22, 175, 7);
-        for (let i = 0; i < (rage ? 3 : 2); i += 1) bossFire(game, boss, aimed + randomBetween(game, -.5, .5), 120, 9, { gravity: 210 });
-        boss.fire = rage ? 1.3 : 2.05;
+        for (let i = 0; i < beats(2, 4); i += 1) bossFire(game, boss, aimed + randomBetween(game, -.5, .5), 120, 9, { gravity: 210 });
+        boss.fire = tempo(2.05, 1.3);
       }
       break;
     }
@@ -323,21 +373,22 @@ function runBossPattern(game, boss, dt) {
       boss.fire -= dt;
       if (boss.fire <= 0) {
         for (let i = 0; i < 3; i += 1) bossFire(game, boss, aimed + (i - 1) * .1, 160, 9, { chill: .7 });
-        boss.fire = rage ? 1 : 1.5;
+        boss.fire = tempo(1.5, 1);
       }
       if (boss.patternTimer <= 0) {
-        for (let i = 0; i < 12; i += 1) bossFire(game, boss, (i / 12) * TAU + boss.age, 130, 7, { chill: .4 });
-        boss.patternTimer = rage ? 3.4 : 5;
+        const spokes = beats(12, 18);
+        for (let i = 0; i < spokes; i += 1) bossFire(game, boss, (i / spokes) * TAU + boss.age, 130, 7, { chill: .4 });
+        boss.patternTimer = tempo(5, 3.4); expose(2.1);
         game.events.push('boss-frost');
       }
       break;
     }
     case 'swarm': {
       boss.fire -= dt;
-      if (boss.fire <= 0) { for (let i = 0; i < 3; i += 1) bossFire(game, boss, aimed + (i - 1) * .2, 185, 7); boss.fire = rage ? 1.2 : 1.9; }
+      if (boss.fire <= 0) { for (let i = 0; i < 3; i += 1) bossFire(game, boss, aimed + (i - 1) * .2, 185, 7); boss.fire = tempo(1.9, 1.2); }
       if (boss.patternTimer <= 0) {
-        for (let i = 0; i < (rage ? 4 : 3); i += 1) spawnDrone(game, true);
-        boss.patternTimer = rage ? 4 : 6;
+        for (let i = 0; i < beats(3, 5); i += 1) spawnDrone(game, true);
+        boss.patternTimer = tempo(6, 4); expose(2.2);
         game.events.push('boss-swarm');
       }
       break;
@@ -345,21 +396,24 @@ function runBossPattern(game, boss, dt) {
     case 'phase': {
       boss.phasing = Math.max(0, boss.phasing - dt);
       if (boss.patternTimer <= 0 && boss.phasing <= 0) {
-        boss.phasing = rage ? 2.4 : 2;
-        boss.patternTimer = rage ? 5 : 7;
-        game.events.push('boss-phase');
+        boss.phasing = tempo(2, 2.4);
+        boss.patternTimer = tempo(7, 5);
+        // The ghost invites a counter-attack: the core opens the moment it becomes solid again.
+        boss.weakOpen = 0;
+        boss.weakTimer = boss.phasing + .35;
+        game.events.push('boss-vanish');
       }
       boss.fire -= dt;
       if (boss.fire <= 0 && boss.phasing <= 0) {
-        for (let i = 0; i < (rage ? 3 : 2); i += 1) bossFire(game, boss, aimed + (i - .5) * .3, 145, 8, { homing: 1 });
-        boss.fire = rage ? 1.4 : 2.2;
+        for (let i = 0; i < beats(2, 4); i += 1) bossFire(game, boss, aimed + (i - .5) * .3, 145, 8, { homing: 1 });
+        boss.fire = tempo(2.2, 1.4);
       }
       break;
     }
     case 'beam': {
       if (boss.beam) {
         boss.beam.timer -= dt;
-        if (Math.abs(player.y - boss.beam.y) < 30) damagePlayer(game, { removed: false }, false);
+        if (Math.abs(player.y - boss.beam.y) < 30 || (boss.beam.second != null && Math.abs(player.y - boss.beam.second) < 30)) damagePlayer(game, { removed: false }, false);
         if (boss.beam.timer <= 0) boss.beam = null;
         break;
       }
@@ -367,14 +421,17 @@ function runBossPattern(game, boss, dt) {
         boss.charge -= dt;
         if (boss.charge <= 0) {
           const y = boss.beam ? boss.beam.y : player.y;
-          boss.beam = { y: clamp(y, 60, WORLD_HEIGHT - 60), timer: .7 };
+          const row = clamp(y, 60, WORLD_HEIGHT - 60);
+          boss.beam = { y: row, timer: tempo(.7, 1) };
+          if (top) boss.beam.second = clamp(row + (row > 270 ? -170 : 170), 60, WORLD_HEIGHT - 60);
+          expose(1.9);
           game.shake = Math.max(game.shake, .45);
           game.events.push('boss-beam');
         }
         break;
       }
       boss.fire -= dt;
-      if (boss.fire <= 0) { boss.charge = rage ? .9 : 1.25; boss.fire = rage ? 2.6 : 3.8; game.events.push('boss-charge'); }
+      if (boss.fire <= 0) { boss.charge = tempo(1.25, .9); boss.fire = tempo(3.8, 2.6); game.events.push('boss-charge'); }
       break;
     }
     case 'lead': {
@@ -384,29 +441,32 @@ function runBossPattern(game, boss, dt) {
         const flight = Math.abs(player.x - boss.x) / lead;
         const predicted = Math.atan2(player.y + player.vy * flight - boss.y, player.x + player.vx * flight - boss.x);
         for (let i = 0; i < 3; i += 1) bossFire(game, boss, predicted + (i - 1) * .12, lead, 7);
-        boss.fire = rage ? 1.1 : 1.7;
+        boss.fire = tempo(1.7, 1.1);
       }
       if (boss.patternTimer <= 0) {
         const offset = boss.age * 1.3;
-        for (let i = 0; i < 4; i += 1) bossFire(game, boss, offset + (i / 4) * TAU, 140, 8);
-        boss.patternTimer = rage ? 2.2 : 3.2;
+        const spokes = beats(4, 6);
+        for (let i = 0; i < spokes; i += 1) bossFire(game, boss, offset + (i / spokes) * TAU, 140, 8);
+        boss.patternTimer = tempo(3.2, 2.2);
+        expose(1.5);
       }
       break;
     }
     case 'pull': {
       const dx = boss.x - player.x, dy = boss.y - player.y;
       const distance = Math.hypot(dx, dy) || 1;
-      const pull = (rage ? 165 : 115) * dt;
+      const pull = tempo(115, 165) * dt;
       player.targetX = clamp(player.targetX + (dx / distance) * pull, 52, game.width * .64);
       player.targetY = clamp(player.targetY + (dy / distance) * pull * .7, 67, WORLD_HEIGHT - 54);
       boss.fire -= dt;
       if (boss.fire <= 0) {
         const gaps = [2, 7];
         for (let i = 0; i < 12; i += 1) {
-          if (gaps.includes(i) || (rage && gaps.includes((i + 6) % 12))) continue;
+          if (gaps.includes(i)) continue;
+          if (boss.phase >= 2 && gaps.includes((i + 6) % 12) && !top) continue;
           bossFire(game, boss, (i / 12) * TAU + boss.age, 150, 8);
         }
-        boss.fire = rage ? 1.9 : 2.8;
+        boss.fire = tempo(2.8, 1.9); expose(1.7);
       }
       break;
     }
@@ -415,7 +475,7 @@ function runBossPattern(game, boss, dt) {
       if (boss.fire <= 0) {
         const count = boss.biome + 3;
         for (let i = 0; i < count; i += 1) bossFire(game, boss, aimed + (i - (count - 1) / 2) * .16, 190, 7);
-        boss.fire = rage ? 1.1 : 1.9;
+        boss.fire = tempo(1.9, 1.1);
       }
     }
   }
@@ -424,36 +484,69 @@ function updateBoss(game, dt) {
   const boss = game.boss;
   if (!boss) return;
   boss.age += dt; boss.hitFlash = Math.max(0, boss.hitFlash - dt);
+  boss.weakFlash = Math.max(0, boss.weakFlash - dt);
   boss.entering = Math.max(0, boss.entering - dt);
+  // A phase shift is a short invulnerable telegraph: the arena holds its breath, then the fight escalates.
+  if (boss.phaseShift > 0) {
+    boss.phaseShift = Math.max(0, boss.phaseShift - dt);
+    if (boss.phaseShift <= 0) {
+      boss.phase = Math.min(boss.phaseCount, boss.phase + 1);
+      boss.burst = 1.4; boss.charge = 0; boss.beam = null; boss.fire = .6;
+      boss.weakOpen = 2.9; boss.weakTimer = 4.4;
+      game.shake = Math.max(game.shake, .6); game.flash = Math.max(game.flash, .32);
+      for (let i = 0; i < 14; i += 1) bossFire(game, boss, (i / 14) * TAU + boss.age, 175, 8);
+      game.rings.push({ x: boss.x, y: boss.y, age: 0, duration: .8, maxRadius: 240, color: '255,214,158' });
+      game.events.push('boss-ascend');
+    }
+  }
+  if (boss.phaseShift > 0) return; // bracing for the next phase: the arena gets a breath
   const desiredX = Math.max(game.width * .76, game.width - 165);
   const approach = boss.phasing > 0 ? 320 : 170;
   boss.x = Math.max(desiredX, boss.x - approach * dt);
-  const drift = .72 + boss.biome * .12 + (boss.phase === 2 ? .3 : 0);
+  const drift = .72 + boss.biome * .12 + (boss.phase - 1) * .3;
   if (boss.blink <= 0 && boss.pattern !== 'lead') boss.y = 270 + Math.sin(boss.age * drift) * (110 - boss.biome * 10);
   boss.breath = Math.max(0, boss.breath - dt);
   if (boss.entering > 0 || boss.x >= game.width - 40) return;
   runBossPattern(game, boss, dt);
+  // Weak point cycle: it opens on its own and after every heavy attack, giving a short damage window.
+  if (boss.phaseShift <= 0 && boss.entering <= 0) {
+    if (boss.weakOpen > 0) boss.weakOpen = Math.max(0, boss.weakOpen - dt);
+    else {
+      boss.weakTimer -= dt;
+      if (boss.weakTimer <= 0) { boss.weakOpen = 2.4; boss.weakTimer = Math.max(3.2, 6.4 - boss.phase * 1.1); game.events.push('weak-open'); }
+    }
+  }
   boss.burst -= dt;
-  if (boss.phase === 2 && boss.burst <= 0) {
+  if (boss.phase >= 2 && boss.burst <= 0) {
     for (let i = 0; i < 10; i += 1) bossFire(game, boss, (i / 10) * TAU + boss.age, 165, 8);
-    boss.burst = 3.6;
+    boss.burst = Math.max(1.8, 3.6 - (boss.phase - 2) * .9);
     game.shake = Math.max(game.shake, .35);
   }
 }
+const FINALE_STYLES = {
+  shatter: { blast: 6, color: '#fff0c4', ring: '255,196,128', outward: 1 },
+  ice: { blast: 7, color: '#e8fbff', ring: '150,220,255', outward: 1 },
+  slag: { blast: 8, color: '#ffb26b', ring: '255,120,60', outward: .7 },
+  dissolve: { blast: 5, color: '#d9fff2', ring: '139,255,207', outward: 1.25 },
+  supernova: { blast: 9, color: '#fff6d8', ring: '255,209,102', outward: 1.4 },
+  crystal: { blast: 6, color: '#d8c7ff', ring: '162,123,255', outward: 1 },
+  collapse: { blast: 4, color: '#b7a6ff', ring: '110,160,255', outward: .35 },
+};
 function updateFinale(game, raw) {
   const finale = game.finale;
+  const style = FINALE_STYLES[finale.style] || FINALE_STYLES.shatter;
   finale.timer -= raw;
   game.timeScale = Math.min(1, game.timeScale + raw * .75);
   finale.next -= raw;
-  if (finale.next <= 0 && finale.blast < 6) {
+  if (finale.next <= 0 && finale.blast < style.blast) {
     finale.blast += 1;
     const angle = game.random() * TAU;
-    const distance = game.random() * finale.radius * 1.15;
+    const distance = game.random() * finale.radius * 1.15 * style.outward;
     const x = finale.x + Math.cos(angle) * distance;
     const y = finale.y + Math.sin(angle) * distance;
     const palette = bossPalette(finale.biome);
-    emit(game, x, y, finale.blast % 2 ? '#fff0c4' : palette[0], 16, 1.4);
-    game.rings.push({ x, y, age: 0, duration: .55, maxRadius: 55 + finale.blast * 16, color: '255,196,128' });
+    emit(game, x, y, finale.blast % 2 ? style.color : palette[0], 16, 1.4);
+    game.rings.push({ x, y, age: 0, duration: .55, maxRadius: (55 + finale.blast * 16) * style.outward, color: style.ring });
     game.shake = Math.max(game.shake, .5);
     game.flash = Math.max(game.flash, .3);
     finale.next = .1 + finale.blast * .07;
@@ -462,7 +555,11 @@ function updateFinale(game, raw) {
   if (finale.timer <= 0) {
     const palette = bossPalette(finale.biome);
     emit(game, finale.x, finale.y, palette[0], 46, 2.2);
-    game.rings.push({ x: finale.x, y: finale.y, age: 0, duration: 1.1, maxRadius: 320, color: '255,226,176' });
+    game.rings.push({ x: finale.x, y: finale.y, age: 0, duration: 1.1, maxRadius: 320 * style.outward, color: style.ring });
+    if (finale.style === 'supernova') {
+      for (let i = 0; i < 3; i += 1) game.rings.push({ x: finale.x, y: finale.y, age: -i * .12, duration: 1.3, maxRadius: 420, color: '255,240,190' });
+    }
+    if (finale.style === 'collapse') game.rings.push({ x: finale.x, y: finale.y, age: 0, duration: .9, maxRadius: 40, color: '80,120,255', shrink: true });
     game.flash = 1; game.shake = 1;
     finishFinale(game);
   }
@@ -685,8 +782,10 @@ export function updateGame(game, seconds) {
   }
   for (const pickup of game.pickups) { pickup.x += pickup.vx * dt; pickup.phase += dt * 3; pickup.spin += dt * 1.6; if (pickup.x < -40) pickup.removed = true; }
   for (const piece of game.debris) {
-    piece.x += piece.vx * dt; piece.y += piece.vy * dt; piece.vy += 42 * dt;
-    piece.vx *= Math.pow(.55, dt); piece.vy *= Math.pow(.65, dt);
+    // Each guardian's debris behaves differently: slag drips down, gas drifts up, a collapse falls inward.
+    piece.x += piece.vx * dt; piece.y += piece.vy * dt; piece.vy += (piece.gravity ?? 42) * dt;
+    const drag = (piece.gravity ?? 42) < 0 ? .8 : .55;
+    piece.vx *= Math.pow(drag, dt); piece.vy *= Math.pow(.65, dt);
     piece.rotation += piece.spin * dt; piece.life -= raw;
   }
 
@@ -709,7 +808,8 @@ export function updateGame(game, seconds) {
       }
     }
     if (!bullet.removed && game.boss && overlaps(bullet, game.boss)) {
-      bullet.removed = true; emit(game, bullet.x, bullet.y, '#fff1c7', 3, .4); damageBoss(game, bullet.damage || 1);
+      bullet.removed = true; emit(game, bullet.x, bullet.y, '#fff1c7', 3, .4);
+      damageBoss(game, bullet.damage || 1, { x: bullet.x, y: bullet.y });
     }
   }
   if (!game.finale) {

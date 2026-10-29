@@ -336,9 +336,17 @@ h1 > span:last-child { color: #aaf9f2; }
 .boss-status span { color: #ff9f8f; font-size: clamp(7px,1.7vh,9px); font-weight: 800; letter-spacing: .22em; }
 .boss-status strong { font-family: 'Russo One',sans-serif; font-size: clamp(10px,2.6vh,15px); letter-spacing: .05em; color: #ffe3cf; }
 .boss-status em { padding: 2px 7px; border-radius: 20px; background: rgba(255,90,60,.24); border: 1px solid rgba(255,140,110,.5); color: #ffb59b; font-size: clamp(7px,1.6vh,9px); font-style: normal; font-weight: 800; letter-spacing: .14em; animation: rage-pulse 1s ease-in-out infinite; }
+.boss-status em.shift { background: rgba(255,214,138,.22); border-color: rgba(255,214,138,.6); color: #ffe1a6; animation-duration: .38s; }
 @keyframes rage-pulse { 0%,100% { opacity: .7; } 50% { opacity: 1; } }
+/* While the weak point is open the whole bar lights up, so the player knows to aim for it. */
+.boss-status.exposed .boss-track { border-color: rgba(255,226,150,.95); box-shadow: 0 0 14px rgba(255,200,110,.55); }
+.boss-status.exposed .boss-track i { background: linear-gradient(90deg,#fff2c9,#ffb457); }
+.boss-status.exposed strong { color: #fff2d2; }
 .boss-track { height: clamp(7px,1.6vh,10px); border: 1px solid rgba(255,168,140,.45); border-radius: 20px; background: rgba(12,8,20,.6); overflow: hidden; }
 .boss-track i { display: block; height: 100%; background: linear-gradient(90deg,#ffd08e,#ff6f6f); transition: width .18s linear; }
+/* Phase thresholds on the guardian's health bar. */
+.boss-mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: rgba(255,236,200,.85); box-shadow: 0 0 6px rgba(255,200,140,.8); }
+.boss-track { position: relative; }
 .music-off { display: none; }
 .music-button[data-muted='true'] .music-on { display: none; }
 .music-button[data-muted='true'] .music-off { display: block; }

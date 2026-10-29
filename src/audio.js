@@ -166,6 +166,24 @@ export class GameAudio {
         this.tone(82, 150, now, 1.1, 'square', .18);
         this.noise(now, 1, .34, 900);
         break;
+      case 'boss-ascend':
+        // The guardian breaks into its next phase: an upwards roar and a metal shriek.
+        this.sweep(now, 70, 300, .8, .5, 'sawtooth');
+        for (const frequency of [98, 139, 196]) this.tone(frequency, frequency * 1.5, now + .2, 1.4, 'sawtooth', .12);
+        this.tone(1200, 300, now + .1, .5, 'square', .1);
+        this.noise(now, 1.2, .34, 1100);
+        break;
+      case 'weak-open':
+        this.tone(1320, 1980, now, .18, 'sine', .22); this.tone(1980, 2640, now + .1, .16, 'sine', .14);
+        break;
+      case 'weak-hit':
+        // A bright metallic ping with a short shimmer — hitting the exposed core pays off.
+        if (throttled('weak-hit', 90)) {
+          this.tone(1568, 920, now, .16, 'square', .26);
+          this.tone(2340, 1400, now + .04, .12, 'triangle', .18);
+          this.noise(now, .12, .18, 3600, 'highpass');
+        }
+        break;
       case 'boss-blast':
         this.noise(now, .5, .5, 700);
         this.tone(150, 40, now, .5, 'sine', .5);
