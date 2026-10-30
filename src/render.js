@@ -173,7 +173,7 @@ function drawCharacter(ctx, x, y, options) {
     ctx.fill();
     if (flash > 0) ctx.globalAlpha = .75;
     drawSprite(ctx, spriteName, px, py + 6 * scale - size / 2 - squash, size,
-      { flip: Math.cos(facing) < -.25 });
+      { flip: options.flip !== undefined ? options.flip : Math.cos(facing) < -.25 });
     ctx.restore();
     // Оружие рисуется поверх спрайта — в руке переднего плана.
     if (swing > 0) drawHeldWeapon(ctx, options.weapon || 'crowbar', px, py - 2 * scale, facing, swing, scale);
@@ -524,9 +524,15 @@ export function renderGame(ctx, game, options = {}) {
     else if (entry.kind === 'pickup') drawPickup(ctx, { ...item, x: item.x - camera.x, y: item.y - camera.y }, game.time);
     else if (entry.kind === 'player') {
       const swing = player.swing ? 1 - player.swing.timer / player.swing.max : 0;
-      if (player.invulnerable > 0 && Math.floor(game.time * 20) % 2 === 0) continue;
+      // Неуязвимость показываем полупрозрачностью: герой не должен пропадать на ходу.
+      const invulnerable = player.invulnerable > 0;
+      if (invulnerable) {
+        ctx.save();
+        ctx.globalAlpha = .55 + Math.sin(game.time * 24) * .18;
+      }
       const lookX = Math.cos(player.facing), lookY = Math.sin(player.facing);
-      const direction = lookX < -.35 ? 'left' : lookX > .35 ? 'right' : lookY > 0 ? 'down' : 'up';
+      // Вид берём из движка: он не перескакивает на каждом кадре диагональной ходьбы.
+      const direction = player.view || (lookX < -.35 ? 'left' : lookX > .35 ? 'right' : lookY > 0 ? 'down' : 'up');
       // Отдача: корпус слегка уходит назад в момент выстрела.
       const kick = (player.recoil || 0) * 2.6;
       const px = player.x - camera.x - lookX * kick;
@@ -536,6 +542,7 @@ export function renderGame(ctx, game, options = {}) {
         scale: 1, frame: player.moving ? player.walk : Math.sin(game.time * 2) * .4,
         facing: player.facing, swing, weapon: player.melee, flash: 0,
         sprite: `hero-${direction}`, spriteSize: 24,
+        flip: false, // у героя свои спрайты на все четыре стороны, зеркалить нечего
       });
       // Дуга удара холодным оружием.
       if (player.swing) {
@@ -581,6 +588,7 @@ export function renderGame(ctx, game, options = {}) {
           }
         }
       }
+      if (invulnerable) ctx.restore();
     } else if (entry.kind === 'enemy') {
       // Зарытый мертвец не виден, пока не начнёт вылезать.
       if (item.buried) continue;

@@ -230,6 +230,15 @@ function makePickup(random, room, kind) {
 const DIGGERS = new Set(['zombie', 'skeleton']);
 export const DIG_TIME = 1.15;
 
+// Какой вид спрайта взять для этого направления. Текущий вид получает фору,
+// иначе при диагональной ходьбе персонаж дёргается, меняя текстуру каждый кадр.
+function viewFromAngle(angle, current) {
+  const x = Math.cos(angle), y = Math.sin(angle);
+  const score = { left: -x, right: x, down: y, up: -y };
+  if (current && score[current] != null) score[current] += .34;
+  return Object.keys(score).reduce((best, key) => (score[key] > score[best] ? key : best), 'down');
+}
+
 function spawnEnemy(game, type, x, y) {
   const data = ENEMIES[type];
   const scale = 1 + game.locationIndex * .12;
@@ -263,6 +272,7 @@ export function createGame({ seed = Date.now(), locationIndex = 0, slot = 0, upg
     facing: 0, melee: STARTER.melee, gun: null, grenades: 1 + (upgrades.grenades || 0),
     ammo: { pistol: 24, shells: 8, rifle: 0 },
     magazine: 0, reload: 0, cooldown: 0, swing: null, invulnerable: 0, hurt: 0, muzzle: 0, recoil: 0,
+    view: 'down', viewHold: 0,
     walk: 0, moving: false, coins: 0,
   };
   game.level = generateLevel(game, locationIndex, slot);
@@ -1039,6 +1049,14 @@ export function updateGame(game, dt, input = {}) {
   if (player.moving) {
     player.facing = Math.atan2(my, mx);
     player.walk += dt * 9;
+    // Вид меняется с небольшой задержкой: герой не должен мигать текстурой на ходу.
+    const wanted = viewFromAngle(player.facing, player.view);
+    if (wanted !== player.view) {
+      player.viewHold = (player.viewHold || 0) + dt;
+      if (player.viewHold > .12) { player.view = wanted; player.viewHold = 0; }
+    } else {
+      player.viewHold = 0;
+    }
   }
   // Отбрасывание от взрывов и ударов.
   applyKnockback(game, player, dt);
