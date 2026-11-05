@@ -3,71 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>PLAYEROK · Заработок</title>
+<title>Playerok — заработок на игровых товарах</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="bgfx"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
-<div id="fx"></div>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo">P</div>
+    <div class="btxt"><b>Playerok</b><small>заработок</small></div>
+  </div>
+  <div class="search"><input id="q" placeholder="Поиск по 267 товарам: Steam, аккаунты, ключи…"></div>
+  <div class="head-right">
+    <div class="wallet"><b id="s-bal">0 ₽</b><span id="s-turn">оборот 0</span></div>
+    <button class="hbtn" id="btn-rate" title="Рейтинг">★ <span id="s-rate">5.00</span></button>
+    <button class="hbtn" id="btn-set" title="Настройки">⚙</button>
+    <button class="menu-btn" id="btn-menu">☰</button>
+  </div>
+</header>
 
 <div id="app">
-
-  <header class="top">
-    <div class="brand"><span class="logo">P</span><div class="btxt"><b>PLAYEROK</b><small>заработок · офлайн</small></div></div>
-    <div class="stats">
-      <div class="stat"><label>Баланс</label><b id="s-bal">0 ₽</b></div>
-      <div class="stat"><label>В лотах</label><b id="s-lots">0 ₽</b></div>
-      <div class="stat"><label>Оборот</label><b id="s-turn">0 ₽</b></div>
-      <div class="stat"><label>Рейтинг</label><b id="s-rate">5.00 ★</b></div>
-      <div class="stat"><label>Жалобы</label><b id="s-claims" class="warn">0</b></div>
+  <div class="mainrow">
+    <aside class="side">
+      <h4>Категории</h4>
+      <div id="cats"></div>
+      <h4>Мой магазин</h4>
+      <button class="cat" data-go="stock"><i data-ic="stock"></i>Склад<b id="s-stock">0</b></button>
+      <button class="cat" data-go="my"><i data-ic="my"></i>Мои лоты<b id="s-my">0</b></button>
+      <button class="cat" data-go="deliv"><i data-ic="deliv"></i>Выдача<b id="s-deliv">0</b></button>
+      <button class="cat" data-go="inbox"><i data-ic="inbox"></i>Чат<b id="s-inbox">0</b></button>
+      <button class="cat" data-go="orders"><i data-ic="orders"></i>Заказы<b id="s-ord">0</b></button>
+      <button class="cat" data-go="upg"><i data-ic="upg"></i>Прокачка</button>
+      <button class="cat" data-go="top"><i data-ic="top"></i>Топ-10</button>
+    </aside>
+    <div class="content">
+      <div id="view"></div>
+      <section class="logwrap">
+        <div class="loghead">Последние события</div>
+        <div id="log" class="log"></div>
+      </section>
     </div>
-    <div class="lvl">
-      <div class="lvltop"><span id="s-rank">Новичок</span><small id="s-lvl">ур. 1</small></div>
-      <div class="bar"><i id="s-lvlbar"></i></div>
-    </div>
-    <button class="icon-btn" id="btn-set" title="Настройки">⚙</button>
-    <button class="menu-btn" id="btn-menu">☰</button>
-  </header>
-
-  <div class="tabswrap"><nav class="tabs" id="tabs"><i id="tab-pill"></i>
-    <button class="tab active" data-tab="market">Рынок</button>
-    <button class="tab" data-tab="stock">Склад <em id="n-stock">0</em></button>
-    <button class="tab" data-tab="my">Мои лоты <em id="n-my">0</em></button>
-    <button class="tab" data-tab="inbox">Сообщения <em id="n-inbox">0</em></button>
-    <button class="tab" data-tab="orders">Заказы <em id="n-ord">0</em></button>
-    <button class="tab" data-tab="upg">Прокачка</button>
-    <button class="tab" data-tab="top">Топ-10</button>
-  </nav></div>
-
-  <main id="view"></main>
-
-  <section class="logwrap">
-    <div class="loghead">События</div>
-    <div id="log" class="log"></div>
-  </section>
-
-  <div class="toasts" id="toasts"></div>
-</div>
-
-<nav class="dock" id="dock">
-  <button class="dk active" data-tab="market"><i>🏪</i><span>Рынок</span></button>
-  <button class="dk" data-tab="stock"><i>📦</i><span>Склад</span><em id="dk-stock">0</em></button>
-  <button class="dk" data-tab="my"><i>🏷️</i><span>Лоты</span><em id="dk-my">0</em></button>
-  <button class="dk" data-tab="inbox"><i>💬</i><span>Чат</span><em id="dk-inbox">0</em></button>
-  <button class="dk" data-tab="orders"><i>📝</i><span>Заказы</span><em id="dk-ord">0</em></button>
-  <button class="dk" data-tab="upg"><i>⚙️</i><span>Прокачка</span></button>
-  <button class="dk" data-tab="top"><i>🏆</i><span>Топ</span></button>
-</nav>
-
-<!-- карточка товара -->
-<div class="modal" id="m-item">
-  <div class="mbox">
-    <button class="x" data-close>×</button>
-    <div id="m-item-body"></div>
   </div>
 </div>
 
-<!-- подтверждение -->
+<div class="toasts" id="toasts"></div>
+<div id="fx"></div>
+
+<nav class="dock" id="dock">
+  <button class="dk active" data-tab="market"><i data-ic="market"></i><span>Рынок</span></button>
+  <button class="dk" data-tab="stock"><i data-ic="stock"></i><span>Склад</span><em id="dk-stock">0</em></button>
+  <button class="dk" data-tab="my"><i data-ic="my"></i><span>Лоты</span><em id="dk-my">0</em></button>
+  <button class="dk" data-tab="deliv"><i data-ic="deliv"></i><span>Выдача</span><em id="dk-deliv">0</em></button>
+  <button class="dk" data-tab="inbox"><i data-ic="inbox"></i><span>Чат</span><em id="dk-inbox">0</em></button>
+  <button class="dk" data-tab="orders"><i data-ic="orders"></i><span>Заказы</span><em id="dk-ord">0</em></button>
+  <button class="dk" data-tab="upg"><i data-ic="upg"></i><span>Прокачка</span></button>
+  <button class="dk" data-tab="top"><i data-ic="top"></i><span>Топ</span></button>
+</nav>
+
+<div class="modal" id="m-item"><div class="mbox"><button class="x" data-close>×</button><div id="m-item-body"></div></div></div>
+
 <div class="modal" id="m-ask">
   <div class="mbox narrow">
     <button class="x" data-close>×</button>
@@ -75,35 +69,29 @@
     <p id="m-ask-text" class="mut"></p>
     <div class="row end">
       <button class="btn ghost" data-close>Отмена</button>
-      <button class="btn ok" id="m-ask-yes">Да</button>
+      <button class="btn primary" id="m-ask-yes">Да</button>
     </div>
   </div>
 </div>
 
-<!-- настройки -->
 <div class="modal" id="m-set">
   <div class="mbox narrow">
     <button class="x" data-close>×</button>
     <h2>Настройки</h2>
     <div id="set-body"></div>
-    <div class="row end">
-      <button class="btn ghost" data-close>Закрыть</button>
-    </div>
+    <div class="row end"><button class="btn ghost" data-close>Закрыть</button></div>
   </div>
 </div>
 
-<!-- старт / имя -->
 <div class="modal show" id="m-start">
   <div class="mbox narrow">
-    <h2>Заработок на PLAYEROK</h2>
-    <p class="mut">Покупай лоты дешевле, перепродавай дороже, выполняй заказы под ключ. Осторожно: скамеры, возвраты платежей и блокировка аккаунта.</p>
-    <label class="fld">Ваш ник для топа
+    <h2>Заработок на Playerok</h2>
+    <p class="mut">Покупайте лоты дешевле рынка, перепродавайте дороже, торгуйтесь с продавцами и отвечайте покупателям. Скам, возвраты платежей и блокировки — часть игры.</p>
+    <label class="fld">Ваш ник
       <input id="nick" maxlength="14" placeholder="Продавец">
     </label>
-    <div class="row end">
-      <button class="btn ok big" id="btn-start">Начать</button>
-    </div>
-    <p class="tiny">Прогресс сохраняется в браузере. Игра офлайн, общий онлайн-топ требует сервера — в топе видны рекорды этого устройства.</p>
+    <div class="row end"><button class="btn big" id="btn-start">Начать</button></div>
+    <p class="tiny">Прогресс хранится в браузере. Игра офлайн, поэтому топ-10 локальный — результат можно передать кодом.</p>
   </div>
 </div>
 
@@ -111,5 +99,3 @@
 <script src="app.js"></script>
 </body>
 </html>
-
-<!-- v2 -->

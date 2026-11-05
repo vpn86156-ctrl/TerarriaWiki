@@ -15,7 +15,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 const SAVE = 'playerok_tycoon_v1';
 const DEF = () => ({
   nick:'Продавец', bal:5000, turn:0, deals:0, rate:5, votes:0, claims:0,
-  blocked:0, stock:[], my:[], orders:[], inbox:[], upg:{}, news:[], day:1, dayTurn:0,
+  blocked:0, stock:[], my:[], orders:[], inbox:[], pending:[], upg:{}, news:[], day:1, dayTurn:0,
   achievements:[], log:[], started:Date.now(), last:Date.now(), best:0, fine:0,
   totalEarn:0, scamLoss:0, chargeLoss:0, blocks:0, warns:0,
 });
@@ -63,7 +63,7 @@ function genLot(){
   const price = Math.max(30, Math.round(mktPrice(g)*disc));
   return {
     id:'L'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-    g:g[0], price, disc, urgent, seller:pick(SELLERS), scam: chance(0.06 + g[4]*0.035),
+    g:g[0], price, disc, urgent, seller:pick(SELLERS), scam: chance(0.14 + g[4]*0.05),
     hot: chance(0.12), views: rndi(0, 40),
   };
 }
@@ -111,10 +111,10 @@ function buy(lotId){
   if(stockFree() <= 0) return toast('Склад полон — прокачайте склад','bad');
   S.bal -= l.price;
   M.lots.splice(i,1);
-  if(l.scam && Math.random() < (0.16 + g[4]*0.06) * scamMul()){
+  if(l.scam && Math.random() < (0.42 + g[4]*0.10) * scamMul()){
     // скам: деньги ушли, товара нет
     S.scamLoss += l.price;
-    addLog(`Скам! Продавец ${l.seller} не передал «${g[0]}». Потеряно ${money(l.price)}`,'bad');
+    addLog(`Оплатил, но ${l.seller} пропал: «${g[0]}» не пришёл. Потеряно ${money(l.price)}`,'bad');
     toast('СКАМ: товар не пришёл','bad');
     bumpClaims(0.5);
     ach('first_scam');
@@ -159,7 +159,7 @@ function trySales(){
     // покупатель сначала пишет: авто-выдача закрывает часть сделок сама
     const already = S.inbox.some(q => q.lot === my.id);
     if(!already && !chance(0.28 + autoLvl()*0.16)){
-      S.inbox.push(genInquiry(my));
+      S.inbox.push(genInquiryWrapped(my));
       addLog(`Покупатель ${S.inbox[S.inbox.length-1].buyer} пишет по лоту «${goodByName(my.g)[0]}»`,'warn');
       toast('Новое сообщение от покупателя','warn'); sound('msg');
       save(); if(currentTab==='inbox') render();
@@ -440,6 +440,7 @@ function step(dt){
   if(M.rtimer <= 0){ M.rtimer = 6; refreshMarket(); }
   tickOrders(dt);
   tickInbox(dt);
+  tickPending(dt);
   coolClaims(dt);
   if(S.turn >= 1e6) ach('million');
   S.best = Math.max(S.best, S.bal);
@@ -450,32 +451,36 @@ function step(dt){
 /* ============ рендер ============ */
 let currentTab = 'market';
 function drawTop(){
-  $('#s-bal').textContent  = money(S.bal);
-  $('#s-lots').textContent = money(S.my.reduce((a,m)=>a+m.price,0));
-  $('#s-turn').textContent = moneyK(S.turn);
-  $('#s-rate').textContent = effRate().toFixed(2) + ' ★';
-  const c = $('#s-claims'); c.textContent = S.claims.toFixed(1);
-  c.className = S.claims > 5 ? 'warn hot' : 'warn';
-  const k = rankIdx(), r = RANKS[k];
-  $('#s-rank').textContent = r.name;
-  $('#s-lvl').textContent  = 'ур. ' + (k+1);
-  const next = RANKS[k+1];
-  const pr = next ? clamp((S.turn-r.turn)/Math.max(1,(next.turn-r.turn)),0,1) : 1;
-  $('#s-lvlbar').style.width = (pr*100).toFixed(1)+'%';
-  $('#s-lvlbar').style.background = S.blocked>0 ? 'var(--bad)' : '';
-  $('#n-stock').textContent = S.stock.length;
-  $('#n-my').textContent    = S.my.length;
-  $('#n-ord').textContent   = S.orders.length;
-  const nb = $('#n-inbox'); if(nb){ nb.textContent = S.inbox.length; nb.parentElement.classList.toggle('pulse', S.inbox.length>0); }
+  setNum($('#s-bal'), S.bal, money);
+  const t = $('#s-turn'); if(t) t.textContent = 'оборот ' + moneyK(S.turn);
+  const r = $('#s-rate'); if(r) r.textContent = effRate().toFixed(2);
+  const set = (id, v) => { const e = $(id); if(e) e.textContent = v; };
+  set('#s-stock', S.stock.length);
+  set('#s-my', S.my.length);
+  set('#s-inbox', S.inbox.length);
+  set('#s-ord', S.orders.length);
+  set('#s-deliv', (S.pending||[]).length);
   if(typeof drawDock === 'function') drawDock();
 }
+function drawCats(){
+  const el = $('#cats'); if(!el) return;
+  const counts = {};
+  for(const l of M.lots){ const c = goodByName(l.g)[1]; counts[c] = (counts[c]||0)+1; }
+  el.innerHTML =
+    `<button class="cat ${filters.cat==='all'?'on':''}" data-cat="all"><i>${ico('market')}</i>Все категории<b>${M.lots.length}</b></button>` +
+    Object.entries(CATS).map(([k,c]) =>
+      `<button class="cat ${filters.cat===k?'on':''}" data-cat="${k}"><i>${ico(k)}</i>${c.name}<b>${counts[k]||0}</b></button>`
+    ).join('');
+}
+
 function render(){
-  drawTop(); drawLog();
+  drawTop(); drawCats(); drawLog();
   const v = $('#view');
   const tab = currentTab;
   if(tab==='market')  v.innerHTML = viewMarket();
   if(tab==='stock')   v.innerHTML = viewStock();
   if(tab==='my')      v.innerHTML = viewMy();
+  if(tab==='deliv')   v.innerHTML = viewPending();
   if(tab==='inbox')   v.innerHTML = viewInbox();
   if(tab==='orders')  v.innerHTML = viewOrders();
   if(tab==='upg')     v.innerHTML = viewUpgrades();
@@ -527,9 +532,9 @@ function lotsFiltered(){
     const q = f.q.trim().toLowerCase();
     a = a.filter(l => l.g.toLowerCase().includes(q) || CATS[goodByName(l.g)[1]].name.toLowerCase().includes(q));
   }
-  if(f.sort===0) a.sort((x,y) => (x.price/fairPrice(goodByName(x.g))) - (y.price/fairPrice(goodByName(y.g))));
   if(f.sort===1) a.sort((x,y) => x.price - y.price);
   if(f.sort===2) a.sort((x,y) => y.price - x.price);
+  if(f.sort===3) a.sort((x,y) => (x.price/fairPrice(goodByName(x.g))) - (y.price/fairPrice(goodByName(y.g))));
   return a;
 }
 /* -------- рынок -------- */
@@ -555,23 +560,18 @@ function viewMarket(){
       <div class="prow"><b class="price" data-p="${l.price}">${money(l.price)}</b></div>
       <div class="pdelta ${p>2?'bad':p<-2?'ok':''}">${p>=0?'+':''}${p.toFixed(0)}% к рынку</div>
       ${upgLvl('an') ? `<div class="trend ${tr>0.02?'ok':tr<-0.02?'bad':''}">${tr>0.02?'▲ рост':tr<-0.02?'▼ падение':'▬ ровно'}</div>`:''}
-      <div class="csell">${esc(l.seller)} · 👁 ${l.views}${l.scam?' · <span class="risk">риск</span>':''}</div>
+      <div class="csell">${esc(l.seller)} · 👁 ${l.views}</div>
       <button class="btn ${l.price<=S.bal&&stockFree()>0&&S.blocked<=0?'ok':''}" data-buy="${l.id}" ${l.price>S.bal||stockFree()<=0||S.blocked>0?'disabled':''}>Купить</button>
       </div></div>`;
   }).join('');
   const f = filters;
+  const sorts = [[0,'По порядку'],[1,'Сначала дешёвые'],[2,'Сначала дорогие'],[3,'Сначала выгодные']];
   return `${blocked}${news}
    <div class="toolbar">
-     <input id="q" class="inp" placeholder="Поиск по каталогу…" value="${esc(f.q)}">
-     <select id="fcat" class="inp">${catOptions(f.cat)}</select>
-     <select id="fsort" class="inp">
-       <option value="0"${f.sort==0?' selected':''}>Сначала выгодные</option>
-       <option value="1"${f.sort==1?' selected':''}>Сначала дешёвые</option>
-       <option value="2"${f.sort==2?' selected':''}>Сначала дорогие</option>
-     </select>
-     <button class="btn small" id="btn-refresh">Обновить</button>
+     ${sorts.map(([v,n])=>`<button class="chipf ${f.sort==v?'on':''}" data-sort="${v}">${n}</button>`).join('')}
+     <button class="chipf" id="btn-refresh" style="margin-left:auto">Обновить</button>
    </div>
-   <div class="hint">Склад свободен: <b>${stockFree()}/${slots()}</b> · комиссия площадки <b>${(fee()*100).toFixed(0)}%</b></div>
+   <div class="hint">Найдено ${lotsFiltered().length} лотов · склад свободен <b>${stockFree()}/${slots()}</b> · комиссия <b>${(fee()*100).toFixed(1)}%</b></div>
    <div class="grid">${cards}</div>`;
 }
 const filters = {q:'', cat:'all', sort:0};
@@ -582,7 +582,7 @@ function catOptions(cur){
 
 /* -------- склад -------- */
 function viewStock(){
-  if(!S.stock.length) return `<div class="empty">📦 Склад пуст. Купите лоты на вкладке «Рынок».</div>`;
+  if(!S.stock.length) return `<div class="empty">Склад пуст. Купите лоты на вкладке «Рынок».</div>`;
   const cards = S.stock.map((s,i) => {
     const g = goodByName(s.g), cur = fairPrice(g);
     const d = cur - s.buy, pr = (cur/s.buy-1)*100;
@@ -664,7 +664,7 @@ function viewUpgrades(){
   const ups = UPGRADES.map(u => {
     const lv = upgLvl(u.id), cost = upgCost(u), max = lv >= u.max;
     return `<div class="upg ${max?'maxed':''}">
-      <div class="uicon">${u.icon}</div>
+      <div class="uicon">${ico(u.icon)}</div>
       <div class="ubody">
         <div class="uname">${u.name} <span class="ulvl">${lv}/${u.max}</span></div>
         <div class="udesc">${u.desc}</div>
@@ -720,13 +720,14 @@ function viewTop(){
 
 /* ============ фильтры ============ */
 function bindFilters(){
-  const q = $('#q'), c = $('#fcat'), s = $('#fsort');
+  const q = $('#q');
   if(q){
-    q.oninput = () => { filters.q = q.value; render(); const n=$('#q'); n.focus(); n.setSelectionRange(n.value.length,n.value.length); };
-    q.onkeydown = e => { if(e.key==='Escape') q.blur(); };
+    q.oninput = () => { filters.q = q.value; render(); const n=$('#q'); if(n && document.activeElement===n){ const v=n.value; n.value=''; n.value=v; } };
+    q.onkeydown = e => { if(e.key==='Escape'){ q.value=''; filters.q=''; q.blur(); render(); } };
   }
-  if(c) c.onchange = () => { filters.cat = c.value; render(); };
-  if(s) s.onchange = () => { filters.sort = +s.value; render(); };
+  $$('[data-cat]').forEach(b => b.onclick = () => { filters.cat = b.dataset.cat; render(); });
+  $$('[data-sort]').forEach(b => b.onclick = () => { filters.sort = +b.dataset.sort; render(); });
+  $$('[data-go]').forEach(b => b.onclick = () => setTab(b.dataset.go));
 }
 
 /* ============ действия ============ */
@@ -754,6 +755,8 @@ function bindView(){
   });
   $$('[data-fraud]').forEach(b => b.onclick = e => { e.stopPropagation(); scamBuyer(b.dataset.q, b.dataset.fraud); });
   $$('[data-dispute]').forEach(b => b.onclick = e => { e.stopPropagation(); openDispute(b.dataset.dispute); });
+  $$('[data-pick]').forEach(b => b.onclick = e => { e.stopPropagation(); pickDelivery(b.dataset.pick); });
+  $$('[data-tpl]').forEach(b => b.onclick = e => { e.stopPropagation(); sendTpl(b.dataset.tpl, b.dataset.tplt); });
   $$('[data-take]').forEach(b => b.onclick = e => { e.stopPropagation(); takeOrder(b.dataset.take); });
   $$('[data-do]').forEach(b => b.onclick = e => { e.stopPropagation(); fulfill(b.dataset.do); });
   $$('[data-skip]').forEach(b => b.onclick = e => {
@@ -816,8 +819,8 @@ function openCard(id){
         <div class="dprice">${money(l.price)} <small>рынок ${money(fair)} · ${p>=0?'+':''}${p.toFixed(1)}%</small></div>
         <div class="dcalc">Продадите по рынку: <b>${money(Math.round(fair*(1-fee())*bankMul()))}</b> чистыми ·
           прибыль <b class="${Math.round(fair*(1-fee()))-l.price>=0?'ok':'bad'}">${money(Math.round(fair*(1-fee())*bankMul())-l.price)}</b></div>
-        <div class="csell">Продавец <b>${esc(l.seller)}</b> · просмотров ${l.views}${l.scam?' · <span class="risk">подозрительный</span>':''}</div>
-        ${l.scam && upgLvl('guar') ? `<div class="ok small">Гарант ур.${upgLvl('guar')} снижает риск скама</div>`:''}
+        <div class="csell">Продавец <b>${esc(l.seller)}</b> · на площадке ${rndi(2,60)} мес. · просмотров ${l.views}</div>
+
       </div>
     </div>
     <div class="row end">
@@ -964,7 +967,7 @@ function doBuy(id){
     const g = goodByName(l.g);
     $('#m-ask-title').textContent = 'Купить «'+g[0]+'»?';
     $('#m-ask-text').innerHTML = `Цена <b>${money(l.price)}</b> · рынок ${money(fairPrice(g))}` +
-      (l.scam ? ` · <span class="bad">продавец выглядит подозрительно</span>` : '');
+      '';
     $('#m-ask').classList.add('show');
     $('#m-ask-yes').onclick = () => { closeModals(); buy(id); };
     return;
@@ -1250,12 +1253,15 @@ function replyInquiry(qid, answer){
     S.inbox.splice(i,1); save(); render(); return;
   }
 
-  // успешная продажа
+  // успешная продажа: деньги приходят, товар ещё нужно выдать
   const net = Math.round(soldPrice*(1-fee())*bankMul());
   S.bal += net; S.turn += soldPrice; S.dayTurn += soldPrice; S.deals++;
   S.totalEarn += Math.max(0, net - m.buy);
   S.my.splice(S.my.indexOf(m),1);
-  addLog(text + ` · чистыми ${money(net)} · <b class="${net-m.buy>=0?'ok':'bad'}">${net-m.buy>=0?'+':''}${money(net-m.buy)}</b>`, cls);
+  S.pending = S.pending || [];
+  S.pending.push({id:'D'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), g:m.g, buyer:q.buyer, price:soldPrice, net, left:40});
+  addLog(text + ` · чистыми ${money(net)} · <b class="${net-m.buy>=0?'ok':'bad'}">${net-m.buy>=0?'+':''}${money(net-m.buy)}</b> · <span class="warn">нужно выдать товар</span>`, cls);
+  toast('Оплачено — выдайте товар','warn');
   flyGain('+' + money(net)); flashStat('#s-bal'); sound('deal');
   // возврат платежа
   if(chance(CATS[g[1]].risk*0.5*chargeMul()*(1-autoLvl()*0.12))){
@@ -1332,7 +1338,12 @@ function viewInbox(){
           <div class="mlot">${esc(q.g)} · ваша цена ${money(S.my.find(m=>m.id===q.lot)?.price||0)}${q.discount?` · просит за ${money(q.offer)}`:''}</div>
         </div>
       </div>
+      ${q.hist && q.hist.length > 1 ? `<div class="hist">${q.hist.slice(-4).map(h=>`<div><b>${h.who==='you'?'Вы':esc(q.buyer)}</b> · ${h.t}: ${esc(h.text)}</div>`).join('')}</div>` : ''}
+      ${q.typing ? `<div class="typing"><i></i><i></i><i></i> ${esc(q.buyer)} печатает…</div>` : ''}
       <div class="row answers">${buttons}</div>
+      <div class="quicktpl">
+        ${TPL.slice(0,3).map(t=>`<button class="chipf" data-tpl="${q.id}" data-tplt="${esc(t)}">${esc(t.slice(0,26))}</button>`).join('')}
+      </div>
       ${S.my.find(m=>m.id===q.lot) ? `<div class="scamwrap">
         <button class="btn small scam-toggle" data-scam="${q.id}">😈 Обмануть покупателя</button>
         <div class="scamopts" id="scam-${q.id}" style="display:none">
@@ -1591,7 +1602,13 @@ function openDispute(stockId){
    НИЖНЯЯ ПАНЕЛЬ
    ============================================================ */
 function bindDock(){
-  $$('.dk').forEach(b => b.onclick = () => { sound('click'); setTab(b.dataset.tab); });
+  $$('#cats .cat i').forEach(i => { const k = i.parentElement.dataset.cat; if(ICONS[k]) i.innerHTML = ico(k); });
+  $$('[data-go] i').forEach(i => { const k = i.parentElement.dataset.go; if(ICONS[k]) i.innerHTML = ico(k); });
+  $$('#dock .dk').forEach(b => {
+    const t = b.dataset.tab, i = b.querySelector('i');
+    if(i && ICONS[t]) i.innerHTML = ico(t);
+    b.onclick = () => { sound('click'); setTab(t); };
+  });
 }
 function drawDock(){
   $$('.dk').forEach(b => b.classList.toggle('active', b.dataset.tab===currentTab));
@@ -1600,6 +1617,198 @@ function drawDock(){
   badge('#dk-my', S.my.length);
   badge('#dk-inbox', S.inbox.length);
   badge('#dk-ord', S.orders.length);
+  const pend = (S.pending||[]).length;
+  const dp = $('.dk[data-tab="deliv"]'); if(dp){ const e = $('#dk-deliv'); if(e){ e.textContent = pend; e.classList.toggle('zero', !pend); } dp.classList.toggle('pulse', pend>0 && currentTab!=='deliv'); }
   const chat = $('.dk[data-tab="inbox"]');
   if(chat) chat.classList.toggle('pulse', S.inbox.length > 0 && currentTab !== 'inbox');
+}
+
+/* ============================================================
+   ВЫДАЧА ТОВАРА: можно перепутать и получить штраф
+   ============================================================ */
+const DELIVERY = {
+  ok:      {name:'Выслать верный товар',    fine:0,    claim:0},
+  wrong:   {name:'Выслать похожий (ошибка)',fine:0.25, claim:1.8},
+  partial: {name:'Выслать часть',           fine:0.15, claim:1.2},
+  late:    {name:'Задержать выдачу',        fine:0.05, claim:0.6},
+};
+function deliverOptions(myId){
+  const m = S.my.find(x => x.id===myId);
+  if(!m) return [];
+  const g = goodByName(m.g);
+  const similar = S.stock.filter(s => s.g !== m.g && goodByName(s.g)[1] === g[1]).slice(0,2);
+  const list = [
+    {key:'ok',    label:`Выслать «${g[0]}»`},
+    {key:'late',  label:'Задержать на пару часов'},
+  ];
+  if(similar.length) list.push({key:'wrong', label:`Перепутать и выслать «${similar[0].g}»`});
+  if((m.qty||1) > 1) list.push({key:'partial', label:'Выслать только часть'});
+  return list;
+}
+function applyDelivery(myId, key){
+  const m = S.my.find(x => x.id===myId);
+  if(!m) return;
+  const d = DELIVERY[key]; if(!d) return;
+  const g = goodByName(m.g);
+  if(key === 'ok'){
+    addLog(`Выдал «${g[0]}» вовремя и полностью`,'ok');
+    S.votes++; S.rate = clamp((S.rate*S.votes+5)/(S.votes+1),1,5);
+    return;
+  }
+  const fine = Math.round(m.price * d.fine);
+  if(fine > 0){ S.bal = Math.max(0, S.bal - fine); S.turn = Math.max(0, S.turn - fine); }
+  S.claims += d.claim * lawMul();
+  S.votes++; S.rate = clamp((S.rate*S.votes + (key==='wrong'?1:2))/(S.votes+1),1,5);
+  const texts = {
+    wrong:   `ОШИБКА ВЫДАЧИ: перепутал товар, выслал не то. Штраф ${money(fine)}, жалоба от покупателя`,
+    partial: `ВЫДАЛ ЧАСТЬ: покупатель недоволен. Штраф ${money(fine)}`,
+    late:    `ЗАДЕРЖКА: выдал позже срока. Штраф ${money(fine)}`,
+  };
+  addLog(texts[key],'bad');
+  toast(`Штраф ${money(fine)}`,'bad'); sound('bad');
+  flyGain('−'+money(fine), true);
+  checkBlock(); save(); render();
+}
+
+/* ============================================================
+   ЖИВОЙ ЧАТ: история, «печатает», шаблоны
+   ============================================================ */
+
+/* ===== SVG-иконки вместо эмодзи ===== */
+const ICONS = {
+  market:'<path d="M3 9l1.5-5h15L21 9M4 9h16v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M9 20v-6h6v6"/>',
+  stock: '<path d="M3 7.5 12 3l9 4.5v9L12 21 3 16.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>',
+  my:    '<path d="M20.6 13.4 12 22l-9-9V4h8l1 3h8z"/>',
+  deliv: '<path d="M3 12h13"/><path d="M12 5l7 7-7 7"/><path d="M21 3v6h-6"/>',
+  inbox: '<path d="M21 11.5a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  orders:'<path d="M8 3h8l1 3h3v16H4V6h3z"/><path d="M9 12h6M9 16h4"/>',
+  upg:   '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  top:   '<path d="M6 9H3V4h5v3l4-3 4 3V4h5v5h-3"/><circle cx="12" cy="14" r="5"/><path d="M12 19v2M9 21h6"/>',
+  acc:   '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>',
+  curr:  '<circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.6-1.2-1.7-1.8-3-1.8-1.7 0-3 .9-3 2.3s1.3 2.1 3 2.4 3.1.7 3.1 2.4c0 1.5-1.4 2.4-3.1 2.4-1.4 0-2.5-.6-3.1-1.7"/><path d="M12 6v12"/>',
+  sub:   '<path d="M3 6h18v12H3z"/><path d="M3 10h18M7 14h3"/>',
+  key:   '<circle cx="8" cy="12" r="4"/><path d="M12 12h9M17 12v3M20 12v2"/>',
+  app:   '<path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M11 18h2"/>',
+  item:  '<path d="M5 8h14M5 12h14M5 16h10"/><circle cx="3.5" cy="8" r="1.2"/><circle cx="3.5" cy="12" r="1.2"/><circle cx="3.5" cy="16" r="1.2"/>',
+  social:'<path d="M12 21s-7-4.4-7-9.5A4.5 4.5 0 0 1 12 8a4.5 4.5 0 0 1 7 3.5c0 5.1-7 9.5-7 9.5z"/>',
+  boost: '<circle cx="12" cy="14" r="5"/><path d="M8.5 9.5 7 3h4l1 3M15.5 9.5 17 3h-4l-1 3"/><path d="M10 14l2-2 2 2"/>',
+  edu:   '<path d="M12 4 2 9l10 5 10-5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/>',
+  rent:  '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+  gear:  '<path d="M4 14h16v4H4z"/><path d="M7 14v-3a5 5 0 0 1 10 0v3"/><circle cx="17" cy="17" r="1.5"/>',
+  bundle:'<path d="M3 8h18v4H3zM5 12v8h14v-8"/><path d="M12 8v12M12 8c-3 0-4-2-4-4 2 0 4 1 4 4zM12 8c3 0 4-2 4-4-2 0-4 1-4 4z"/>',
+  server:'<rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/><path d="M7 7h.01M7 17h.01"/>',
+  mobskin:'<path d="M12 3c4 0 6 2.5 6 5.5S16 14 12 14s-6-2.5-6-5.5S8 3 12 3z"/><path d="M8 15c-2 1-3 3-3 6h14c0-3-1-5-3-6"/>',
+  collect:'<path d="M12 3 4 7v10l8 4 8-4V7z"/><path d="M12 11 4 7M12 11l8-4M12 11v10"/>',
+  crypto:'<ellipse cx="12" cy="6.5" rx="7" ry="2.5"/><path d="M5 6.5v11c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-11"/><path d="M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/>',
+};
+function ico(k, cls){
+  const d = ICONS[k];
+  if(!d) return '';
+  return `<svg class="ic ${cls||''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+}
+
+const TPL = ['Здравствуйте! Товар в наличии','Отправлю в течение 5 минут','Цена окончательная, извините','Гарантия 24 часа','Спасибо за покупку!'];
+function pushHistory(q, who, text){
+  q.hist = q.hist || [];
+  q.hist.push({who, text, t:new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})});
+  if(q.hist.length > 12) q.hist.shift();
+}
+function sendTpl(qid, text){
+  const q = S.inbox.find(x => x.id===qid);
+  if(!q) return;
+  pushHistory(q, 'you', text);
+  sound('click');
+  // покупатель «печатает» и отвечает
+  q.typing = true; render();
+  setTimeout(() => {
+    q.typing = false;
+    const answers = ['Понял, жду','Хорошо, согласен','А можно быстрее?','Тогда беру','Не подходит, отбой'];
+    const a = pick(answers);
+    pushHistory(q, q.buyer, a);
+    addLog(`${q.buyer}: «${a}» (ответ на «${text}»)`,'');
+    if(currentTab==='inbox') render(); else drawDock();
+  }, rnd(1400, 2600));
+}
+function genInquiryWrapped(my){
+  const q = genInquiry(my);
+  q.hist = [{who:q.buyer, text:q.text, t:new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}];
+  return q;
+}
+
+/* ============================================================
+   ОЖИДАЮТ ВЫДАЧИ
+   ============================================================ */
+function tickPending(dt){
+  if(!S.pending) return;
+  for(let i=S.pending.length-1;i>=0;i--){
+    const d = S.pending[i];
+    d.left -= dt;
+    if(d.left <= 0){
+      S.pending.splice(i,1);
+      const fine = Math.round(d.price*0.2);
+      S.bal = Math.max(0, S.bal - fine);
+      S.claims += 2.2*lawMul();
+      S.votes++; S.rate = clamp((S.rate*S.votes+1)/(S.votes+1),1,5);
+      addLog(`НЕ ВЫДАЛ ВОВРЕМЯ: «${d.g}» для ${d.buyer}. Штраф ${money(fine)} и жалоба`,'bad');
+      toast('Просрочил выдачу: штраф '+money(fine),'bad'); sound('bad');
+      checkBlock(); save(); render();
+    }
+  }
+}
+/* выбрать, что именно выслать */
+function pickDelivery(pid){
+  const d = (S.pending||[]).find(x => x.id===pid);
+  if(!d) return;
+  const g = goodByName(d.g);
+  const similar = S.stock.filter(s => s.g !== d.g && goodByName(s.g)[1] === g[1]).slice(0,2);
+  $('#m-ask-title').textContent = 'Выдача: «' + d.g + '»';
+  $('#m-ask-text').innerHTML =
+    `Покупатель <b>${esc(d.buyer)}</b> оплатил ${money(d.price)}. Что отправляем?<br>
+     <span class="tiny">Ошибка в выдаче — штраф от 5 до 25 % суммы плюс жалоба.</span>`;
+  $('#m-ask').classList.add('show');
+  const box = $('#m-ask');
+  let extra = box.querySelector('.deliv-opts');
+  if(!extra){ extra = document.createElement('div'); extra.className = 'deliv-opts row'; box.querySelector('.mbox, .mbox.narrow').insertBefore(extra, box.querySelector('.row.end')); }
+  extra.style.flexDirection = 'column';
+  extra.innerHTML =
+    `<button class="btn ok" data-dv="ok" data-p="${pid}">Выслать «${esc(d.g)}» как есть</button>` +
+    (similar.length?`<button class="btn bad" data-dv="wrong" data-p="${pid}">Выслать «${esc(similar[0].g)}» (перепутать)</button>`:'') +
+    `<button class="btn bad" data-dv="partial" data-p="${pid}">Выслать часть и сказать, что остальное позже</button>` +
+    `<button class="btn ghost" data-dv="late" data-p="${pid}">Попросить подождать</button>`;
+  extra.querySelectorAll('[data-dv]').forEach(b => b.onclick = () => {
+    const way = b.dataset.dv;
+    closeModals();
+    const fine = Math.round(d.price * DELIVERY[way].fine);
+    if(fine>0){ S.bal = Math.max(0, S.bal - fine); }
+    if(way === 'ok'){
+      addLog(`Выдал «${d.g}» покупателю ${d.buyer} — сделка закрыта`,'ok');
+      toast('Выдано','ok'); sound('deal');
+      S.votes++; S.rate = clamp((S.rate*S.votes+5)/(S.votes+1),1,5);
+    } else {
+      S.claims += DELIVERY[way].claim*lawMul();
+      S.votes++; S.rate = clamp((S.rate*S.votes + (way==='wrong'?1:2))/(S.votes+1),1,5);
+      const what = {wrong:'перепутал товар', partial:'выслал часть', late:'задержал выдачу'}[way];
+      addLog(`ОШИБКА ВЫДАЧИ (${what}) по «${d.g}»: штраф ${money(fine)}`,'bad');
+      toast('Штраф '+money(fine),'bad'); sound('bad'); flyGain('−'+money(fine), true);
+    }
+    S.pending = (S.pending||[]).filter(x => x.id !== pid);
+    checkBlock(); save(); render();
+  });
+  $('#m-ask-yes').onclick = () => { closeModals(); pickDelivery(pid); };
+}
+function viewPending(){
+  if(!(S.pending||[]).length) return `<div class="empty">Нечего выдавать. Здесь появятся оплаченные сделки, по которым нужно передать товар.</div>`;
+  return (S.pending||[]).map(d => {
+    const g = goodByName(d.g);
+    return `<div class="ord ${d.left<15?'urgent':''}" data-id="${d.id}">
+      <div class="ohead"><b>${esc(d.g)}</b><span class="tmr">${Math.ceil(d.left)} с</span></div>
+      <div class="obar"><i style="width:${(d.left/40*100).toFixed(0)}%"></i></div>
+      <div class="orow">
+        <span>Покупатель: <b>${esc(d.buyer)}</b></span>
+        <span>Оплачено: <b class="ok">${money(d.price)}</b></span>
+        <span>${ico(g[1])} ${CATS[g[1]].name}</span>
+      </div>
+      <div class="row end"><button class="btn ok" data-pick="${d.id}">Выдать</button></div>
+    </div>`;
+  }).join('');
 }
