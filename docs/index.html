@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>PLAYEROK · Заработок</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bgfx"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+<div id="fx"></div>
+
+<div id="app">
+
+  <header class="top">
+    <div class="brand"><span class="logo">P</span><div class="btxt"><b>PLAYEROK</b><small>заработок · офлайн</small></div></div>
+    <div class="stats">
+      <div class="stat"><label>Баланс</label><b id="s-bal">0 ₽</b></div>
+      <div class="stat"><label>В лотах</label><b id="s-lots">0 ₽</b></div>
+      <div class="stat"><label>Оборот</label><b id="s-turn">0 ₽</b></div>
+      <div class="stat"><label>Рейтинг</label><b id="s-rate">5.00 ★</b></div>
+      <div class="stat"><label>Жалобы</label><b id="s-claims" class="warn">0</b></div>
+    </div>
+    <div class="lvl">
+      <div class="lvltop"><span id="s-rank">Новичок</span><small id="s-lvl">ур. 1</small></div>
+      <div class="bar"><i id="s-lvlbar"></i></div>
+    </div>
+    <button class="icon-btn" id="btn-set" title="Настройки">⚙</button>
+    <button class="menu-btn" id="btn-menu">☰</button>
+  </header>
+
+  <div class="tabswrap"><nav class="tabs" id="tabs"><i id="tab-pill"></i>
+    <button class="tab active" data-tab="market">Рынок</button>
+    <button class="tab" data-tab="stock">Склад <em id="n-stock">0</em></button>
+    <button class="tab" data-tab="my">Мои лоты <em id="n-my">0</em></button>
+    <button class="tab" data-tab="inbox">Сообщения <em id="n-inbox">0</em></button>
+    <button class="tab" data-tab="orders">Заказы <em id="n-ord">0</em></button>
+    <button class="tab" data-tab="upg">Прокачка</button>
+    <button class="tab" data-tab="top">Топ-10</button>
+  </nav></div>
+
+  <main id="view"></main>
+
+  <section class="logwrap">
+    <div class="loghead">События</div>
+    <div id="log" class="log"></div>
+  </section>
+
+  <div class="toasts" id="toasts"></div>
+</div>
+
+<nav class="dock" id="dock">
+  <button class="dk active" data-tab="market"><i>🏪</i><span>Рынок</span></button>
+  <button class="dk" data-tab="stock"><i>📦</i><span>Склад</span><em id="dk-stock">0</em></button>
+  <button class="dk" data-tab="my"><i>🏷️</i><span>Лоты</span><em id="dk-my">0</em></button>
+  <button class="dk" data-tab="inbox"><i>💬</i><span>Чат</span><em id="dk-inbox">0</em></button>
+  <button class="dk" data-tab="orders"><i>📝</i><span>Заказы</span><em id="dk-ord">0</em></button>
+  <button class="dk" data-tab="upg"><i>⚙️</i><span>Прокачка</span></button>
+  <button class="dk" data-tab="top"><i>🏆</i><span>Топ</span></button>
+</nav>
+
+<!-- карточка товара -->
+<div class="modal" id="m-item">
+  <div class="mbox">
+    <button class="x" data-close>×</button>
+    <div id="m-item-body"></div>
+  </div>
+</div>
+
+<!-- подтверждение -->
+<div class="modal" id="m-ask">
+  <div class="mbox narrow">
+    <button class="x" data-close>×</button>
+    <h3 id="m-ask-title">Подтвердите</h3>
+    <p id="m-ask-text" class="mut"></p>
+    <div class="row end">
+      <button class="btn ghost" data-close>Отмена</button>
+      <button class="btn ok" id="m-ask-yes">Да</button>
+    </div>
+  </div>
+</div>
+
+<!-- настройки -->
+<div class="modal" id="m-set">
+  <div class="mbox narrow">
+    <button class="x" data-close>×</button>
+    <h2>Настройки</h2>
+    <div id="set-body"></div>
+    <div class="row end">
+      <button class="btn ghost" data-close>Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- старт / имя -->
+<div class="modal show" id="m-start">
+  <div class="mbox narrow">
+    <h2>Заработок на PLAYEROK</h2>
+    <p class="mut">Покупай лоты дешевле, перепродавай дороже, выполняй заказы под ключ. Осторожно: скамеры, возвраты платежей и блокировка аккаунта.</p>
+    <label class="fld">Ваш ник для топа
+      <input id="nick" maxlength="14" placeholder="Продавец">
+    </label>
+    <div class="row end">
+      <button class="btn ok big" id="btn-start">Начать</button>
+    </div>
+    <p class="tiny">Прогресс сохраняется в браузере. Игра офлайн, общий онлайн-топ требует сервера — в топе видны рекорды этого устройства.</p>
+  </div>
+</div>
+
+<script src="catalog.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
+
+<!-- v2 -->
