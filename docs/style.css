@@ -327,26 +327,136 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .dk.pulse i{animation:bell 1.6s ease-in-out infinite}
 @keyframes bell{0%,100%{transform:rotate(0)}15%{transform:rotate(-14deg)}30%{transform:rotate(12deg)}45%{transform:rotate(-8deg)}60%{transform:rotate(0)}}
 
-/* ================= ТЁМНАЯ ТЕМА ================= */
+/* ================= ЧЕТЫРЕ ТЕМЫ ================= */
+/* 1. Светлая (по умолчанию, как Playerok) */
+:root[data-theme="light"]{
+  --bg:#f4f5f7; --card:#ffffff; --card2:#fafbfc;
+  --line:#e3e5ea; --line2:#d3d7de;
+  --text:#2b2530; --muted:#6b6474; --faint:#9a94a3;
+  --blue:#4384d0; --blue-d:#2f6cb4; --blue-l:#e8f1fc; --blue-xl:#f2f7fd;
+  --orange:#eda849; --orange-d:#c98a2c;
+  --green:#228e5d; --green-l:#e6f4ec;
+  --red:#d93a45; --red-l:#fdeaec;
+  --sh:0 1px 2px rgba(16,12,24,.06), 0 1px 3px rgba(16,12,24,.04);
+  --sh2:0 4px 12px rgba(16,12,24,.1);
+}
+/* 2. Тёмная — мягкий графит, без чистого белого и чёрного */
 :root[data-theme="dark"]{
-  --blue:#5b9ae3; --blue-d:#3d7fc4; --blue-l:#1e3350; --blue-xl:#17212f;
-  --orange:#f0b45f; --orange-d:#e0a03f;
-  --green:#3fbd82; --green-l:#173a2a;
-  --red:#ff6b74; --red-l:#3d1f24;
-  --ink:#f0eef2; --text:#e6e4ea; --muted:#9a94a3; --faint:#6f6a78;
-  --bg:#12100f; --card:#1c1a1e; --line:#2a272e; --line2:#3a363f;
+  --bg:#12141a; --card:#1a1d25; --card2:#20242e;
+  --line:#272b36; --line2:#333846;
+  --text:#d6dae3; --muted:#8b93a3; --faint:#666e7e;
+  --blue:#6aa6e8; --blue-d:#4d86c6; --blue-l:#1c2635; --blue-xl:#171d28;
+  --orange:#e0a95e; --orange-d:#c08f43;
+  --green:#4bbd84; --green-l:#183027;
+  --red:#ef6a74; --red-l:#332025;
+  --sh:0 1px 2px rgba(0,0,0,.28); --sh2:0 6px 18px rgba(0,0,0,.42);
+}
+/* 3. Графит — тёплый тёмный, в духе FunPay */
+:root[data-theme="graphite"]{
+  --bg:#141213; --card:#1e1b1d; --card2:#241f22;
+  --line:#2e282b; --line2:#3c3438;
+  --text:#e2dcdf; --muted:#9d949a; --faint:#7a7177;
+  --blue:#5b93d6; --blue-d:#43729f; --blue-l:#222b33; --blue-xl:#1c222a;
+  --orange:#e8a44f; --orange-d:#c8873a;
+  --green:#54a97c; --green-l:#1c2c24;
+  --red:#e0656f; --red-l:#332226;
   --sh:0 1px 2px rgba(0,0,0,.3); --sh2:0 6px 18px rgba(0,0,0,.45);
 }
-:root[data-theme="dark"] .top{background:#1a181c;border-color:var(--line)}
-:root[data-theme="dark"] .search input,:root[data-theme="dark"] .inp{background:#232027;border-color:var(--line2);color:var(--text)}
-:root[data-theme="dark"] .hbtn{background:#232027;border-color:var(--line2);color:var(--text)}
-:root[data-theme="dark"] .thumb{background:#262329}
-:root[data-theme="dark"] .loghead,:root[data-theme="dark"] .hist{background:#232027}
-:root[data-theme="dark"] .dock{background:#1a181c;border-color:var(--line)}
-:root[data-theme="dark"] .dk:hover{background:#232027}
-:root[data-theme="dark"] .dk.active{background:var(--blue-l)}
-:root[data-theme="dark"] .x{color:var(--muted)}
-:root[data-theme="dark"] .toast{background:#232027;border-color:var(--line2)}
+/* 4. Индиго — холодная ночная */
+:root[data-theme="indigo"]{
+  --bg:#0e1118; --card:#161b26; --card2:#1c2231;
+  --line:#232b3c; --line2:#2f3a4f;
+  --text:#d3daea; --muted:#8590a8; --faint:#65708a;
+  --blue:#7aa2ff; --blue-d:#5a7fd0; --blue-l:#1e2740; --blue-xl:#182031;
+  --orange:#f0b45f; --orange-d:#d09443;
+  --green:#48c78e; --green-l:#163028;
+  --red:#ff7b85; --red-l:#3a2028;
+  --sh:0 1px 2px rgba(0,0,0,.34); --sh2:0 8px 22px rgba(0,0,0,.5);
+}
+/* тёмные темы: никаких белых пятен */
+:root[data-theme="dark"] .top,
+:root[data-theme="graphite"] .top,
+:root[data-theme="indigo"] .top{background:var(--card);border-color:var(--line)}
+:root[data-theme="dark"] .card,
+:root[data-theme="graphite"] .card,
+:root[data-theme="indigo"] .card,
+:root[data-theme="dark"] .ord,.root[data-theme="dark"] .upg,
+:root[data-theme="graphite"] .ord,:root[data-theme="graphite"] .upg,
+:root[data-theme="indigo"] .ord,:root[data-theme="indigo"] .upg{background:var(--card);border-color:var(--line)}
+:root[data-theme="dark"] input,
+:root[data-theme="graphite"] input,
+:root[data-theme="indigo"] input,
+:root[data-theme="dark"] .search input,
+:root[data-theme="graphite"] .search input,
+:root[data-theme="indigo"] .search input,
+:root[data-theme="dark"] .inp,
+:root[data-theme="graphite"] .inp,
+:root[data-theme="indigo"] .inp{background:var(--card2);border-color:var(--line2);color:var(--text)}
+:root[data-theme="dark"] .hbtn,
+:root[data-theme="graphite"] .hbtn,
+:root[data-theme="indigo"] .hbtn,
+:root[data-theme="dark"] .icon-btn,
+:root[data-theme="graphite"] .icon-btn,
+:root[data-theme="indigo"] .icon-btn{background:var(--card2);border-color:var(--line2);color:var(--text)}
+:root[data-theme="dark"] .thumb,
+:root[data-theme="graphite"] .thumb,
+:root[data-theme="indigo"] .thumb{background:var(--card2)}
+:root[data-theme="dark"] .loghead,
+:root[data-theme="graphite"] .loghead,
+:root[data-theme="indigo"] .loghead,
+:root[data-theme="dark"] .hist,
+:root[data-theme="graphite"] .hist,
+:root[data-theme="indigo"] .hist{background:var(--card2)}
+:root[data-theme="dark"] .dock,
+:root[data-theme="graphite"] .dock,
+:root[data-theme="indigo"] .dock{background:var(--card);border-color:var(--line)}
+:root[data-theme="dark"] .dk:hover,
+:root[data-theme="graphite"] .dk:hover,
+:root[data-theme="indigo"] .dk:hover{background:var(--card2)}
+:root[data-theme="dark"] .dk.active,
+:root[data-theme="graphite"] .dk.active,
+:root[data-theme="indigo"] .dk.active{background:var(--blue-l)}
+:root[data-theme="dark"] .modal,
+:root[data-theme="graphite"] .modal,
+:root[data-theme="indigo"] .modal{background:rgba(6,7,10,.62)}
+:root[data-theme="dark"] .mbox,
+:root[data-theme="graphite"] .mbox,
+:root[data-theme="indigo"] .mbox{background:var(--card);color:var(--text)}
+:root[data-theme="dark"] .toast,
+:root[data-theme="graphite"] .toast,
+:root[data-theme="indigo"] .toast{background:var(--card);border-color:var(--line2)}
+:root[data-theme="dark"] .news,
+:root[data-theme="graphite"] .news,
+:root[data-theme="indigo"] .news{background:var(--card2);border-color:var(--line2);color:var(--orange)}
+:root[data-theme="dark"] .chip,
+:root[data-theme="graphite"] .chip,
+:root[data-theme="indigo"] .chip{background:var(--card2);border-color:var(--line)}
+:root[data-theme="dark"] .btn.ghost,
+:root[data-theme="graphite"] .btn.ghost,
+:root[data-theme="indigo"] .btn.ghost{background:var(--card2);border-color:var(--line2);color:var(--text)}
+:root[data-theme="dark"] .empty,
+:root[data-theme="graphite"] .empty,
+:root[data-theme="indigo"] .empty{background:var(--card);color:var(--muted)}
+:root[data-theme="dark"] .side,
+:root[data-theme="graphite"] .side,
+:root[data-theme="indigo"] .side{background:var(--card)}
+:root[data-theme="dark"] .logo,
+:root[data-theme="graphite"] .logo,
+:root[data-theme="indigo"] .logo{color:#fff}
+:root[data-theme="dark"] .block-banner,
+:root[data-theme="graphite"] .block-banner,
+:root[data-theme="indigo"] .block-banner{background:var(--red-l);border-color:var(--red);color:var(--red)}
+/* переключатель тем */
+.themes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:6px 0 2px}
+.tcard{
+  border:1px solid var(--line2);border-radius:10px;padding:8px 4px 7px;cursor:pointer;
+  background:var(--card2);text-align:center;font-size:11px;color:var(--muted);transition:.15s;
+}
+.tcard:hover{border-color:var(--blue)}
+.tcard.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-l);color:var(--text);font-weight:600}
+.tprev{display:flex;height:30px;border-radius:6px;overflow:hidden;margin-bottom:5px;border:1px solid var(--line2)}
+.tprev i{flex:1}
+.tprev i:last-child{flex:0 0 34%}
 
 /* ================= АДАПТИВ ================= */
 @media (max-width:960px){

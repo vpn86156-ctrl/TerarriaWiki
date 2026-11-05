@@ -16,6 +16,7 @@ const SAVE = 'playerok_tycoon_v1';
 const DEF = () => ({
   nick:'Продавец', bal:5000, turn:0, deals:0, rate:5, votes:0, claims:0,
   blocked:0, stock:[], my:[], orders:[], inbox:[], pending:[], upg:{}, news:[], day:1, dayTurn:0,
+  heat:0, dirty:0, roofT:0,
   achievements:[], log:[], started:Date.now(), last:Date.now(), best:0, fine:0,
   totalEarn:0, scamLoss:0, chargeLoss:0, blocks:0, warns:0,
 });
@@ -58,8 +59,8 @@ function genLot(){
   const byMoney = pool.filter(g => mktPrice(g) <= budget);
   if(byMoney.length && chance(0.62)) pool = byMoney;
   const g = pick(pool);
-  const urgent = chance(0.30);                    // срочная продажа — реально ниже рынка
-  const disc = urgent ? rnd(0.70, 0.89) : rnd(0.90, 1.18);
+  const urgent = chance(0.38);                    // срочная продажа — заметно ниже рынка
+  const disc = urgent ? rnd(0.58, 0.82) : rnd(0.84, 1.10);
   const price = Math.max(30, Math.round(mktPrice(g)*disc));
   return {
     id:'L'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
@@ -90,7 +91,7 @@ function scamMul(){ return Math.pow(0.8, upgLvl('guar')) * diffK().risk; }
 function chargeMul(){ return Math.pow(0.72, upgLvl('anti')) * diffK().risk; }
 function autoLvl(){ return upgLvl('auto'); }
 function lawMul(){ return Math.pow(0.75, upgLvl('law')); }
-function fee(){ return clamp(0.055 - upgLvl('prem')*0.01, 0.015, 0.055); }
+function fee(){ return clamp(0.042 - upgLvl('prem')*0.008, 0.012, 0.042); }
 function rateBonus(){ return upgLvl('rep')*0.05; }
 function bankMul(){ return 1 + upgLvl('bank')*0.004; }
 function effRate(){ return clamp(S.rate + rateBonus(), 1, 5); }
@@ -144,7 +145,7 @@ function listItem(stockId, price){
 function saleChance(my){
   const g = goodByName(my.g), mkt = mktPrice(g);
   const over = my.price / mkt;                      // насколько дороже рынка
-  let ch = 0.55 * Math.pow(0.35, Math.max(0, over-0.95)*7);
+  let ch = 0.55 * Math.pow(0.45, Math.max(0, over-1.06)*6);
   ch *= 0.6 + effRate()/5 * 0.6;                    // рейтинг
   ch *= 0.55 + g[6]*0.6;                            // ликвидность
   ch *= speedMul();
@@ -441,6 +442,7 @@ function step(dt){
   tickOrders(dt);
   tickInbox(dt);
   tickPending(dt);
+  tickCrime(dt);
   coolClaims(dt);
   if(S.turn >= 1e6) ach('million');
   S.best = Math.max(S.best, S.bal);
@@ -480,6 +482,7 @@ function render(){
   if(tab==='market')  v.innerHTML = viewMarket();
   if(tab==='stock')   v.innerHTML = viewStock();
   if(tab==='my')      v.innerHTML = viewMy();
+  if(tab==='crime')   v.innerHTML = viewCrime();
   if(tab==='deliv')   v.innerHTML = viewPending();
   if(tab==='inbox')   v.innerHTML = viewInbox();
   if(tab==='orders')  v.innerHTML = viewOrders();
@@ -755,6 +758,7 @@ function bindView(){
   });
   $$('[data-fraud]').forEach(b => b.onclick = e => { e.stopPropagation(); scamBuyer(b.dataset.q, b.dataset.fraud); });
   $$('[data-dispute]').forEach(b => b.onclick = e => { e.stopPropagation(); openDispute(b.dataset.dispute); });
+  $$('[data-crime]').forEach(b => b.onclick = () => doCrime(b.dataset.crime));
   $$('[data-pick]').forEach(b => b.onclick = e => { e.stopPropagation(); pickDelivery(b.dataset.pick); });
   $$('[data-tpl]').forEach(b => b.onclick = e => { e.stopPropagation(); sendTpl(b.dataset.tpl, b.dataset.tplt); });
   $$('[data-take]').forEach(b => b.onclick = e => { e.stopPropagation(); takeOrder(b.dataset.take); });
@@ -1408,6 +1412,12 @@ function openHaggle(lotId){
    НАСТРОЙКИ
    ============================================================ */
 const SETDEF = {sound:true, anim:'auto', diff:'normal', autosave:true, confirmBuy:true, theme:'dark'};
+const THEMES = [
+  {id:'light',    name:'Светлая', bg:'#f4f5f7', card:'#ffffff', ac:'#4384d0'},
+  {id:'dark',     name:'Тёмная',  bg:'#12141a', card:'#1a1d25', ac:'#6aa6e8'},
+  {id:'graphite', name:'Графит',  bg:'#141213', card:'#1e1b1d', ac:'#5b93d6'},
+  {id:'indigo',   name:'Индиго',  bg:'#0e1118', card:'#161b26', ac:'#7aa2ff'},
+];
 let SET = Object.assign({}, SETDEF);
 function setKey(){ return SAVE+'_set'; }
 function loadSet(){
@@ -1433,7 +1443,10 @@ function openSettings(){
     row('Звук', `<button class="btn small ${SET.sound?'ok':''}" id="set-sound">${SET.sound?'Включён':'Выключен'}</button>`, 'короткие сигналы о сделках и сообщениях') +
     row('Анимации', sel('set-anim',[['auto','Авто'],['full','Полные'],['lite','Облегчённые']], SET.anim), 'автоматически упрощает эффекты на слабых устройствах') +
     row('Сложность', sel('set-diff',[['easy','Лёгкая'],['normal','Обычная'],['hard','Жёсткая']], SET.diff), 'влияет на скам, возвраты и спреды') +
-    row('Тема', sel('set-theme',[['dark','Тёмная'],['light','Светлая']], SET.theme)) +
+    `<div class="setrow" style="display:block"><div><b>Тема оформления</b><div class="tiny">4 варианта, переключаются мгновенно</div></div>
+      <div class="themes">${THEMES.map(t=>`<div class="tcard ${SET.theme===t.id?'on':''}" data-theme-btn="${t.id}">
+        <div class="tprev"><i style="background:${t.bg}"></i><i style="background:${t.card}"></i><i style="background:${t.ac}"></i></div>${t.name}</div>`).join('')}
+      </div></div>` +
     row('Подтверждать покупку', `<button class="btn small ${SET.confirmBuy?'ok':''}" id="set-conf">${SET.confirmBuy?'Да':'Нет'}</button>`) +
     `<div class="setrow"><div><b>Сохранение</b><div class="tiny">экспорт прогресса в файл и обратно</div></div>
       <div class="row end">
@@ -1447,7 +1460,11 @@ function openSettings(){
   $('#set-conf').onclick  = e => { SET.confirmBuy = !SET.confirmBuy; e.target.textContent = SET.confirmBuy?'Да':'Нет'; e.target.classList.toggle('ok', SET.confirmBuy); saveSet(); };
   $('#set-anim').onchange = e => { SET.anim = e.target.value; applySet(); saveSet(); };
   $('#set-diff').onchange = e => { SET.diff = e.target.value; saveSet(); toast('Сложность: '+DIFF[SET.diff].name,'warn'); };
-  $('#set-theme').onchange= e => { SET.theme = e.target.value; applySet(); saveSet(); };
+  $$('[data-theme-btn]').forEach(el => el.onclick = () => {
+    SET.theme = el.dataset.themeBtn; applySet(); saveSet(); sound('click');
+    $$('[data-theme-btn]').forEach(x => x.classList.toggle('on', x.dataset.themeBtn===SET.theme));
+    toast('Тема: ' + (THEMES.find(t=>t.id===SET.theme)||{}).name, 'ok');
+  });
   $('#set-export').onclick = () => {
     const data = btoa(unescape(encodeURIComponent(JSON.stringify(S))));
     const a = document.createElement('a');
@@ -1683,6 +1700,7 @@ const ICONS = {
   inbox: '<path d="M21 11.5a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
   orders:'<path d="M8 3h8l1 3h3v16H4V6h3z"/><path d="M9 12h6M9 16h4"/>',
   upg:   '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  crime: '<path d="M4 8h16v3a6 6 0 0 1-6 6h-1l-1 3h-1l-1-3h-1a6 6 0 0 1-5-6z"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>',
   top:   '<path d="M6 9H3V4h5v3l4-3 4 3V4h5v5h-3"/><circle cx="12" cy="14" r="5"/><path d="M12 19v2M9 21h6"/>',
   acc:   '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>',
   curr:  '<circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.6-1.2-1.7-1.8-3-1.8-1.7 0-3 .9-3 2.3s1.3 2.1 3 2.4 3.1.7 3.1 2.4c0 1.5-1.4 2.4-3.1 2.4-1.4 0-2.5-.6-3.1-1.7"/><path d="M12 6v12"/>',
@@ -1811,4 +1829,127 @@ function viewPending(){
       <div class="row end"><button class="btn ok" data-pick="${d.id}">Выдать</button></div>
     </div>`;
   }).join('');
+}
+
+/* ============================================================
+   КРИМИНАЛЬНАЯ ВЕТКА: розыск, кражи, отмывание, крыша, модерация
+   ============================================================ */
+const CRIME = {
+  steal:   {name:'Угнать лот',        heat:14, dirty:0.85, cash:0,   desc:'Товар со скидкой 45–70 %, но он числится краденым'},
+  carding: {name:'Кардинг',           heat:26, dirty:1.00, cash:1,   desc:'Быстрые деньги, но розыск растёт сильно'},
+  launder: {name:'Отмыть деньги',     heat:8,  dirty:0,    cash:0,   desc:'Превращает грязные в чистые, теряешь 25 %'},
+  roof:    {name:'Платить за крышу',  heat:-30,dirty:0,    cash:0,   desc:'Снимает розыск и жалобы, действует 3 минуты'},
+  bribe:   {name:'Договориться с модератором', heat:-55, dirty:0, cash:0, desc:'Снимает блокировку и розыск, дорого'},
+};
+function heatMul(){ return DIFF[SET.diff].risk; }
+function roofActive(){ return (S.roofT||0) > 0; }
+/* ---- действие ---- */
+function doCrime(kind){
+  const c = CRIME[kind];
+  if(S.blocked > 0 && kind !== 'bribe'){ toast('Сначала снимите блокировку','bad'); return; }
+  const cost = crimeCost(kind);
+  if(cost > 0){
+    if(S.bal < cost){ toast('Недостаточно денег','bad'); sound('no'); return; }
+    S.bal -= cost;
+  }
+  if(kind === 'steal'){
+    const g = pick(GOODS.filter(x => x[2] >= 1) || GOODS);
+    const base = fairPrice(g);
+    const price = Math.round(base * rnd(0.30, 0.55));
+    S.stock.push({id:'S'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), g:g[0], buy:price, hot:false});
+    S.heat = clamp((S.heat||0) + c.heat*heatMul(), 0, 100);
+    addLog(`УГНАЛ «${g[0]}» за ${money(price)} (рынок ${money(Math.round(base))}) · розыск +${(c.heat*heatMul()).toFixed(0)}%`,'warn');
+    toast('Товар у вас, но он краденый','warn');
+  }
+  if(kind === 'carding'){
+    const sum = Math.round(rnd(0.06, 0.14) * Math.max(8000, S.turn||0) + rnd(1500, 6000));
+    S.dirty = (S.dirty||0) + sum;
+    S.heat = clamp((S.heat||0) + c.heat*heatMul(), 0, 100);
+    addLog(`КАРДИНГ: +${money(sum)} грязными · розыск +${(c.heat*heatMul()).toFixed(0)}%`,'warn');
+    toast('Грязные деньги получены','warn');
+  }
+  if(kind === 'launder'){
+    const dirty = S.dirty||0;
+    if(dirty < 500){ toast('Нечего отмывать','bad'); sound('no'); return; }
+    const clean = Math.round(dirty * 0.75);
+    S.bal += clean; S.dirty = 0;
+    S.heat = clamp((S.heat||0) + c.heat*heatMul(), 0, 100);
+    addLog(`ОТМЫЛ ${money(dirty)} → чистыми ${money(clean)} (потеряно 25 %)`,'ok');
+    toast('Отмыто: '+money(clean),'ok'); flyGain('+'+money(clean)); sound('money');
+  }
+  if(kind === 'roof'){
+    S.roofT = 180;
+    S.heat = clamp((S.heat||0) + c.heat, 0, 100);
+    S.claims = Math.max(0, (S.claims||0) - 2);
+    addLog(`КРЫША оплачена на 3 мин: розыск −30 %, жалобы частично сняты`,'ok');
+    toast('Крыша активна 3 минуты','ok');
+  }
+  if(kind === 'bribe'){
+    S.blocked = 0; S.heat = clamp((S.heat||0) + c.heat, 0, 100);
+    S.claims = Math.max(0, (S.claims||0) - 4);
+    addLog(`МОДЕРАТОР закрыл глаза: блокировка снята, розыск −55 %`,'ok');
+    toast('Блокировка снята','ok');
+  }
+  checkHeat(); save(); render();
+}
+function crimeCost(kind){
+  const turn = Math.max(10000, S.turn||0);
+  return {
+    steal:   Math.round(turn*0.02 + 300),
+    carding: Math.round(turn*0.03 + 800),
+    launder: 0,
+    roof:    Math.round(turn*0.06 + 1500),
+    bribe:   Math.round(turn*0.12 + 4000),
+  }[kind] || 0;
+}
+/* ---- проверка розыска ---- */
+function checkHeat(){
+  const h = S.heat||0;
+  if(h >= 100){
+    S.heat = 30;
+    const lost = Math.round(Math.min(S.bal, (S.turn||0)*0.08 + 5000));
+    S.bal = Math.max(0, S.bal - lost);
+    S.blocked = Math.max(S.blocked||0, 45);
+    addLog(`ОБЛАВА: розыск дошёл до 100 %. Изъято ${money(lost)}, аккаунт заморожен на 45 с`,'bad');
+    toast('Облава! Изъято '+money(lost),'bad'); sound('bad');
+  }
+}
+/* ---- тик: крыша и остывание розыска ---- */
+function tickCrime(dt){
+  if(S.roofT > 0) S.roofT = Math.max(0, S.roofT - dt);
+  const cool = (roofActive() ? 0.55 : 0.25) * (lawMul ? (2.2 - lawMul()) : 1);
+  if(S.heat > 0) S.heat = Math.max(0, S.heat - dt*cool);
+}
+/* ---- вкладка ---- */
+function viewCrime(){
+  const h = Math.round(S.heat||0), dirty = Math.round(S.dirty||0);
+  const hcls = h > 70 ? 'bad' : h > 40 ? 'warn' : 'ok';
+  return `
+  <div class="ord">
+    <div class="ohead"><b>Розыск</b><span class="${hcls}" style="font-weight:700">${h}%</span></div>
+    <div class="obar"><i style="width:${h}%;background:${h>70?'var(--red)':h>40?'var(--orange)':'var(--green)'}"></i></div>
+    <div class="orow">
+      <span>Грязных денег: <b class="${dirty>0?'warn':'mut'}">${money(dirty)}</b></span>
+      <span>Крыша: <b class="${roofActive()?'ok':'mut'}">${roofActive()?'активна '+Math.ceil(S.roofT)+' с':'нет'}</b></span>
+      <span>Блокировка: <b class="${S.blocked>0?'bad':'mut'}">${S.blocked>0?Math.ceil(S.blocked)+' с':'нет'}</b></span>
+    </div>
+    <div class="tiny" style="margin-top:6px">Розыск растёт от криминальных действий и остывает сам. На 100 % приходит облава: изымают часть денег и морозят аккаунт.</div>
+  </div>
+  ${Object.entries(CRIME).map(([k,c])=>{
+    const cost = crimeCost(k);
+    const dis = (cost > S.bal) || (k==='launder' && dirty < 500) || (S.blocked>0 && k!=='bribe');
+    return `<div class="upg ${dis?'maxed':''}">
+      <div class="uicon">${ico(k==='steal'?'item':k==='carding'?'crypto':k==='launder'?'curr':k==='roof'?'bundle':'top')}</div>
+      <div class="ubody">
+        <div class="uname">${c.name}</div>
+        <div class="udesc">${c.desc}</div>
+        <div class="ubar"><i style="width:${k==='steal'?70:k==='carding'?45:k==='launder'?100:k==='roof'?60:85}%"></i></div>
+      </div>
+      <button class="btn ${k==='roof'||k==='bribe'||k==='launder'?'ok':'bad'}" data-crime="${k}" ${dis?'disabled':''}>${cost>0?money(cost):'Бесплатно'}</button>
+    </div>`;
+  }).join('')}
+  <div class="prof">
+    <h3>Что это даёт</h3>
+    <div class="tiny">Угнанные лоты дешевле рынка в 2–3 раза — их выгодно перепродать. Грязные деньги нельзя тратить, пока не отмоете (теряете 25 %). Крыша и модератор — единственный способ быстро снизить розыск и снять блокировку.</div>
+  </div>`;
 }
