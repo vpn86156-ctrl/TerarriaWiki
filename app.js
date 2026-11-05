@@ -87,7 +87,8 @@ function upgLvl(id){ return S.upg[id]||0; }
 function upgCost(u){ return Math.round(u.base * Math.pow(u.mul, upgLvl(u.id))); }
 function slots(){ return 6 + upgLvl('slots')*4; }
 function speedMul(){ return 1 + upgLvl('ads')*0.18 + (typeof roleLvl==='function' ? roleLvl('seller')*0.16 : 0); }
-function scamMul(){ return Math.pow(0.8, upgLvl('guar')) * diffK().risk; }
+function guardMul(){ return (typeof roleLvl==='function' ? Math.pow(0.8, roleLvl('guard')) : 1); }
+function scamMul(){ return Math.pow(0.8, upgLvl('guar')) * guardMul() * diffK().risk; }
 function chargeMul(){ return Math.pow(0.72, upgLvl('anti')) * diffK().risk; }
 function autoLvl(){ return upgLvl('auto'); }
 function lawMul(){ return Math.pow(0.75, upgLvl('law')); }
@@ -444,6 +445,7 @@ function step(dt){
   tickPending(dt);
   tickCrime(dt);
   tickTeam(dt);
+  tickJobs(dt);
   coolClaims(dt);
   if(S.turn >= 1e6) ach('million');
   S.best = Math.max(S.best, S.bal);
@@ -760,6 +762,10 @@ function bindView(){
   });
   $$('[data-fraud]').forEach(b => b.onclick = e => { e.stopPropagation(); scamBuyer(b.dataset.q, b.dataset.fraud); });
   $$('[data-dispute]').forEach(b => b.onclick = e => { e.stopPropagation(); openDispute(b.dataset.dispute); });
+  $$('[data-scheme]').forEach(b => b.onclick = () => doScheme(b.dataset.scheme));
+  $$('[data-case]').forEach(b => b.onclick = () => resolveCase(b.dataset.case));
+  $$('[data-rival]').forEach(b => b.onclick = () => rivalAnswer(b.dataset.rival));
+  const tipBtn = $('#btn-tip'); if(tipBtn) tipBtn.onclick = () => buyTip();
   $$('[data-hire]').forEach(b => b.onclick = () => hireAgent(b.dataset.hire));
   $$('[data-up]').forEach(b => b.onclick = () => upAgent(b.dataset.up));
   $$('[data-bonus]').forEach(b => b.onclick = () => bonusAgent(b.dataset.bonus));
@@ -1269,7 +1275,8 @@ function replyInquiry(qid, answer){
   S.totalEarn += Math.max(0, net - m.buy);
   S.my.splice(S.my.indexOf(m),1);
   S.pending = S.pending || [];
-  S.pending.push({id:'D'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), g:m.g, buyer:q.buyer, price:soldPrice, net, left:40});
+  const logL = (typeof roleLvl==='function' ? roleLvl('logist') : 0);
+  S.pending.push({id:'D'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), g:m.g, buyer:q.buyer, price:soldPrice, net, left:40 + logL*10});
   addLog(text + ` · чистыми ${money(net)} · <b class="${net-m.buy>=0?'ok':'bad'}">${net-m.buy>=0?'+':''}${money(net-m.buy)}</b> · <span class="warn">нужно выдать товар</span>`, cls);
   toast('Оплачено — выдайте товар','warn');
   flyGain('+' + money(net)); flashStat('#s-bal'); sound('deal');
@@ -1803,7 +1810,8 @@ function pickDelivery(pid){
   extra.querySelectorAll('[data-dv]').forEach(b => b.onclick = () => {
     const way = b.dataset.dv;
     closeModals();
-    const fine = Math.round(d.price * DELIVERY[way].fine);
+    const logL = (typeof roleLvl==='function' ? roleLvl('logist') : 0);
+    const fine = Math.round(d.price * DELIVERY[way].fine * (way==='ok'?1:Math.max(0.4, 1 - logL*0.2)));
     if(fine>0){ S.bal = Math.max(0, S.bal - fine); }
     if(way === 'ok'){
       addLog(`Выдал «${d.g}» покупателю ${d.buyer} — сделка закрыта`,'ok');
@@ -1827,7 +1835,7 @@ function viewPending(){
     const g = goodByName(d.g);
     return `<div class="ord ${d.left<15?'urgent':''}" data-id="${d.id}">
       <div class="ohead"><b>${esc(d.g)}</b><span class="tmr">${Math.ceil(d.left)} с</span></div>
-      <div class="obar"><i style="width:${(d.left/40*100).toFixed(0)}%"></i></div>
+      <div class="obar"><i style="width:${Math.min(100,(d.left/(40+roleLvl('logist')*10)*100)).toFixed(0)}%"></i></div>
       <div class="orow">
         <span>Покупатель: <b>${esc(d.buyer)}</b></span>
         <span>Оплачено: <b class="ok">${money(d.price)}</b></span>
@@ -1924,7 +1932,9 @@ function checkHeat(){
 /* ---- тик: крыша и остывание розыска ---- */
 function tickCrime(dt){
   if(S.roofT > 0) S.roofT = Math.max(0, S.roofT - dt);
-  const cleaner = (typeof roleLvl==='function' ? roleLvl('cleaner') : 0);
+  const ins = (typeof roleLvl==='function' ? roleLvl('insider') : 0);
+  if(ins > 0 && S.claims > 0) S.claims = Math.max(0, S.claims - dt*ins*0.012);
+  const cleaner = (typeof roleLvl==='function' ? roleLvl('cleaner') : 0) + ins*0.5;
   const cool = ((roofActive() ? 0.55 : 0.25) + cleaner*0.22) * (lawMul ? (2.2 - lawMul()) : 1);
   if(S.heat > 0) S.heat = Math.max(0, S.heat - dt*cool);
 }
@@ -1942,6 +1952,54 @@ function viewCrime(){
       <span>Блокировка: <b class="${S.blocked>0?'bad':'mut'}">${S.blocked>0?Math.ceil(S.blocked)+' с':'нет'}</b></span>
     </div>
     <div class="tiny" style="margin-top:6px">Розыск растёт от криминальных действий и остывает сам. На 100 % приходит облава: изымают часть денег и морозят аккаунт.</div>
+  </div>
+  ${S.case_ ? `<div class="ord urgent">
+    <div class="ohead"><b>🚨 Заведено дело</b><span class="tmr">розыск ${Math.round(S.heat)}%</span></div>
+    <div class="orow" style="margin-top:6px">
+      <span>Штраф: <b class="warn">${money(S.case_.fine)}</b></span>
+      <span>Откуп: <b class="bad">${money(S.case_.bribe)}</b></span>
+      <span>Отсидка: <b class="bad">120 с и −25 % баланса</b></span>
+    </div>
+    <div class="row">
+      <button class="btn ok" data-case="pay">Заплатить штраф</button>
+      <button class="btn bad" data-case="bribe">Откупиться</button>
+      <button class="btn ghost" data-case="jail">Отсидеть</button>
+    </div>
+    <div class="tiny" style="margin-top:6px">Штраф снижает розыск на 45 %, откуп — на 75 %. Отсидка обнуляет розыск и жалобы, но морозит аккаунт.</div>
+  </div>` : ''}
+  ${S.rival ? `<div class="ord urgent">
+    <div class="ohead"><b>⚔️ ${esc(S.rival.name)} требует долю</b><span class="tmr">${money(S.rival.cut)}</span></div>
+    <div class="tiny" style="margin:6px 0">Заплатишь — потеряешь деньги, но сохранишь рейтинг. Ответишь — розыск +20 % и жалоба, но можно забрать его точку. Промолчишь — упадёт рейтинг.</div>
+    <div class="row">
+      <button class="btn ok" data-rival="pay">Заплатить</button>
+      <button class="btn bad" data-rival="fight">Ответить</button>
+      <button class="btn ghost" data-rival="ignore">Игнорировать</button>
+    </div>
+  </div>` : ''}
+  ${(S.jobs||[]).length ? `<div class="ord">
+    <div class="ohead"><b>Активные схемы</b></div>
+    ${(S.jobs||[]).map(j=>`<div class="orow" style="margin-top:6px">
+      <span>${j.kind==='import'?'Серый импорт':'Дроп-ферма'}</span>
+      <span class="tmr">${Math.ceil(j.left)} с</span>
+      <span>розыск +${Math.round(j.heat*heatMul())}% по завершении</span>
+    </div>`).join('')}
+  </div>` : ''}
+  <div class="ord">
+    <div class="ohead"><b>Схемы и наводки</b></div>
+    <div class="orow" style="margin-top:8px">
+      ${Object.entries(SCHEMES).map(([k,sc])=>{
+        const cost = schemeCost(k);
+        return `<div class="upg" style="flex:1;min-width:210px">
+          <div class="uicon">${ico(k==='import'?'item':k==='farm'?'crypto':k==='rollback'?'curr':'crime')}</div>
+          <div class="ubody"><div class="uname">${sc.name}</div><div class="udesc">${sc.desc}</div>
+          <div class="tiny">розыск +${Math.round(sc.heat*heatMul())}%</div></div>
+          <button class="btn small bad" data-scheme="${k}" ${S.bal<cost||S.blocked>0?'disabled':''}>${money(cost)}</button>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="row end" style="margin-top:8px">
+      <button class="btn small ghost" id="btn-tip">Купить наводку (${money(Math.max(1500,(S.turn||0)*0.012))})</button>
+    </div>
   </div>
   ${Object.entries(CRIME).map(([k,c])=>{
     const cost = crimeCost(k);
@@ -1970,6 +2028,10 @@ const ROLES = {
   seller: {name:'Продажник',   ic:'boost',  base:8000,  sal:0.009, desc:'+16% к скорости продажи твоих лотов за уровень'},
   negot:  {name:'Переговорщик',ic:'inbox',  base:11000, sal:0.012, desc:'+12% к шансу, что покупатель согласится на цену'},
   cleaner:{name:'Чистильщик',  ic:'crime',  base:12000, sal:0.014, desc:'снижает розыск, гасит последствия криминала'},
+  guard:  {name:'Охранник',    ic:'bundle', base:10000, sal:0.011, desc:'-30% шанс кидка агентов и -20% риск скама при покупке'},
+  analyst:{name:'Аналитик',    ic:'crypto', base:13000, sal:0.013, desc:'подсвечивает выгодные лоты и даёт прогноз цены'},
+  insider:{name:'Инсайдер',    ic:'server', base:15000, sal:0.016, desc:'пассивно гасит жалобы и замедляет набор розыска'},
+  logist: {name:'Логист',      ic:'deliv',  base:8500,  sal:0.009, desc:'+10 с на выдачу товара и -40% риск ошибки при выдаче'},
 };
 const AGENT_NAMES = ['Сергей','Артём','Дина','Марк','Лиза','Ким','Илья','Рита','Тимур','Вера','Олег','Соня','Даня','Инга','Павел','Ника'];
 function teamSize(){ return (S.team||[]).filter(a=>!a.gone).length; }
@@ -2035,7 +2097,7 @@ function tickTeam(dt){
   // агент с низкой лояльностью может кинуть
   for(const a of S.team){
     if(a.gone) continue;
-    if(a.loy < 25 && chance(0.16 * (1 + (SET.diff==='hard'?0.4:0)))){
+    if(a.loy < 25 && chance(0.16 * (1 + (SET.diff==='hard'?0.4:0)) * (typeof guardMul==='function'?guardMul():1))){
       const stealMoney = Math.round(Math.min(S.bal, S.bal*rnd(0.10,0.30)));
       let stoleItem = null;
       if(S.stock.length && chance(0.55)){
@@ -2113,4 +2175,166 @@ function viewTeam(){
     </div>
     <div class="tiny">Агенты одной роли складываются: два закупщика 1-го уровня работают как один 2-го.</div>
   </div>`;
+}
+
+/* ============================================================
+   СХЕМЫ, НАВОДКИ, КОНКУРЕНТЫ, ПОЛИЦИЯ
+   ============================================================ */
+const SCHEMES = {
+  import:  {name:'Серый импорт',  cost:0.05, heat:20, time:26, desc:'партия товара по 40 % рынка через 26 с'},
+  farm:    {name:'Дроп-ферма',    cost:0.08, heat:32, time:20, desc:'120 с пассивного дохода грязными'},
+  rollback:{name:'Откат',         cost:0.09, heat:6,  time:0,  desc:'жалобы и блокировка снимаются, розыск почти не растёт'},
+  frame:   {name:'Подставить конкурента', cost:0.07, heat:18, time:0, desc:'розыск уходит на конкурента, но он может ответить'},
+};
+function schemeCost(k){ return Math.round(Math.max(6000, (S.turn||0)*SCHEMES[k].cost) + 2000); }
+function doScheme(k){
+  const c = SCHEMES[k], cost = schemeCost(k);
+  if(S.bal < cost){ toast('Не хватает денег','bad'); sound('no'); return; }
+  S.bal -= cost;
+  S.jobs = S.jobs || [];
+  if(k === 'import'){
+    S.jobs.push({kind:'import', left:c.time, heat:c.heat});
+    addLog(`СХЕМА «Серый импорт» запущена: партия придёт через ${c.time} с`,'warn');
+  }
+  if(k === 'farm'){
+    S.jobs.push({kind:'farm', left:120, heat:c.heat, pay:Math.round(cost*rnd(0.28,0.46))});
+    addLog(`СХЕМА «Дроп-ферма»: 120 с пассивного дохода`,'warn');
+  }
+  if(k === 'rollback'){
+    S.claims = Math.max(0, (S.claims||0) - 5); S.blocked = 0;
+    S.heat = clamp((S.heat||0) + c.heat*heatMul(), 0, 100);
+    addLog(`ОТКАТ: жалобы сняты, блокировка убрана за ${money(cost)}`,'ok');
+  }
+  if(k === 'frame'){
+    S.heat = clamp((S.heat||0) - 22, 0, 100);
+    S.heat = clamp(S.heat + c.heat*heatMul()*0.35, 0, 100);
+    addLog(`ПОДСТАВА: розыск переведён на конкурента (−22 %), но есть риск ответа`,'warn');
+    if(chance(0.35)){
+      S.claims += 1.5; addLog(`Конкурент ответил: жалоба и −рейтинг`,'bad');
+    }
+  }
+  toast('Схема запущена','warn'); sound('click'); checkHeat(); save(); render();
+}
+/* ---- наводка ---- */
+const TIPS = [
+  'На рынке сейчас лот с дисконтом {d}% — успевай забрать',
+  'Продавец {s} завтра уйдёт в офлайн, лоты подешевеют',
+  'Площадка готовит проверку: {n} жалоб уже на рассмотрении',
+  'Категория «{c}» вырастет в цене в ближайшую минуту',
+  'Слышал, {s} продаёт краденое — можно перехватить дешевле',
+];
+function buyTip(){
+  const cost = Math.round(Math.max(1500, (S.turn||0)*0.012));
+  if(S.bal < cost){ toast('Не хватает денег','bad'); sound('no'); return; }
+  S.bal -= cost;
+  const best = [...M.lots].sort((a,b)=>a.disc-b.disc)[0];
+  const t = pick(TIPS)
+    .replace('{d}', best ? Math.round((1-best.disc)*100) : '30')
+    .replace('{s}', best ? best.seller : 'Seller_Pro')
+    .replace('{n}', Math.round(S.claims||0))
+    .replace('{c}', pick(Object.values(CATS)).name);
+  addLog(`НАВОДКА (${money(cost)}): ${t}`,'warn');
+  toast(t,'warn'); sound('click'); save(); render();
+}
+/* ---- полиция ---- */
+function policeCheck(dt){
+  S.polT = (S.polT||0) + dt;
+  if(S.polT < 12) return;
+  S.polT = 0;
+  const h = S.heat||0;
+  if(h < 78 || S.blocked > 0) return;
+  if(!chance((h-78)/100)) return;
+  S.case_ = {fine: Math.round(Math.max(12000, (S.turn||0)*0.10)), bribe: Math.round(Math.max(25000, (S.turn||0)*0.20))};
+  addLog(`ЗАВЕДЕНО ДЕЛО: розыск ${Math.round(h)} %. Штраф ${money(S.case_.fine)} или откуп ${money(S.case_.bribe)}`,'bad');
+  toast('Заведено дело! Открой «Криминал»','bad'); sound('bad');
+}
+function resolveCase(way){
+  if(!S.case_) return;
+  if(way === 'pay'){
+    if(S.bal < S.case_.fine){ S.bal = 0; S.blocked = 150; }
+    else S.bal -= S.case_.fine;
+    S.heat = clamp((S.heat||0)*0.55, 0, 100);
+    addLog(`Дело закрыто штрафом ${money(S.case_.fine)}, розыск снижен`,'warn');
+  }
+  if(way === 'bribe'){
+    if(S.bal < S.case_.bribe){ toast('Не хватает на откуп','bad'); sound('no'); return; }
+    S.bal -= S.case_.bribe; S.heat = clamp((S.heat||0)*0.25, 0, 100);
+    addLog(`Дело развалилось: откуп ${money(S.case_.bribe)}`,'ok');
+  }
+  if(way === 'jail'){
+    S.blocked = Math.max(S.blocked||0, 120);
+    S.bal = Math.round(S.bal*0.75);
+    S.heat = 0; S.claims = 0;
+    addLog(`ОТСИДКА: аккаунт заморожен на 120 с, изъято 25 % баланса`,'bad');
+  }
+  S.case_ = null; save(); render();
+}
+/* ---- конкуренты ---- */
+function rivalEvent(dt){
+  S.rivT = (S.rivT||0) + dt;
+  if(S.rivT < 55) return;
+  S.rivT = 0;
+  if(S.blocked > 0 || (S.turn||0) < 60000) return;
+  if(!chance(0.30)) return;
+  const cut = Math.round(Math.max(3000, (S.turn||0)*0.05));
+  S.rival = {name: pick(['GreyShop','Тень_Трейд','Оптовик_88','DarkMarket','Быстрый_Лот']), cut};
+  addLog(`КОНКУРЕНТ ${S.rival.name} требует долю ${money(cut)}. Ответь во вкладке «Криминал»`,'bad');
+  toast('Конкуренты давят: '+S.rival.name,'bad'); sound('bad');
+}
+function rivalAnswer(way){
+  if(!S.rival) return;
+  const r = S.rival;
+  if(way === 'pay'){
+    if(S.bal < r.cut){ toast('Не хватает денег','bad'); sound('no'); return; }
+    S.bal -= r.cut;
+    addLog(`Заплатил ${money(r.cut)} конкуренту ${r.name} — спокойствие на время`,'warn');
+  }
+  if(way === 'fight'){
+    S.heat = clamp((S.heat||0) + 20*heatMul(), 0, 100);
+    S.claims += 1.2;
+    if(chance(0.5)){ S.bal += Math.round(r.cut*1.6); addLog(`Разобрался с ${r.name}: забрал его точку, +${money(Math.round(r.cut*1.6))}`,'ok'); }
+    else { S.bal = Math.max(0, S.bal - r.cut); addLog(`${r.name} оказался сильнее: потерял ${money(r.cut)}`,'bad'); }
+  }
+  if(way === 'ignore'){
+    S.rate = clamp((S.rate||5) - 0.25, 1, 5);
+    S.claims += 0.8;
+    addLog(`Проигнорировал ${r.name}: рейтинг −0.25 и жалоба`,'bad');
+  }
+  S.rival = null; save(); render();
+}
+/* ---- тик схем и событий ---- */
+function tickJobs(dt){
+  S.jobs = S.jobs || [];
+  for(let i=S.jobs.length-1;i>=0;i--){
+    const j = S.jobs[i];
+    if(j.kind === 'farm'){
+      j.payT = (j.payT||0) + dt;
+      if(j.payT >= 18){
+        j.payT = 0;
+        const add = Math.round(j.pay/7);
+        S.dirty = (S.dirty||0) + add;
+        addLog(`Дроп-ферма: +${money(add)} грязными`,'warn');
+      }
+    }
+    j.left -= dt;
+    if(j.left <= 0){
+      S.jobs.splice(i,1);
+      if(j.kind === 'import'){
+        const n = rndi(2,4);
+        for(let k=0;k<n;k++){
+          if(stockFree() <= 0) break;
+          const g = pick(GOODS);
+          const price = Math.round(mktPrice(g)*rnd(0.36,0.48));
+          S.stock.push({id:'SI'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), g:g[0], buy:price});
+        }
+        addLog(`СЕРАЯ ПАРТИЯ пришла: ${n} позиций по 36–48 % рынка`,'ok');
+        toast('Партия на складе','ok'); sound('money');
+      } else {
+        addLog(`Дроп-ферма завершила работу`,'warn');
+      }
+      S.heat = clamp((S.heat||0) + j.heat*heatMul(), 0, 100);
+      checkHeat();
+    }
+  }
+  policeCheck(dt); rivalEvent(dt);
 }
