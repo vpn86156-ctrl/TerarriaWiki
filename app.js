@@ -1868,19 +1868,31 @@ function doCrime(kind){
     S.bal -= cost;
   }
   if(kind === 'steal'){
-    const g = pick(GOODS.filter(x => x[2] >= 1) || GOODS);
+    if(stockFree() <= 0){ toast('На складе нет места','bad'); sound('no'); return; }
+    const budget = Math.max(2000, S.bal*0.55);
+    let pool = GOODS.filter(x => x[2] >= 1 && mktPrice(x) <= budget);
+    if(pool.length < 3) pool = GOODS.filter(x => mktPrice(x) <= budget);
+    if(!pool.length) pool = [GOODS[0]];
+    const g = pick(pool);
     const base = fairPrice(g);
-    const price = Math.round(base * rnd(0.30, 0.55));
-    S.stock.push({id:'S'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), g:g[0], buy:price, hot:false});
+    const price = Math.round(base * rnd(0.48, 0.68));   // реально платишь за товар
+    if(S.bal < price){ toast('Недостаточно денег на выкуп','bad'); sound('no'); return; }
+    S.bal -= price;
     S.heat = clamp((S.heat||0) + c.heat*heatMul(), 0, 100);
-    addLog(`УГНАЛ «${g[0]}» за ${money(price)} (рынок ${money(Math.round(base))}) · розыск +${(c.heat*heatMul()).toFixed(0)}%`,'warn');
-    toast('Товар у вас, но он краденый','warn');
+    if(chance(0.15)){                                    // риск: товар изымают при передаче
+      addLog(`ОБЛОМ: «${g[0]}» изъят при передаче, ${money(price)} пропало`,'bad');
+      toast('Товар изъят при передаче','bad'); sound('bad');
+    } else {
+      S.stock.push({id:'S'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), g:g[0], buy:price, stolen:true});
+      addLog(`УГНАЛ «${g[0]}» за ${money(price)} (рынок ${money(Math.round(base))}, −${Math.round((1-price/base)*100)}%) · розыск +${(c.heat*heatMul()).toFixed(0)}%`,'warn');
+      toast('Товар у вас, но он краденый','warn');
+    }
   }
   if(kind === 'carding'){
-    const sum = Math.round(rnd(0.06, 0.14) * Math.max(8000, S.turn||0) + rnd(1500, 6000));
+    const sum = Math.round(cost * rnd(1.2, 2.0));      // доход кратен затратам на операцию
     S.dirty = (S.dirty||0) + sum;
     S.heat = clamp((S.heat||0) + c.heat*heatMul(), 0, 100);
-    addLog(`КАРДИНГ: +${money(sum)} грязными · розыск +${(c.heat*heatMul()).toFixed(0)}%`,'warn');
+    addLog(`КАРДИНГ: вложил ${money(cost)}, получил ${money(sum)} грязными · розыск +${(c.heat*heatMul()).toFixed(0)}%`,'warn');
     toast('Грязные деньги получены','warn');
   }
   if(kind === 'launder'){
@@ -1910,7 +1922,7 @@ function doCrime(kind){
 function crimeCost(kind){
   const turn = Math.max(10000, S.turn||0);
   return {
-    steal:   Math.round(turn*0.02 + 300),
+    steal:   Math.round(turn*0.008 + 200),
     carding: Math.round(turn*0.03 + 800),
     launder: 0,
     roof:    Math.round(turn*0.06 + 1500),
@@ -1935,7 +1947,7 @@ function tickCrime(dt){
   const ins = (typeof roleLvl==='function' ? roleLvl('insider') : 0);
   if(ins > 0 && S.claims > 0) S.claims = Math.max(0, S.claims - dt*ins*0.012);
   const cleaner = (typeof roleLvl==='function' ? roleLvl('cleaner') : 0) + ins*0.5;
-  const cool = ((roofActive() ? 0.55 : 0.25) + cleaner*0.22) * (lawMul ? (2.2 - lawMul()) : 1);
+  const cool = ((roofActive() ? 0.35 : 0.12) + cleaner*0.22) * (lawMul ? (2.2 - lawMul()) : 1);
   if(S.heat > 0) S.heat = Math.max(0, S.heat - dt*cool);
 }
 /* ---- вкладка ---- */
@@ -2004,14 +2016,16 @@ function viewCrime(){
   ${Object.entries(CRIME).map(([k,c])=>{
     const cost = crimeCost(k);
     const dis = (cost > S.bal) || (k==='launder' && dirty < 500) || (S.blocked>0 && k!=='bribe');
+    const label = k==='steal' ? 'от 52% рынка' : (cost>0 ? money(cost) : 'Бесплатно');
     return `<div class="upg ${dis?'maxed':''}">
       <div class="uicon">${ico(k==='steal'?'item':k==='carding'?'crypto':k==='launder'?'curr':k==='roof'?'bundle':'top')}</div>
       <div class="ubody">
         <div class="uname">${c.name}</div>
         <div class="udesc">${c.desc}</div>
+        <div class="tiny">${k==='steal' ? 'взнос '+money(cost)+' + цена товара, 15% шанс изъятия' : 'розыск '+(c.heat>0?'+':'')+Math.round(c.heat*heatMul())+'%'}</div>
         <div class="ubar"><i style="width:${k==='steal'?70:k==='carding'?45:k==='launder'?100:k==='roof'?60:85}%"></i></div>
       </div>
-      <button class="btn ${k==='roof'||k==='bribe'||k==='launder'?'ok':'bad'}" data-crime="${k}" ${dis?'disabled':''}>${cost>0?money(cost):'Бесплатно'}</button>
+      <button class="btn ${k==='roof'||k==='bribe'||k==='launder'?'ok':'bad'}" data-crime="${k}" ${dis?'disabled':''}>${label}</button>
     </div>`;
   }).join('')}
   <div class="prof">
@@ -2181,7 +2195,7 @@ function viewTeam(){
    СХЕМЫ, НАВОДКИ, КОНКУРЕНТЫ, ПОЛИЦИЯ
    ============================================================ */
 const SCHEMES = {
-  import:  {name:'Серый импорт',  cost:0.05, heat:20, time:26, desc:'партия товара по 40 % рынка через 26 с'},
+  import:  {name:'Серый импорт',  cost:0.05, heat:24, time:26, desc:'партия товара по 36–48 % рынка через 26 с'},
   farm:    {name:'Дроп-ферма',    cost:0.08, heat:32, time:20, desc:'120 с пассивного дохода грязными'},
   rollback:{name:'Откат',         cost:0.09, heat:6,  time:0,  desc:'жалобы и блокировка снимаются, розыск почти не растёт'},
   frame:   {name:'Подставить конкурента', cost:0.07, heat:18, time:0, desc:'розыск уходит на конкурента, но он может ответить'},
@@ -2190,14 +2204,16 @@ function schemeCost(k){ return Math.round(Math.max(6000, (S.turn||0)*SCHEMES[k].
 function doScheme(k){
   const c = SCHEMES[k], cost = schemeCost(k);
   if(S.bal < cost){ toast('Не хватает денег','bad'); sound('no'); return; }
+  if(k === 'import' && stockFree() < 1){ toast('На складе нет места под партию','bad'); sound('no'); return; }
   S.bal -= cost;
   S.jobs = S.jobs || [];
   if(k === 'import'){
-    S.jobs.push({kind:'import', left:c.time, heat:c.heat});
+    const total = Math.round(cost*rnd(1.8,2.6));
+    S.jobs.push({kind:'import', left:c.time, heat:c.heat, total, paid:cost});
     addLog(`СХЕМА «Серый импорт» запущена: партия придёт через ${c.time} с`,'warn');
   }
   if(k === 'farm'){
-    S.jobs.push({kind:'farm', left:120, heat:c.heat, pay:Math.round(cost*rnd(0.28,0.46))});
+    S.jobs.push({kind:'farm', left:120, heat:c.heat, pay:Math.round(cost*rnd(1.3,2.0))});
     addLog(`СХЕМА «Дроп-ферма»: 120 с пассивного дохода`,'warn');
   }
   if(k === 'rollback'){
@@ -2320,14 +2336,30 @@ function tickJobs(dt){
     if(j.left <= 0){
       S.jobs.splice(i,1);
       if(j.kind === 'import'){
-        const n = rndi(2,4);
+        // подбираем товар так, чтобы партия влезала в свободные слоты и стоила обещанных денег
+        const budget = j.total || 0;
+        const slots = Math.max(1, stockFree());
+        const target = budget / slots;                       // желаемая цена одной единицы
+        let pool = GOODS.filter(x => mktPrice(x) <= budget);
+        if(!pool.length) pool = GOODS;
+        // ближайший по цене к целевой, чтобы не размениваться на копеечный товар
+        let g = pool[0], bestDiff = Infinity;
+        for(const x of pool){
+          const d = Math.abs(mktPrice(x) - target);
+          if(d < bestDiff){ bestDiff = d; g = x; }
+        }
+        const unit = Math.max(1, mktPrice(g));
+        let n = Math.floor(budget/unit);
+        n = clamp(n, 1, slots);
+        while(n > 1 && n*unit > budget*1.15) n--;            // не раздаём больше оплаченного
+        const price = Math.round(unit*rnd(0.36,0.48));      // скидка к рынку
+        let got = 0;
         for(let k=0;k<n;k++){
           if(stockFree() <= 0) break;
-          const g = pick(GOODS);
-          const price = Math.round(mktPrice(g)*rnd(0.36,0.48));
-          S.stock.push({id:'SI'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), g:g[0], buy:price});
+          S.stock.push({id:'SI'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), g:g[0], buy:price, stolen:true});
+          got++;
         }
-        addLog(`СЕРАЯ ПАРТИЯ пришла: ${n} позиций по 36–48 % рынка`,'ok');
+        addLog(`СЕРАЯ ПАРТИЯ: ${got}× «${g[0]}» по ${money(price)} (рынок ${money(unit)}, итого ${money(got*unit)} рынка за ${money(j.paid)})`,'ok');
         toast('Партия на складе','ok'); sound('money');
       } else {
         addLog(`Дроп-ферма завершила работу`,'warn');
