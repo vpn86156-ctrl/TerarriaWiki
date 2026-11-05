@@ -16,7 +16,7 @@ const SAVE = 'playerok_tycoon_v1';
 const DEF = () => ({
   nick:'Продавец', bal:5000, turn:0, deals:0, rate:5, votes:0, claims:0,
   blocked:0, stock:[], my:[], orders:[], inbox:[], pending:[], upg:{}, news:[], day:1, dayTurn:0,
-  heat:0, dirty:0, roofT:0,
+  heat:0, dirty:0, roofT:0, team:[], payT:0,
   achievements:[], log:[], started:Date.now(), last:Date.now(), best:0, fine:0,
   totalEarn:0, scamLoss:0, chargeLoss:0, blocks:0, warns:0,
 });
@@ -86,7 +86,7 @@ function goodByName(n){ return GOODS.find(g => g[0]===n); }
 function upgLvl(id){ return S.upg[id]||0; }
 function upgCost(u){ return Math.round(u.base * Math.pow(u.mul, upgLvl(u.id))); }
 function slots(){ return 6 + upgLvl('slots')*4; }
-function speedMul(){ return 1 + upgLvl('ads')*0.18; }
+function speedMul(){ return 1 + upgLvl('ads')*0.18 + (typeof roleLvl==='function' ? roleLvl('seller')*0.16 : 0); }
 function scamMul(){ return Math.pow(0.8, upgLvl('guar')) * diffK().risk; }
 function chargeMul(){ return Math.pow(0.72, upgLvl('anti')) * diffK().risk; }
 function autoLvl(){ return upgLvl('auto'); }
@@ -443,6 +443,7 @@ function step(dt){
   tickInbox(dt);
   tickPending(dt);
   tickCrime(dt);
+  tickTeam(dt);
   coolClaims(dt);
   if(S.turn >= 1e6) ach('million');
   S.best = Math.max(S.best, S.bal);
@@ -482,6 +483,7 @@ function render(){
   if(tab==='market')  v.innerHTML = viewMarket();
   if(tab==='stock')   v.innerHTML = viewStock();
   if(tab==='my')      v.innerHTML = viewMy();
+  if(tab==='team')    v.innerHTML = viewTeam();
   if(tab==='crime')   v.innerHTML = viewCrime();
   if(tab==='deliv')   v.innerHTML = viewPending();
   if(tab==='inbox')   v.innerHTML = viewInbox();
@@ -758,6 +760,10 @@ function bindView(){
   });
   $$('[data-fraud]').forEach(b => b.onclick = e => { e.stopPropagation(); scamBuyer(b.dataset.q, b.dataset.fraud); });
   $$('[data-dispute]').forEach(b => b.onclick = e => { e.stopPropagation(); openDispute(b.dataset.dispute); });
+  $$('[data-hire]').forEach(b => b.onclick = () => hireAgent(b.dataset.hire));
+  $$('[data-up]').forEach(b => b.onclick = () => upAgent(b.dataset.up));
+  $$('[data-bonus]').forEach(b => b.onclick = () => bonusAgent(b.dataset.bonus));
+  $$('[data-fire]').forEach(b => b.onclick = () => fireAgent(b.dataset.fire));
   $$('[data-crime]').forEach(b => b.onclick = () => doCrime(b.dataset.crime));
   $$('[data-pick]').forEach(b => b.onclick = e => { e.stopPropagation(); pickDelivery(b.dataset.pick); });
   $$('[data-tpl]').forEach(b => b.onclick = e => { e.stopPropagation(); sendTpl(b.dataset.tpl, b.dataset.tplt); });
@@ -1121,7 +1127,7 @@ boot = function(){
    ============================================================ */
 const NEG_UPG = {id:'neg', name:'Переговорщик', icon:'🤝', max:5, base:5500, mul:2.4, desc:'+8% к шансу, что продавец уступит'};
 if(!UPGRADES.find(u => u.id==='neg')) UPGRADES.push(NEG_UPG);
-function negBonus(){ return upgLvl('neg')*0.08; }
+function negBonus(){ return upgLvl('neg')*0.08 + (typeof roleLvl==='function' ? roleLvl('negot')*0.12 : 0); }
 
 /* решимость продавца: чем дольше лот висит и хуже ликвидность — тем сговорчивее */
 function sellerMood(l){
@@ -1701,6 +1707,7 @@ const ICONS = {
   orders:'<path d="M8 3h8l1 3h3v16H4V6h3z"/><path d="M9 12h6M9 16h4"/>',
   upg:   '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
   crime: '<path d="M4 8h16v3a6 6 0 0 1-6 6h-1l-1 3h-1l-1-3h-1a6 6 0 0 1-5-6z"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>',
+  team:  '<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.4 2.9-5.2 6.5-5.2s6.5 1.8 6.5 5.2"/><path d="M16 6.2a3 3 0 0 1 0 5.9M17.5 14.9c2.1.6 3.6 2.1 3.6 4.3"/>',
   top:   '<path d="M6 9H3V4h5v3l4-3 4 3V4h5v5h-3"/><circle cx="12" cy="14" r="5"/><path d="M12 19v2M9 21h6"/>',
   acc:   '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>',
   curr:  '<circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.6-1.2-1.7-1.8-3-1.8-1.7 0-3 .9-3 2.3s1.3 2.1 3 2.4 3.1.7 3.1 2.4c0 1.5-1.4 2.4-3.1 2.4-1.4 0-2.5-.6-3.1-1.7"/><path d="M12 6v12"/>',
@@ -1917,7 +1924,8 @@ function checkHeat(){
 /* ---- тик: крыша и остывание розыска ---- */
 function tickCrime(dt){
   if(S.roofT > 0) S.roofT = Math.max(0, S.roofT - dt);
-  const cool = (roofActive() ? 0.55 : 0.25) * (lawMul ? (2.2 - lawMul()) : 1);
+  const cleaner = (typeof roleLvl==='function' ? roleLvl('cleaner') : 0);
+  const cool = ((roofActive() ? 0.55 : 0.25) + cleaner*0.22) * (lawMul ? (2.2 - lawMul()) : 1);
   if(S.heat > 0) S.heat = Math.max(0, S.heat - dt*cool);
 }
 /* ---- вкладка ---- */
@@ -1951,5 +1959,158 @@ function viewCrime(){
   <div class="prof">
     <h3>Что это даёт</h3>
     <div class="tiny">Угнанные лоты дешевле рынка в 2–3 раза — их выгодно перепродать. Грязные деньги нельзя тратить, пока не отмоете (теряете 25 %). Крыша и модератор — единственный способ быстро снизить розыск и снять блокировку.</div>
+  </div>`;
+}
+
+/* ============================================================
+   КОМАНДА И НАЙМ: агенты работают на тебя, но могут кинуть
+   ============================================================ */
+const ROLES = {
+  buyer:  {name:'Закупщик',    ic:'item',   base:9000,  sal:0.010, desc:'сам находит и покупает выгодные лоты в твой склад'},
+  seller: {name:'Продажник',   ic:'boost',  base:8000,  sal:0.009, desc:'+16% к скорости продажи твоих лотов за уровень'},
+  negot:  {name:'Переговорщик',ic:'inbox',  base:11000, sal:0.012, desc:'+12% к шансу, что покупатель согласится на цену'},
+  cleaner:{name:'Чистильщик',  ic:'crime',  base:12000, sal:0.014, desc:'снижает розыск, гасит последствия криминала'},
+};
+const AGENT_NAMES = ['Сергей','Артём','Дина','Марк','Лиза','Ким','Илья','Рита','Тимур','Вера','Олег','Соня','Даня','Инга','Павел','Ника'];
+function teamSize(){ return (S.team||[]).filter(a=>!a.gone).length; }
+function roleLvl(role){ return (S.team||[]).filter(a=>a.role===role && !a.gone).reduce((s,a)=>s+a.lvl,0); }
+function agentPay(a){ return Math.round(ROLES[a.role].base * Math.pow(1.55, a.lvl-1) * ROLES[a.role].sal * 6); }
+function hireCost(role, lvl){ return Math.round(ROLES[role].base * Math.pow(1.7, lvl-1)); }
+function teamSalary(){ return (S.team||[]).filter(a=>!a.gone).reduce((s,a)=>s+agentPay(a),0); }
+/* найм */
+function hireAgent(role){
+  const lvl = 1;
+  const cost = hireCost(role, lvl);
+  if(S.bal < cost){ toast('Не хватает денег на найм','bad'); sound('no'); return; }
+  S.bal -= cost;
+  const used = new Set((S.team||[]).map(a=>a.name));
+  const name = AGENT_NAMES.find(n=>!used.has(n)) || pick(AGENT_NAMES);
+  (S.team ||= []).push({id:'A'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), role, lvl, name, loy:70, gone:false});
+  addLog(`НАЙМ: ${name} — ${ROLES[role].name} (ур.${lvl}) за ${money(cost)}`,'ok');
+  toast('В команде: '+name,'ok'); sound('money'); save(); render();
+}
+/* повысить / премия / уволить */
+function upAgent(id){
+  const a = (S.team||[]).find(x=>x.id===id); if(!a) return;
+  const cost = Math.round(hireCost(a.role, a.lvl) * 0.85);
+  if(S.bal < cost){ toast('Не хватает денег','bad'); sound('no'); return; }
+  S.bal -= cost; a.lvl++; a.loy = clamp(a.loy+8, 0, 100);
+  addLog(`${a.name} повышен до ур.${a.lvl} (${ROLES[a.role].name}) за ${money(cost)}`,'ok');
+  sound('money'); save(); render();
+}
+function bonusAgent(id){
+  const a = (S.team||[]).find(x=>x.id===id); if(!a) return;
+  const sum = agentPay(a)*2;
+  if(S.bal < sum){ toast('Не хватает денег на премию','bad'); sound('no'); return; }
+  S.bal -= sum; a.loy = clamp(a.loy+22, 0, 100);
+  addLog(`Премия ${money(sum)} для ${a.name}: лояльность ${Math.round(a.loy)}%`,'ok');
+  sound('money'); save(); render();
+}
+function fireAgent(id){
+  const a = (S.team||[]).find(x=>x.id===id); if(!a) return;
+  const sever = agentPay(a);
+  S.bal = Math.max(0, S.bal - sever);
+  a.gone = true;
+  addLog(`УВОЛИЛ ${a.name} (${ROLES[a.role].name}), выходное пособие ${money(sever)}`,'warn');
+  save(); render();
+}
+/* тик команды: зарплаты, лояльность, кидок */
+function tickTeam(dt){
+  if(!S.team || !S.team.length) return;
+  S.payT = (S.payT||0) + dt;
+  if(S.payT < 18) return;
+  S.payT = 0;
+  const total = teamSalary();
+  if(total > 0){
+    if(S.bal >= total){
+      S.bal -= total;
+      S.team.forEach(a=>{ if(!a.gone) a.loy = clamp(a.loy + 1.2, 0, 100); });
+      addLog(`Зарплата команде: ${money(total)}`,'');
+    } else {
+      S.team.forEach(a=>{ if(!a.gone) a.loy = clamp(a.loy - 9, 0, 100); });
+      addLog(`НЕЧЕМ ПЛАТИТЬ команде (нужно ${money(total)}): лояльность падает`,'bad');
+      toast('Команда не получила зарплату','bad');
+    }
+  }
+  // агент с низкой лояльностью может кинуть
+  for(const a of S.team){
+    if(a.gone) continue;
+    if(a.loy < 25 && chance(0.16 * (1 + (SET.diff==='hard'?0.4:0)))){
+      const stealMoney = Math.round(Math.min(S.bal, S.bal*rnd(0.10,0.30)));
+      let stoleItem = null;
+      if(S.stock.length && chance(0.55)){
+        const i = rndi(0, S.stock.length-1);
+        stoleItem = S.stock.splice(i,1)[0];
+      }
+      S.bal = Math.max(0, S.bal - stealMoney);
+      a.gone = true;
+      addLog(`КИДОК: ${a.name} (${ROLES[a.role].name}) сбежал${stealMoney?`, украв ${money(stealMoney)}`:''}${stoleItem?` и «${stoleItem.g}»`:''}`,'bad');
+      toast(a.name+' кинул тебя и ушёл','bad'); sound('bad');
+    }
+  }
+  // закупщик сам покупает выгодные лоты
+  const bl = roleLvl('buyer');
+  if(bl > 0 && stockFree() > 0){
+    const best = [...M.lots].sort((x,y)=>x.disc-y.disc)[0];
+    if(best && best.disc < 0.92 && chance(0.20 + bl*0.14)){
+      const budget = S.bal*0.45;
+      if(budget > best.price && S.bal > best.price){
+        S.bal -= best.price;
+        S.stock.push({id:'SB'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), g:best.g, buy:best.price});
+        M.lots.splice(M.lots.indexOf(best),1);
+        addLog(`${(S.team||[]).filter(a=>a.role==='buyer'&&!a.gone)[0]?.name||'Закупщик'} купил «${best.g}» за ${money(best.price)} (${Math.round((1-best.disc)*100)}% ниже рынка)`,'ok');
+        sound('money');
+      }
+    }
+  }
+  render();
+}
+/* вкладка */
+function viewTeam(){
+  const list = (S.team||[]).filter(a=>!a.gone);
+  const sal = teamSalary();
+  return `
+  <div class="ord">
+    <div class="ohead"><b>Команда: ${list.length} чел.</b><span class="${sal>S.turn*0.02?'warn':'ok'}">зарплата ${money(sal)} / 18 с</span></div>
+    <div class="orow">
+      <span>Закупщики: <b>${roleLvl('buyer')}</b></span>
+      <span>Продажники: <b>${roleLvl('seller')}</b></span>
+      <span>Переговорщики: <b>${roleLvl('negot')}</b></span>
+      <span>Чистильщики: <b>${roleLvl('cleaner')}</b></span>
+    </div>
+    <div class="tiny" style="margin-top:6px">Зарплата списывается каждые 18 секунд. Не платишь — лояльность падает, и агент может сбежать, прихватив деньги или товар со склада.</div>
+  </div>
+  ${list.map(a=>{
+    const r = ROLES[a.role], pay = agentPay(a);
+    const lcls = a.loy>60?'ok':a.loy>30?'warn':'bad';
+    return `<div class="upg">
+      <div class="uicon">${ico(r.ic)}</div>
+      <div class="ubody">
+        <div class="uname">${esc(a.name)} <span class="ulvl">${r.name} ур.${a.lvl}</span></div>
+        <div class="udesc">${r.desc}</div>
+        <div class="ubar"><i style="width:${Math.round(a.loy)}%;background:${a.loy>60?'var(--green)':a.loy>30?'var(--orange)':'var(--red)'}"></i></div>
+        <div class="tiny">Лояльность <b class="${lcls}">${Math.round(a.loy)}%</b> · зарплата ${money(pay)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:104px">
+        <button class="btn small" data-up="${a.id}">Повысить ${money(Math.round(hireCost(a.role,a.lvl)*0.85))}</button>
+        <button class="btn small ghost" data-bonus="${a.id}">Премия</button>
+        <button class="btn small bad" data-fire="${a.id}">Уволить</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">Команды нет. Найми агентов — они будут работать на тебя.</div>'}
+  <div class="prof">
+    <h3>Нанять</h3>
+    <div class="orow" style="margin-bottom:8px">
+      ${Object.entries(ROLES).map(([k,r])=>{
+        const c = hireCost(k,1);
+        return `<div class="upg" style="flex:1;min-width:200px">
+          <div class="uicon">${ico(r.ic)}</div>
+          <div class="ubody"><div class="uname">${r.name}</div><div class="udesc">${r.desc}</div>
+          <div class="tiny">зарплата ${money(agentPay({role:k,lvl:1}))} / 18 с</div></div>
+          <button class="btn small" data-hire="${k}" ${S.bal<c?'disabled':''}>${money(c)}</button>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="tiny">Агенты одной роли складываются: два закупщика 1-го уровня работают как один 2-го.</div>
   </div>`;
 }
