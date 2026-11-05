@@ -16,7 +16,7 @@ const SAVE = 'playerok_tycoon_v1';
 const DEF = () => ({
   nick:'Продавец', bal:5000, turn:0, deals:0, rate:5, votes:0, claims:0,
   blocked:0, stock:[], my:[], orders:[], inbox:[], pending:[], upg:{}, news:[], day:1, dayTurn:0,
-  heat:0, dirty:0, roofT:0, team:[], payT:0,
+  heat:0, dirty:0, roofT:0, team:[], payT:0, chain:null, legit:false,
   achievements:[], log:[], started:Date.now(), last:Date.now(), best:0, fine:0,
   totalEarn:0, scamLoss:0, chargeLoss:0, blocks:0, warns:0,
 });
@@ -446,6 +446,7 @@ function step(dt){
   tickCrime(dt);
   tickTeam(dt);
   tickJobs(dt);
+  tickChains(dt);
   coolClaims(dt);
   if(S.turn >= 1e6) ach('million');
   S.best = Math.max(S.best, S.bal);
@@ -762,6 +763,7 @@ function bindView(){
   });
   $$('[data-fraud]').forEach(b => b.onclick = e => { e.stopPropagation(); scamBuyer(b.dataset.q, b.dataset.fraud); });
   $$('[data-dispute]').forEach(b => b.onclick = e => { e.stopPropagation(); openDispute(b.dataset.dispute); });
+  $$('[data-chain]').forEach(b => b.onclick = () => startChain(b.dataset.chain));
   $$('[data-scheme]').forEach(b => b.onclick = () => doScheme(b.dataset.scheme));
   $$('[data-case]').forEach(b => b.onclick = () => resolveCase(b.dataset.case));
   $$('[data-rival]').forEach(b => b.onclick = () => rivalAnswer(b.dataset.rival));
@@ -1856,7 +1858,7 @@ const CRIME = {
   roof:    {name:'Платить за крышу',  heat:-30,dirty:0,    cash:0,   desc:'Снимает розыск и жалобы, действует 3 минуты'},
   bribe:   {name:'Договориться с модератором', heat:-55, dirty:0, cash:0, desc:'Снимает блокировку и розыск, дорого'},
 };
-function heatMul(){ return DIFF[SET.diff].risk; }
+function heatMul(){ return DIFF[SET.diff].risk * (S.legit ? 0.5 : 1); }
 function roofActive(){ return (S.roofT||0) > 0; }
 /* ---- действие ---- */
 function doCrime(kind){
@@ -1996,6 +1998,7 @@ function viewCrime(){
       <span>розыск +${Math.round(j.heat*heatMul())}% по завершении</span>
     </div>`).join('')}
   </div>` : ''}
+  ${viewChains()}
   <div class="ord">
     <div class="ohead"><b>Схемы и наводки</b></div>
     <div class="orow" style="margin-top:8px">
@@ -2369,4 +2372,127 @@ function tickJobs(dt){
     }
   }
   policeCheck(dt); rivalEvent(dt);
+}
+
+/* ============================================================
+   ЦЕПОЧКИ СХЕМ: многоходовые комбинации с зависимостями
+   ============================================================ */
+const CHAINS = {
+  carousel: {
+    name:'Карусель',
+    desc:'закупка партии → отмывка → реализация. Нужен закупщик и чистильщик в команде',
+    steps:[
+      {name:'Закупить партию',  k:0.06, time:22, need:'buyer'},
+      {name:'Отмыть оборот',    k:0.05, time:20, need:'cleaner'},
+      {name:'Реализовать',      k:0.04, time:18, need:'seller'},
+    ],
+    reward: inv => Math.round(inv * rnd(1.7, 2.4)),
+    log: sum => `КАРУСЕЛЬ провернута: чистыми ${money(sum)}`,
+  },
+  mole: {
+    name:'Крот',
+    desc:'внедрить своего → слить базу конкурента → шантаж. Нужен инсайдер',
+    steps:[
+      {name:'Внедрить своего',  k:0.07, time:24, need:'insider'},
+      {name:'Слить базу',       k:0.05, time:22, need:null},
+      {name:'Шантаж',           k:0.04, time:20, need:'negot'},
+    ],
+    reward: inv => Math.round(inv * rnd(1.2, 1.7)),
+    extra: () => { S.claims = Math.max(0, (S.claims||0) - 6); S.heat = clamp((S.heat||0)-20, 0, 100); },
+    log: sum => `КРОТ отработал: ${money(sum)} и жалобы сняты`,
+  },
+  whiteflag: {
+    name:'Белый флаг',
+    desc:'легализация → налоги → чистый бизнес. Долго и дорого, но розыск навсегда растёт вдвое медленнее',
+    steps:[
+      {name:'Легализация',      k:0.09, time:30, need:null},
+      {name:'Уплата налогов',   k:0.08, time:26, need:null},
+      {name:'Чистый бизнес',    k:0.07, time:24, need:'analyst'},
+    ],
+    reward: inv => Math.round(inv * rnd(0.9, 1.2)),
+    extra: () => { S.legit = true; },
+    log: sum => `БЕЛЫЙ ФЛАГ: бизнес легализован, розыск теперь растёт вдвое медленнее`,
+  },
+};
+function chainStepCost(ch, i){
+  return Math.round(Math.max(5000, (S.turn||0)*ch.steps[i].k) + 1500);
+}
+function startChain(id){
+  const ch = CHAINS[id];
+  if(!ch || S.chain) return;
+  const cost = chainStepCost(ch, 0);
+  if(S.bal < cost){ toast('Не хватает денег на первый этап','bad'); sound('no'); return; }
+  S.bal -= cost;
+  S.chain = {id, step:0, left:ch.steps[0].time, invested:cost};
+  addLog(`ЦЕПОЧКА «${ch.name}»: этап 1 — ${ch.steps[0].name} (${money(cost)})`,'warn');
+  toast('Цепочка запущена','warn'); sound('click'); save(); render();
+}
+function tickChains(dt){
+  if(!S.chain) return;
+  const ch = CHAINS[S.chain.id];
+  if(!ch){ S.chain = null; return; }
+  S.chain.left -= dt;
+  if(S.chain.left > 0) return;
+  const step = ch.steps[S.chain.step];
+  // риск провала, если нужен агент, а его нет
+  if(step.need && roleLvl(step.need) === 0){
+    if(chance(0.55)){
+      addLog(`ЦЕПОЧКА «${ch.name}» СОРВАЛАСЬ на этапе «${step.name}»: нужен ${ROLES[step.need].name}, вложенное пропало`,'bad');
+      toast('Цепочка сорвана','bad'); sound('bad');
+      S.claims += 1.4*lawMul(); checkBlock();
+      S.chain = null; save(); render(); return;
+    }
+  }
+  S.heat = clamp((S.heat||0) + 8*heatMul(), 0, 100);
+  if(S.chain.step >= ch.steps.length-1){
+    // финальный этап — награда
+    const sum = ch.reward(S.chain.invested);
+    S.bal += sum;
+    if(ch.extra) ch.extra();
+    addLog(ch.log(sum),'ok');
+    toast('Цепочка завершена: +'+money(sum),'ok'); sound('money'); flyGain('+'+money(sum));
+    S.chain = null; checkHeat(); save(); render(); return;
+  }
+  // следующий этап
+  S.chain.step++;
+  const ns = ch.steps[S.chain.step];
+  const cost = chainStepCost(ch, S.chain.step);
+  if(S.bal < cost){
+    addLog(`ЦЕПОЧКА «${ch.name}» встала: нет денег на этап «${ns.name}» (${money(cost)})`,'bad');
+    toast('Цепочка встала — нет денег','bad'); sound('bad');
+    S.chain = null; save(); render(); return;
+  }
+  S.bal -= cost; S.chain.invested += cost; S.chain.left = ns.time;
+  addLog(`ЦЕПОЧКА «${ch.name}»: этап ${S.chain.step+1} — ${ns.name} (${money(cost)})`,'warn');
+  save(); render();
+}
+function viewChains(){
+  return `<div class="ord">
+    <div class="ohead"><b>Цепочки схем</b><span class="mut small">многоходовые комбинации</span></div>
+    ${S.chain ? (()=>{
+      const ch = CHAINS[S.chain.id], st = ch.steps[S.chain.step];
+      return `<div class="orow" style="margin-top:8px">
+        <span><b>${ch.name}</b> · этап ${S.chain.step+1}/${ch.steps.length}: ${st.name}</span>
+        <span class="tmr">${Math.ceil(S.chain.left)} с</span>
+        <span>вложено ${money(S.chain.invested)}</span>
+      </div>
+      <div class="obar"><i style="width:${(100*(st.time-Math.max(0,S.chain.left))/st.time).toFixed(0)}%;background:var(--orange)"></i></div>
+      <div class="tiny">${st.need?('Этапу нужен '+ROLES[st.need].name+(roleLvl(st.need)?' — есть':' — <b class="bad">нет в команде, риск провала</b>')):'Этап без требований к команде'}</div>`;
+    })() : '<div class="tiny" style="margin-top:6px">Активной цепочки нет. Запустите одну — она идёт сама, но каждый этап требует денег и времени.</div>'}
+    <div class="orow" style="margin-top:10px">
+      ${Object.entries(CHAINS).map(([id,ch])=>{
+        const c0 = chainStepCost(ch,0);
+        const dis = !!S.chain || S.bal < c0 || S.blocked > 0;
+        return `<div class="upg ${dis?'maxed':''}" style="flex:1;min-width:230px">
+          <div class="uicon">${ico(id==='carousel'?'item':id==='mole'?'server':'bundle')}</div>
+          <div class="ubody">
+            <div class="uname">${ch.name} <span class="ulvl">${ch.steps.length} этапа</span></div>
+            <div class="udesc">${ch.desc}</div>
+            <div class="tiny">первый этап ${money(c0)} · всего ≈ ${money(Math.round(c0*2.6))}</div>
+          </div>
+          <button class="btn small bad" data-chain="${id}" ${dis?'disabled':''}>Запустить</button>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
 }
