@@ -1,0 +1,65 @@
+/* ============ LOOTORA · адаптив ============ */
+@media (max-width:1080px){
+  .arena{grid-template-columns:1fr}
+  .boss-portrait{width:min(300px,64%)}
+}
+@media (max-width:860px){
+  .sidebar{
+    position:fixed;left:0;top:62px;bottom:0;z-index:120;width:250px;
+    transform:translateX(-102%);transition:transform var(--t-mid);
+    background:rgba(12,13,18,.97);backdrop-filter:blur(10px);box-shadow:var(--sh-3);
+  }
+  .sidebar.open{transform:none}
+  .stage{padding:14px 12px 20px}
+  .topstats .tstat:nth-child(n+3){display:none}
+}
+@media (max-width:640px){
+  .topbar{height:56px;flex:0 0 56px;padding:0 10px;gap:8px}
+  .brand-text i{display:none}
+  .brand-text b{font-size:13px;letter-spacing:.16em}
+  .topstats{gap:5px}
+  .tstat{height:28px;padding:0 8px}
+  .tstat b{font-size:12px}
+  .pname{display:none}
+  .profile-btn{padding:0 4px}
+  .only-mobile{display:grid !important}
+  .icon-btn{width:30px;height:30px;font-size:13px}
+  .conn span{display:none}
+  .conn{padding:0 8px}
+
+  .dock{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:150;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(23,25,34,.97),rgba(12,13,18,.99));
+    border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(0,0,0,.6);
+  }
+  .dk{
+    position:relative;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:5px 2px 4px;color:var(--muted);font-size:9.5px;transition:var(--t-fast);
+  }
+  .dk-ic{font-size:17px;line-height:1}
+  .dk.on{color:var(--gold)}
+  .dk em{
+    position:absolute;top:0;right:14%;min-width:15px;height:15px;padding:0 4px;border-radius:8px;
+    background:var(--blood);color:#fff;font-size:9px;font-style:normal;font-weight:700;
+    display:grid;place-items:center;
+  }
+  .stage{padding-bottom:calc(var(--dock-h) + 14px)}
+
+  .screen-title{font-size:21px;letter-spacing:.14em}
+  .arena-main{min-height:0}
+  .boss-portrait{width:min(240px,72%);aspect-ratio:1/1}
+  .boss-name{font-size:23px}
+  .attack-btn{height:68px;width:min(300px,94%);font-size:20px}
+  .inv-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .grid2{grid-template-columns:1fr}
+  .row{flex-direction:column}
+  .toasts{left:10px;right:10px;bottom:calc(var(--dock-h) + 10px);align-items:center}
+  .toast{max-width:100%}
+  .panel-b{padding:12px}
+}
+@media (max-width:380px){
+  .inv-grid{grid-template-columns:1fr}
+  .dk span{font-size:8.5px}
+}
+@media (min-width:641px){ .only-mobile{display:none !important} }

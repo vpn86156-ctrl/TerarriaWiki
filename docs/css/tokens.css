@@ -1,0 +1,66 @@
+/* ============ LOOTORA · дизайн-токены ============ */
+:root{
+  /* --- поверхности --- */
+  --bg:            #08090D;
+  --bg-2:          #101117;
+  --panel:         #171922;
+  --panel-2:       #20232D;
+  --panel-3:       #262A36;
+  --elev:          #2B3040;
+
+  /* --- металл и границы --- */
+  --line:          #2A2E3A;
+  --line-soft:     #232733;
+  --line-strong:   #3A4052;
+  --metal-1:       #4A5164;
+  --metal-2:       #2E3341;
+
+  /* --- акценты --- */
+  --gold:          #C9A46A;
+  --gold-dim:      #8D6A3E;
+  --gold-bright:   #E8C88C;
+  --warm:          #E8E2D8;
+  --muted:         #898B96;
+  --faint:         #5F6270;
+  --blood:         #8F2635;
+  --blood-bright:  #C23B4C;
+  --arcane:        #7546A8;
+  --arcane-bright: #A276D8;
+  --frost:         #5C9BC9;
+
+  /* --- редкости --- */
+  --r-common:      #8A8D98;
+  --r-rare:        #4FBF7A;
+  --r-superb:      #4A8FE7;
+  --r-epic:        #9B59D0;
+  --r-mythic:      #D3455B;
+  --r-legendary:   #E0B45C;
+  --r-secret:      #12131A;
+
+  /* --- типографика --- */
+  --f-display: 'Cinzel', 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+  --f-ui:      'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --f-art:     'Cormorant Garamond', Georgia, serif;
+  --f-num:     ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* --- геометрия --- */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+
+  /* --- тени и свет --- */
+  --sh-1: 0 1px 2px rgba(0,0,0,.55);
+  --sh-2: 0 6px 18px rgba(0,0,0,.55);
+  --sh-3: 0 18px 48px rgba(0,0,0,.65);
+  --in-hi: inset 0 1px 0 rgba(255,255,255,.045);
+  --in-lo: inset 0 -1px 0 rgba(0,0,0,.5);
+
+  /* --- динамика --- */
+  --t-fast: 120ms cubic-bezier(.4,0,.2,1);
+  --t-mid:  260ms cubic-bezier(.33,1,.68,1);
+  --t-slow: 520ms cubic-bezier(.22,1,.36,1);
+
+  --sidebar-w: 228px;
+  --dock-h: 62px;
+}

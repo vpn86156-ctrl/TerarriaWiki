@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LOOTORA — The Darkness Awakens</title>
+<meta name="description" content="LOOTORA — атмосферная Dark Fantasy Clicker RPG: охота на боссов, сбор добычи, подземелья, башня и PvP.">
+<link rel="preload" href="fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/cinzel-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<!-- атмосферный фон: туман, пепел, виньетка -->
+<div class="atmosphere" aria-hidden="true">
+  <div class="fog fog-a"></div>
+  <div class="fog fog-b"></div>
+  <div class="vignette"></div>
+  <canvas id="ash-canvas"></canvas>
+</div>
+
+<!-- экран загрузки -->
+<div id="boot" class="boot">
+  <div class="boot-mark">LOOTORA</div>
+  <div class="boot-sub">THE DARKNESS AWAKENS</div>
+  <div class="boot-bar"><i id="boot-fill"></i></div>
+</div>
+
+<!-- ВХОД / РЕГИСТРАЦИЯ -->
+<section id="auth" class="auth" hidden>
+  <div class="auth-card">
+    <div class="auth-crest" aria-hidden="true"></div>
+    <h1 class="auth-title">LOOTORA</h1>
+    <p class="auth-tag">THE DARKNESS AWAKENS</p>
+
+    <div class="auth-tabs">
+      <button class="atab on" data-amode="login">Вход</button>
+      <button class="atab" data-amode="register">Регистрация</button>
+      <button class="atab" data-amode="reset">Восстановление</button>
+    </div>
+
+    <form id="auth-form" autocomplete="on">
+      <label class="fld">
+        <span>Email</span>
+        <input id="a-email" type="email" placeholder="hunter@lootora.games" required autocomplete="email">
+      </label>
+      <label class="fld" id="fld-pass">
+        <span>Пароль</span>
+        <input id="a-pass" type="password" placeholder="минимум 6 символов" required autocomplete="current-password" minlength="6">
+      </label>
+      <label class="fld" id="fld-nick" hidden>
+        <span>Никнейм</span>
+        <input id="a-nick" type="text" placeholder="Имя охотника" maxlength="16" autocomplete="nickname">
+      </label>
+      <p class="auth-note" id="auth-note"></p>
+      <button class="btn btn-gold btn-block" id="a-submit" type="submit">Войти</button>
+    </form>
+
+    <button class="btn btn-ghost btn-block" id="a-offline">Играть локально без входа</button>
+    <p class="auth-legal">Локальный режим хранит прогресс только в этом браузере.
+      Облачное сохранение, PvP, гильдии и рынок требуют подключения Supabase.</p>
+  </div>
+</section>
+
+<!-- ИГРА -->
+<div id="game" class="shell" hidden>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">L</span>
+      <span class="brand-text"><b>LOOTORA</b><i>THE DARKNESS AWAKENS</i></span>
+    </div>
+
+    <div class="topstats">
+      <div class="tstat" title="Золото"><span class="tstat-ic gold">◈</span><b id="h-gold">0</b></div>
+      <div class="tstat" title="Уровень"><span class="tstat-ic">✦</span><b id="h-level">1</b></div>
+      <div class="tstat" title="Сила атаки"><span class="tstat-ic">⚔</span><b id="h-power">0</b></div>
+    </div>
+
+    <div class="topright">
+      <div class="conn" id="h-conn" title="Состояние подключения"><i></i><span>локально</span></div>
+      <button class="icon-btn loot-btn" id="h-loot" title="Незабранная добыча" hidden>❒<em id="h-loot-n">0</em></button>
+      <button class="icon-btn" id="h-bell" title="Уведомления">✉<em id="h-bell-n" class="zero">0</em></button>
+      <button class="icon-btn" id="h-sound" title="Звук">♪</button>
+      <button class="profile-btn" id="h-profile">
+        <span class="avatar" id="h-avatar">L</span>
+        <span class="pname" id="h-nick">Охотник</span>
+      </button>
+      <button class="icon-btn only-mobile" id="h-menu" title="Меню">☰</button>
+    </div>
+  </header>
+
+  <div class="body">
+    <nav class="sidebar" id="sidebar">
+      <button class="nav on" data-screen="hunt"><span class="nav-ic">⚔</span>Охота</button>
+      <button class="nav" data-screen="inventory"><span class="nav-ic">▤</span>Инвентарь<em id="n-inv" class="zero">0</em></button>
+      <button class="nav" data-screen="hero"><span class="nav-ic">✦</span>Герой</button>
+      <button class="nav" data-screen="pets"><span class="nav-ic">☾</span>Питомцы</button>
+      <button class="nav" data-screen="dungeons"><span class="nav-ic">⌂</span>Подземелья</button>
+      <button class="nav" data-screen="tower"><span class="nav-ic">▲</span>Башня</button>
+      <button class="nav" data-screen="quests"><span class="nav-ic">✎</span>Задания<em id="n-q" class="zero">0</em></button>
+      <div class="nav-sep">Мультиплеер</div>
+      <button class="nav" data-screen="pvp"><span class="nav-ic">⇄</span>PvP</button>
+      <button class="nav" data-screen="guild"><span class="nav-ic">⚑</span>Гильдия</button>
+      <button class="nav" data-screen="market"><span class="nav-ic">⚖</span>Рынок</button>
+      <button class="nav" data-screen="social"><span class="nav-ic">❝</span>Общение</button>
+      <button class="nav" data-screen="rating"><span class="nav-ic">♛</span>Рейтинг</button>
+    </nav>
+
+    <main class="stage" id="stage"></main>
+  </div>
+
+  <nav class="dock" id="dock">
+    <button class="dk on" data-screen="hunt"><span class="dk-ic">⚔</span><span>Охота</span></button>
+    <button class="dk" data-screen="inventory"><span class="dk-ic">▤</span><span>Инвентарь</span><em id="dk-inv" class="zero">0</em></button>
+    <button class="dk" data-screen="hero"><span class="dk-ic">✦</span><span>Герой</span></button>
+    <button class="dk" data-screen="pets"><span class="dk-ic">☾</span><span>Питомцы</span></button>
+    <button class="dk" data-screen="dungeons"><span class="dk-ic">⌂</span><span>Подземелья</span></button>
+    <button class="dk" data-screen="tower"><span class="dk-ic">▲</span><span>Башня</span></button>
+    <button class="dk" data-screen="quests"><span class="dk-ic">✎</span><span>Задания</span><em id="dk-q" class="zero">0</em></button>
+    <button class="dk" data-screen="more"><span class="dk-ic">⋯</span><span>Ещё</span></button>
+  </nav>
+</div>
+
+<!-- оверлеи -->
+<div class="overlay" id="ov-loot" hidden></div>
+<div class="overlay" id="ov-modal" hidden></div>
+<div class="overlay" id="ov-connect" hidden></div>
+<div id="fx-layer" class="fx-layer" aria-hidden="true"></div>
+<div id="toasts" class="toasts"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
