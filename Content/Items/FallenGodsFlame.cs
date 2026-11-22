@@ -12,7 +12,7 @@ namespace WikiStarter.Content.Items
     {
         public override void SetDefaults()
         {
-            Item.damage = 120;
+            Item.damage = 150;
             Item.DamageType = DamageClass.Melee;
             Item.width = 72;
             Item.height = 72;
@@ -42,7 +42,7 @@ namespace WikiStarter.Content.Items
                 if (player.GetModPlayer<GodslayerPlayer>().DivineWaveCooldown > 0)
                     return false;
 
-                Item.damage = 190;
+                Item.damage = 230;
                 Item.knockBack = 12f;
                 Item.useTime = 36;
                 Item.useAnimation = 36;
@@ -52,7 +52,7 @@ namespace WikiStarter.Content.Items
             }
             else
             {
-                Item.damage = 120;
+                Item.damage = 150;
                 Item.knockBack = 10f;
                 Item.useTime = 28;
                 Item.useAnimation = 28;
@@ -90,6 +90,7 @@ namespace WikiStarter.Content.Items
                 .AddIngredient(ItemID.HellstoneBar, 15)
                 .AddIngredient(ItemID.FallenStar, 5)
                 .AddIngredient(ItemID.Fireblossom, 3)
+                .AddIngredient(ModContent.ItemType<FallenGodHeart>())
                 .AddTile(TileID.Hellforge)
                 .Register();
         }

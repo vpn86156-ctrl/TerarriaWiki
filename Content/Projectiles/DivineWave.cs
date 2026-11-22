@@ -14,7 +14,7 @@ namespace WikiStarter.Content.Projectiles
             Projectile.friendly = true;
             Projectile.hostile = false;
             Projectile.DamageType = DamageClass.Melee;
-            Projectile.penetrate = 4;
+            Projectile.penetrate = 5;
             Projectile.timeLeft = 75;
             Projectile.tileCollide = true;
             Projectile.ignoreWater = true;
