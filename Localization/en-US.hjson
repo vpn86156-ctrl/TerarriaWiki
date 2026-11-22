@@ -1,0 +1,14 @@
+Mods: {
+  WikiStarter: {
+    Items: {
+      GuidesEdge: {
+        DisplayName: "Guide's Edge"
+        Tooltip: "A dependable blade for a new adventure"
+      }
+      FallenGodsFlame: {
+        DisplayName: "Fallen God's Flame"
+        Tooltip: "A colossal blade stolen from a god. The fire obeys you now."
+      }
+    }
+  }
+}

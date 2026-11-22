@@ -1,0 +1,14 @@
+Mods: {
+  WikiStarter: {
+    Items: {
+      GuidesEdge: {
+        DisplayName: "Клинок наставника"
+        Tooltip: "Надёжный меч для нового приключения"
+      }
+      FallenGodsFlame: {
+        DisplayName: "Пламя Падшего Бога"
+        Tooltip: "Ты забрал этот клинок у бога. Теперь пламя слушается тебя."
+      }
+    }
+  }
+}

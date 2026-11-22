@@ -1,0 +1,3 @@
+displayName = Wiki Starter
+author = Mod Author
+version = 0.1
