@@ -5,6 +5,8 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
+using WikiStarter.Content.Items;
+
 namespace WikiStarter.Content.Tiles
 {
     public class FallenGodStatue : ModTile
@@ -22,7 +24,7 @@ namespace WikiStarter.Content.Tiles
             TileObjectData.newTile.LavaDeath = false;
             TileObjectData.addTile(Type);
 
-            RegisterItemDrop(ModContent.ItemType<WikiStarter.Content.Items.FallenGodStatueItem>());
+            RegisterItemDrop(ModContent.ItemType<FallenGodStatueItem>());
             AddMapEntry(new Color(220, 159, 45), Language.GetText("Mods.WikiStarter.Tiles.FallenGodStatue.DisplayName"));
             DustType = DustID.Torch;
             HitSound = SoundID.Tink;

@@ -630,7 +630,7 @@ namespace WikiStarter.Content.NPCs
         public override void ModifyNPCLoot(NPCLoot npcLoot)
         {
             npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<FallenGodHeart>()));
-            npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<WikiStarter.Content.Items.FallenGodStatueItem>(), 8));
+            npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<FallenGodStatueItem>(), 8));
         }
     }
 }
