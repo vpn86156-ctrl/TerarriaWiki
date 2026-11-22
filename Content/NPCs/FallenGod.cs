@@ -28,6 +28,12 @@ namespace WikiStarter.Content.NPCs
             PitchVariance = 0.04f
         };
 
+        private static readonly SoundStyle DeathSound = new SoundStyle("WikiStarter/Sounds/FallenGodDeath")
+        {
+            Volume = 1f,
+            PitchVariance = 0.02f
+        };
+
         public override void SetStaticDefaults()
         {
             Main.npcFrameCount[Type] = 9;
@@ -83,8 +89,8 @@ namespace WikiStarter.Content.NPCs
                 frame = 2; // rise
             else if (NPC.ai[3] == 3f)
                 frame = 3; // descent
-            else if (NPC.ai[3] == 6f)
-                frame = 8; // final transformation
+            else if (NPC.ai[3] == 6f || NPC.ai[3] == 7f)
+                frame = 8; // transformation and final death pose; the background artifact was removed
             else if (NPC.ai[3] == 0f && NPC.localAI[0] > 12f)
                 frame = 6; // gather a fireball
             else if (NPC.ai[3] == 0f && NPC.localAI[0] > 0f)
@@ -95,10 +101,30 @@ namespace WikiStarter.Content.NPCs
             NPC.frame.Y = frameHeight * frame;
         }
 
+        public override bool CheckDead()
+        {
+            if (NPC.ai[3] == 7f)
+                return true;
+
+            NPC.life = 1;
+            NPC.dontTakeDamage = true;
+            NPC.damage = 0;
+            NPC.ai[2] = 0f;
+            NPC.ai[3] = 7f;
+            NPC.netUpdate = true;
+            return false;
+        }
+
         public override void AI()
         {
             NPC.TargetClosest();
             Player target = Main.player[NPC.target];
+
+            if (NPC.ai[3] == 7f)
+            {
+                RunDeathSequence();
+                return;
+            }
 
             if (!target.active || target.dead)
             {
@@ -107,6 +133,9 @@ namespace WikiStarter.Content.NPCs
                     NPC.timeLeft = 10;
                 return;
             }
+
+            NPC.direction = target.Center.X >= NPC.Center.X ? 1 : -1;
+            NPC.spriteDirection = -NPC.direction;
 
             if (NPC.ai[3] == 5f)
             {
@@ -173,7 +202,7 @@ namespace WikiStarter.Content.NPCs
                     {
                         if (finalPhase)
                         {
-                            switch (Main.rand.Next(3))
+                            switch (Main.rand.Next(5))
                             {
                                 case 0:
                                     FireFan(target, enraged, true);
@@ -181,8 +210,14 @@ namespace WikiStarter.Content.NPCs
                                 case 1:
                                     FireCrescentVolley(target);
                                     break;
-                                default:
+                                case 2:
                                     FireCometVolley(target);
+                                    break;
+                                case 3:
+                                    FireHellLaser(target);
+                                    break;
+                                default:
+                                    FireInfernalRifts(target);
                                     break;
                             }
                         }
@@ -244,6 +279,76 @@ namespace WikiStarter.Content.NPCs
             }
         }
 
+        private void RunDeathSequence()
+        {
+            const int deathDuration = 156;
+            NPC.life = 1;
+            NPC.dontTakeDamage = true;
+            NPC.damage = 0;
+            NPC.noTileCollide = true;
+            NPC.velocity *= 0.78f;
+            NPC.ai[2]++;
+
+            float time = NPC.ai[2];
+            float dissolve = MathHelper.Clamp((time - 86f) / 68f, 0f, 1f);
+            NPC.scale = 1.3f * (1f + (float)System.Math.Sin(time * 0.14f) * 0.035f) * (1f - 0.28f * dissolve);
+            NPC.alpha = (int)(dissolve * 255f);
+            NPC.rotation = (float)System.Math.Sin(time * 0.11f) * (0.025f + dissolve * 0.11f);
+            Lighting.AddLight(NPC.Center, 1f - dissolve * 0.5f, 0.24f, 0.04f);
+
+            if (time == 1f)
+            {
+                if (Main.netMode != NetmodeID.Server)
+                {
+                    SoundEngine.PlaySound(DeathSound, NPC.Center);
+                    Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 190, 2);
+                    ShakeCamera(8f);
+                }
+            }
+
+            if (time < 86f && time % 4f == 0f)
+                SpawnDeathSparks(5, 4f, 9f);
+
+            if (time == 48f && Main.netMode != NetmodeID.Server)
+                ShakeCamera(10f);
+
+            if (time == 86f)
+            {
+                if (Main.netMode != NetmodeID.Server)
+                {
+                    SoundEngine.PlaySound(SoundID.Item14, NPC.Center);
+                    ShakeCamera(28f);
+                    FallenGodCutsceneSystem.TriggerDeathFlash();
+                }
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    SpawnDeathSparks(72, 7f, 18f);
+            }
+
+            if (time > 86f && time < 150f && time % 3f == 0f)
+                SpawnDeathSparks(4, 1.5f, 7f);
+
+            if (time >= deathDuration && Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                NPC.dontTakeDamage = false;
+                NPC.StrikeInstantKill();
+            }
+        }
+
+        private void SpawnDeathSparks(int count, float minSpeed, float maxSpeed)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                float angle = Main.rand.NextFloat(MathHelper.TwoPi);
+                float speed = Main.rand.NextFloat(minSpeed, maxSpeed);
+                Vector2 velocity = new Vector2((float)System.Math.Cos(angle), (float)System.Math.Sin(angle)) * speed;
+                int dustIndex = Dust.NewDust(NPC.Center, 1, 1, DustID.Torch, velocity.X, velocity.Y, 40,
+                    Color.Lerp(new Color(255, 50, 12), new Color(255, 220, 90), Main.rand.NextFloat()),
+                    Main.rand.NextFloat(1.4f, 3f));
+                Main.dust[dustIndex].velocity = velocity;
+                Main.dust[dustIndex].noGravity = true;
+            }
+        }
+
         private void RunFinalTransformation()
         {
             NPC.dontTakeDamage = true;
@@ -260,7 +365,7 @@ namespace WikiStarter.Content.NPCs
                 SoundEngine.PlaySound(AwakeningSound, NPC.Center);
                 ShakeCamera(9f);
                 if (Main.LocalPlayer.active)
-                    Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 210);
+                    Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 210, 1);
             }
 
             if (NPC.ai[2] % 6f == 0f)
@@ -461,6 +566,32 @@ namespace WikiStarter.Content.NPCs
             }
         }
 
+        private void FireHellLaser(Player target)
+        {
+            Vector2 direction = (target.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
+            direction = direction.RotatedBy(Main.rand.NextFloat(-0.07f, 0.07f));
+            Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, direction,
+                ModContent.ProjectileType<GodfireLaser>(), 30, 0f);
+        }
+
+        private void FireInfernalRifts(Player target)
+        {
+            const int riftCount = 3;
+            int riftType = ModContent.ProjectileType<GodfireRift>();
+            for (int i = 0; i < riftCount; i++)
+            {
+                float offset = (i - (riftCount - 1) * 0.5f) * 148f;
+                float x = target.Center.X + offset;
+                Vector2 position = new Vector2(x - 26f, target.Bottom.Y - 96f);
+                int projectileIndex = Projectile.NewProjectile(NPC.GetSource_FromAI(), position, Vector2.Zero, riftType, 24, 0f);
+                if (projectileIndex >= 0 && projectileIndex < Main.maxProjectiles)
+                {
+                    Main.projectile[projectileIndex].ai[1] = i;
+                    Main.projectile[projectileIndex].netUpdate = true;
+                }
+            }
+        }
+
         private void FireMeteorRain(Player target)
         {
             const int meteorCount = 5;
@@ -499,6 +630,7 @@ namespace WikiStarter.Content.NPCs
         public override void ModifyNPCLoot(NPCLoot npcLoot)
         {
             npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<FallenGodHeart>()));
+            npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<WikiStarter.Content.Items.FallenGodStatueItem>(), 8));
         }
     }
 }

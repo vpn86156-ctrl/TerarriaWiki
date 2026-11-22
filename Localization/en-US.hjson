@@ -17,11 +17,24 @@ Mods: {
         DisplayName: "Sigil of Awakening"
         Tooltip: "Use it to challenge the Fallen God."
       }
+      FallenGodStatueItem: {
+        DisplayName: "Golden Fallen God Statue"
+        Tooltip: "A gilded memorial to the god's return. Placeable."
+      }
     }
     NPCs: {
       FallenGod: {
         DisplayName: "The Fallen God"
       }
+    }
+    Tiles: {
+      FallenGodStatue: {
+        DisplayName: "Golden Fallen God Statue"
+      }
+    }
+    Cutscenes: {
+      FallenGodDeath: "THE GOD FALLS"
+      FallenGodReturn: "HELL ANSWERS"
     }
   }
 }

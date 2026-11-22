@@ -17,11 +17,24 @@ Mods: {
         DisplayName: "Печать пробуждения"
         Tooltip: "Используй её, чтобы бросить вызов Падшему Богу."
       }
+      FallenGodStatueItem: {
+        DisplayName: "Золотая статуя Падшего Бога"
+        Tooltip: "Золотая память о возвращении бога. Можно установить."
+      }
     }
     NPCs: {
       FallenGod: {
         DisplayName: "Падший Бог"
       }
+    }
+    Tiles: {
+      FallenGodStatue: {
+        DisplayName: "Золотая статуя Падшего Бога"
+      }
+    }
+    Cutscenes: {
+      FallenGodDeath: "БОГ ПОВЕРЖЕН"
+      FallenGodReturn: "АД ОТВЕЧАЕТ"
     }
   }
 }

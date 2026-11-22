@@ -19,9 +19,9 @@ namespace WikiStarter.Content.Players
             AddGreatswordFlameTrail();
         }
 
-        public void BeginBossIntro(int npcIndex, int duration)
+        public void BeginBossIntro(int npcIndex, int duration, int sceneStyle = 0)
         {
-            FallenGodCutsceneSystem.Begin(npcIndex, duration);
+            FallenGodCutsceneSystem.Begin(npcIndex, duration, sceneStyle);
         }
 
         private void AddGreatswordFlameTrail()
