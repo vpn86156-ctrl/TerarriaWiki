@@ -37,7 +37,7 @@ namespace WikiStarter.Content.Systems
 
             Texture2D backdrop = ModContent.Request<Texture2D>("WikiStarter/Content/Systems/FallenGodCutsceneBackdrop").Value;
             spriteBatch.Draw(backdrop, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
-                Color.White * (opacity * 0.28f));
+                Color.White * (opacity * 0.18f));
 
             Texture2D pixel = TextureAssets.MagicPixel.Value;
             Color barColor = Color.Black * opacity;

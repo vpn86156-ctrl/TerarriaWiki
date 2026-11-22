@@ -137,14 +137,16 @@ namespace WikiStarter.Content.NPCs
                 NPC.localAI[0]--;
 
             bool enraged = NPC.life < NPC.lifeMax / 2;
+            NPC.scale = 1.3f + (float)System.Math.Sin(Main.GameUpdateCount * 0.075f) * 0.015f;
             NPC.damage = finalPhase ? 38 : enraged ? 48 : 42;
             NPC.defense = finalPhase ? 18 : enraged ? 20 : 15;
             NPC.direction = target.Center.X >= NPC.Center.X ? 1 : -1;
-            NPC.spriteDirection = NPC.direction;
+            // This sprite sheet is authored facing right; invert Terraria's draw-direction flag so the face tracks the target.
+            NPC.spriteDirection = -NPC.direction;
             NPC.noTileCollide = NPC.ai[3] != 3f;
             if (NPC.ai[3] == 0f)
             {
-                float bank = MathHelper.Clamp(NPC.velocity.X * 0.004f, -0.045f, 0.045f);
+                float bank = MathHelper.Clamp(NPC.velocity.X * 0.006f, -0.075f, 0.075f);
                 NPC.rotation = MathHelper.Lerp(NPC.rotation, bank, 0.08f);
             }
             else
@@ -157,6 +159,7 @@ namespace WikiStarter.Content.NPCs
                 // Keep the boss close; reduced final-phase tracking leaves a clearer opening to dodge.
                 float horizontalOffset = finalPhase ? 82f : enraged ? 84f : 112f;
                 float verticalOffset = finalPhase ? -48f : enraged ? -60f : -86f;
+                verticalOffset += (float)System.Math.Sin(Main.GameUpdateCount * 0.075f) * 5f;
                 float flightSpeed = finalPhase ? 7.3f : enraged ? 7.8f : 7.5f;
                 float tracking = finalPhase ? 0.06f : enraged ? 0.07f : 0.075f;
                 Vector2 hoverPoint = target.Center + new Vector2(-NPC.direction * horizontalOffset, verticalOffset);
@@ -168,10 +171,25 @@ namespace WikiStarter.Content.NPCs
                     NPC.ai[1]--;
                     if (NPC.ai[1] == 7f && Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        if (finalPhase && Main.rand.NextBool(2))
-                            FireCrescentVolley(target);
+                        if (finalPhase)
+                        {
+                            switch (Main.rand.Next(3))
+                            {
+                                case 0:
+                                    FireFan(target, enraged, true);
+                                    break;
+                                case 1:
+                                    FireCrescentVolley(target);
+                                    break;
+                                default:
+                                    FireCometVolley(target);
+                                    break;
+                            }
+                        }
                         else
-                            FireFan(target, enraged, finalPhase);
+                        {
+                            FireFan(target, enraged, false);
+                        }
                     }
                 }
                 else
@@ -233,6 +251,7 @@ namespace WikiStarter.Content.NPCs
             NPC.noTileCollide = true;
             NPC.velocity *= 0.82f;
             NPC.ai[2]++;
+            NPC.scale = 1.3f + (float)System.Math.Sin(Main.GameUpdateCount * 0.09f) * 0.035f;
             NPC.alpha = NPC.ai[2] < 75f ? System.Math.Max(0, 180 - (int)(NPC.ai[2] * 2.4f)) : 0;
             Lighting.AddLight(NPC.Center, 1.1f, 0.32f, 0.06f);
 
@@ -419,6 +438,26 @@ namespace WikiStarter.Content.NPCs
                 Vector2 velocity = aim.RotatedBy(curve * 0.32f) * 7f;
                 Projectile.NewProjectile(NPC.GetSource_FromAI(), origin, velocity,
                     ModContent.ProjectileType<GodfireBolt>(), 22, 0f);
+            }
+        }
+
+        private void FireCometVolley(Player target)
+        {
+            Vector2 aim = (target.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
+            Vector2 side = aim.RotatedBy(MathHelper.PiOver2);
+            int boltType = ModContent.ProjectileType<GodfireBolt>();
+
+            for (int i = -1; i <= 1; i++)
+            {
+                Vector2 origin = NPC.Center + side * (i * 18f) - new Vector2(0f, 12f);
+                Vector2 velocity = aim.RotatedBy(i * 0.16f) * 7.5f - new Vector2(0f, 1.8f);
+                int projectileIndex = Projectile.NewProjectile(NPC.GetSource_FromAI(), origin, velocity,
+                    boltType, 24, 0f);
+                if (projectileIndex >= 0 && projectileIndex < Main.maxProjectiles)
+                {
+                    Main.projectile[projectileIndex].ai[0] = 1f;
+                    Main.projectile[projectileIndex].netUpdate = true;
+                }
             }
         }
 
