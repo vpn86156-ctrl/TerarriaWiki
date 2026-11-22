@@ -1,1 +1,1 @@
-A starter tModLoader mod with a custom melee weapon. Expand it with your own items, recipes, and mechanics.
+A Terraria content mod featuring the Fallen God boss, animated fire attacks, a heart-forged greatsword, and a cinematic entrance.

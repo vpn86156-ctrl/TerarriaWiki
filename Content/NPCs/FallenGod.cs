@@ -27,7 +27,7 @@ namespace WikiStarter.Content.NPCs
 
         public override void SetStaticDefaults()
         {
-            Main.npcFrameCount[Type] = 8;
+            Main.npcFrameCount[Type] = 9;
         }
 
         public override void SetDefaults()
@@ -76,6 +76,8 @@ namespace WikiStarter.Content.NPCs
                 frame = 2; // rise
             else if (NPC.ai[3] == 3f)
                 frame = 3; // descent
+            else if (NPC.ai[3] == 6f)
+                frame = 8; // final transformation
             else if (NPC.ai[3] == 0f && NPC.localAI[0] > 12f)
                 frame = 6; // gather a fireball
             else if (NPC.ai[3] == 0f && NPC.localAI[0] > 0f)
@@ -105,35 +107,56 @@ namespace WikiStarter.Content.NPCs
                 return;
             }
 
+            bool finalPhase = NPC.life <= NPC.lifeMax / 5;
+            if (finalPhase && NPC.localAI[2] == 0f)
+            {
+                NPC.localAI[2] = 1f;
+                NPC.ai[0] = 0f;
+                NPC.ai[1] = 0f;
+                NPC.ai[2] = 0f;
+                NPC.ai[3] = 6f;
+                NPC.localAI[0] = 0f;
+                NPC.velocity = Vector2.Zero;
+                NPC.netUpdate = true;
+            }
+
+            if (NPC.ai[3] == 6f)
+            {
+                RunFinalTransformation();
+                return;
+            }
+
             if (NPC.localAI[0] > 0f)
                 NPC.localAI[0]--;
 
             bool enraged = NPC.life < NPC.lifeMax / 2;
-            NPC.damage = enraged ? 55 : 45;
-            NPC.defense = enraged ? 20 : 15;
+            NPC.damage = finalPhase ? 68 : enraged ? 55 : 45;
+            NPC.defense = finalPhase ? 26 : enraged ? 20 : 15;
             NPC.direction = target.Center.X >= NPC.Center.X ? 1 : -1;
             NPC.spriteDirection = NPC.direction;
             NPC.noTileCollide = NPC.ai[3] != 3f;
 
             if (NPC.ai[3] == 0f)
             {
-                // Keep the boss close enough to threaten the player instead of orbiting far away.
-                float horizontalOffset = enraged ? 88f : 118f;
-                float verticalOffset = enraged ? -72f : -98f;
+                // The god now stays within striking distance and accelerates in his final phase.
+                float horizontalOffset = finalPhase ? 58f : enraged ? 88f : 118f;
+                float verticalOffset = finalPhase ? -48f : enraged ? -72f : -98f;
+                float flightSpeed = finalPhase ? 12.5f : enraged ? 9.5f : 7.5f;
+                float tracking = finalPhase ? 0.14f : 0.085f;
                 Vector2 hoverPoint = target.Center + new Vector2(-NPC.direction * horizontalOffset, verticalOffset);
-                Vector2 desiredVelocity = (hoverPoint - NPC.Center).SafeNormalize(Vector2.Zero) * (enraged ? 9.5f : 7.5f);
-                NPC.velocity = Vector2.Lerp(NPC.velocity, desiredVelocity, 0.085f);
+                Vector2 desiredVelocity = (hoverPoint - NPC.Center).SafeNormalize(Vector2.Zero) * flightSpeed;
+                NPC.velocity = Vector2.Lerp(NPC.velocity, desiredVelocity, tracking);
 
                 if (NPC.ai[1] > 0f)
                 {
                     NPC.ai[1]--;
                     if (NPC.ai[1] == 7f && Main.netMode != NetmodeID.MultiplayerClient)
-                        FireFan(target, enraged);
+                        FireFan(target, enraged, finalPhase);
                 }
                 else
                 {
                     NPC.ai[0]++;
-                    int shotInterval = enraged ? 55 : 82;
+                    int shotInterval = finalPhase ? 38 : enraged ? 55 : 82;
                     if (NPC.ai[0] >= shotInterval)
                     {
                         NPC.ai[0] = 0f;
@@ -146,7 +169,8 @@ namespace WikiStarter.Content.NPCs
                 if (enraged)
                 {
                     NPC.ai[2]++;
-                    if (NPC.ai[2] >= 260f && NPC.ai[1] <= 0f)
+                    float jumpInterval = finalPhase ? 170f : 260f;
+                    if (NPC.ai[2] >= jumpInterval && NPC.ai[1] <= 0f)
                     {
                         NPC.ai[2] = 0f;
                         NPC.ai[3] = 1f;
@@ -159,10 +183,58 @@ namespace WikiStarter.Content.NPCs
                 {
                     NPC.ai[2] = 0f;
                 }
+
+                if (finalPhase)
+                {
+                    NPC.localAI[1]++;
+                    if (NPC.localAI[1] >= 190f)
+                    {
+                        NPC.localAI[1] = 0f;
+                        if (Main.netMode != NetmodeID.MultiplayerClient)
+                            FireMeteorRain(target);
+                    }
+                }
+                else
+                {
+                    NPC.localAI[1] = 0f;
+                }
             }
             else
             {
                 RunJumpSlam(target);
+            }
+        }
+
+        private void RunFinalTransformation()
+        {
+            NPC.dontTakeDamage = true;
+            NPC.damage = 0;
+            NPC.noTileCollide = true;
+            NPC.velocity *= 0.82f;
+            NPC.ai[2]++;
+            NPC.alpha = NPC.ai[2] % 12f < 6f ? 72 : 0;
+
+            if (NPC.ai[2] == 1f && Main.netMode != NetmodeID.Server)
+            {
+                SoundEngine.PlaySound(AwakeningSound, NPC.Center);
+                if (Main.LocalPlayer.active)
+                    Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 90);
+            }
+
+            if (NPC.ai[2] % 6f == 0f)
+                SpawnEntranceEmbers();
+
+            if (NPC.ai[2] >= 60f)
+            {
+                NPC.ai[2] = 0f;
+                NPC.ai[3] = 0f;
+                NPC.alpha = 0;
+                NPC.dontTakeDamage = false;
+                NPC.netUpdate = true;
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                    FireSlamBurst();
+                if (Main.netMode != NetmodeID.Server)
+                    SoundEngine.PlaySound(SlamSound, NPC.Center);
             }
         }
 
@@ -276,13 +348,13 @@ namespace WikiStarter.Content.NPCs
             }
         }
 
-        private void FireFan(Player target, bool enraged)
+        private void FireFan(Player target, bool enraged, bool finalPhase)
         {
             Vector2 aim = (target.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
-            int projectileCount = enraged ? 5 : 3;
-            float spread = enraged ? 0.72f : 0.48f;
-            float speed = enraged ? 9f : 8f;
-            int damage = enraged ? 32 : 24;
+            int projectileCount = finalPhase ? 7 : enraged ? 5 : 3;
+            float spread = finalPhase ? 1.05f : enraged ? 0.72f : 0.48f;
+            float speed = finalPhase ? 10f : enraged ? 9f : 8f;
+            int damage = finalPhase ? 42 : enraged ? 32 : 24;
 
             for (int i = 0; i < projectileCount; i++)
             {
@@ -291,6 +363,19 @@ namespace WikiStarter.Content.NPCs
                 Vector2 velocity = aim.RotatedBy(rotation) * speed;
                 Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, velocity,
                     ModContent.ProjectileType<GodfireBolt>(), damage, 0f);
+            }
+        }
+
+        private void FireMeteorRain(Player target)
+        {
+            const int meteorCount = 7;
+            for (int i = 0; i < meteorCount; i++)
+            {
+                float offset = (i - (meteorCount - 1) / 2f) * 92f;
+                Vector2 spawnPosition = target.Center + new Vector2(offset, -440f);
+                Vector2 velocity = new Vector2(-offset * 0.009f, 10.5f);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnPosition, velocity,
+                    ModContent.ProjectileType<GodfireBolt>(), 40, 0f);
             }
         }
 
