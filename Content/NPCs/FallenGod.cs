@@ -9,6 +9,7 @@ using Terraria.ModLoader;
 using WikiStarter.Content.Items;
 using WikiStarter.Content.Players;
 using WikiStarter.Content.Projectiles;
+using WikiStarter.Content.Systems;
 using WikiStarter.Content.UI;
 
 namespace WikiStarter.Content.NPCs
