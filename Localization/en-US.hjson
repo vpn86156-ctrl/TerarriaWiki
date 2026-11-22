@@ -7,7 +7,7 @@ Mods: {
       }
       FallenGodsFlame: {
         DisplayName: "Fallen God's Flame"
-        Tooltip: "A colossal blade stolen from a god. The fire obeys you now."
+        Tooltip: "A colossal blade stolen from a god. The fire obeys you now.\nRight-click to unleash a divine wave (4-second cooldown)"
       }
     }
   }
