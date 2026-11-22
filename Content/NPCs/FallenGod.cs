@@ -1,18 +1,33 @@
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
 using Terraria.ModLoader;
 using WikiStarter.Content.Items;
+using WikiStarter.Content.Players;
 using WikiStarter.Content.Projectiles;
 
 namespace WikiStarter.Content.NPCs
 {
     public class FallenGod : ModNPC
     {
+        private static readonly SoundStyle AwakeningSound = new SoundStyle("WikiStarter/Sounds/FallenGodAwakening")
+        {
+            Volume = 0.9f,
+            PitchVariance = 0.04f
+        };
+
+        private static readonly SoundStyle SlamSound = new SoundStyle("WikiStarter/Sounds/FallenGodSlam")
+        {
+            Volume = 1f,
+            PitchVariance = 0.04f
+        };
+
         public override void SetStaticDefaults()
         {
-            Main.npcFrameCount[Type] = 4;
+            Main.npcFrameCount[Type] = 8;
         }
 
         public override void SetDefaults()
@@ -36,15 +51,37 @@ namespace WikiStarter.Content.NPCs
             Music = MusicID.Boss3;
         }
 
+        public override void OnSpawn(IEntitySource source)
+        {
+            NPC.TargetClosest(false);
+            if (NPC.target >= 0 && NPC.target < Main.maxPlayers && Main.player[NPC.target].active)
+            {
+                Player target = Main.player[NPC.target];
+                NPC.Center = target.Center + new Vector2(target.direction * 230f, -180f);
+            }
+
+            NPC.ai[2] = 0f;
+            NPC.ai[3] = 5f; // dramatic entrance
+            NPC.alpha = 255;
+            NPC.dontTakeDamage = true;
+            NPC.netUpdate = true;
+        }
+
         public override void FindFrame(int frameHeight)
         {
             int frame = 0;
             if (NPC.ai[3] == 1f)
-                frame = 1; // crouch and gather power
+                frame = 1; // jump wind-up
             else if (NPC.ai[3] == 2f)
-                frame = 2; // leap upward
+                frame = 2; // rise
             else if (NPC.ai[3] == 3f)
-                frame = 3; // descend into the slam
+                frame = 3; // descent
+            else if (NPC.ai[3] == 0f && NPC.localAI[0] > 12f)
+                frame = 6; // gather a fireball
+            else if (NPC.ai[3] == 0f && NPC.localAI[0] > 0f)
+                frame = 7; // release the fireball
+            else if (NPC.ai[3] == 0f && System.Math.Abs(NPC.velocity.X) > 1.6f)
+                frame = 4 + (int)(Main.GameUpdateCount / 7 % 2); // horizontal flight cycle
 
             NPC.frame.Y = frameHeight * frame;
         }
@@ -62,42 +99,118 @@ namespace WikiStarter.Content.NPCs
                 return;
             }
 
+            if (NPC.ai[3] == 5f)
+            {
+                RunEntrance();
+                return;
+            }
+
+            if (NPC.localAI[0] > 0f)
+                NPC.localAI[0]--;
+
             bool enraged = NPC.life < NPC.lifeMax / 2;
             NPC.damage = enraged ? 55 : 45;
             NPC.defense = enraged ? 20 : 15;
             NPC.direction = target.Center.X >= NPC.Center.X ? 1 : -1;
             NPC.spriteDirection = NPC.direction;
+            NPC.noTileCollide = NPC.ai[3] != 3f;
 
             if (NPC.ai[3] == 0f)
             {
-                Vector2 hoverPoint = target.Center + new Vector2(-NPC.direction * 230f, -155f);
-                Vector2 desiredVelocity = (hoverPoint - NPC.Center).SafeNormalize(Vector2.Zero) * (enraged ? 8f : 6f);
-                NPC.velocity = Vector2.Lerp(NPC.velocity, desiredVelocity, 0.045f);
+                // Keep the boss close enough to threaten the player instead of orbiting far away.
+                float horizontalOffset = enraged ? 88f : 118f;
+                float verticalOffset = enraged ? -72f : -98f;
+                Vector2 hoverPoint = target.Center + new Vector2(-NPC.direction * horizontalOffset, verticalOffset);
+                Vector2 desiredVelocity = (hoverPoint - NPC.Center).SafeNormalize(Vector2.Zero) * (enraged ? 9.5f : 7.5f);
+                NPC.velocity = Vector2.Lerp(NPC.velocity, desiredVelocity, 0.085f);
 
-                NPC.ai[0]++;
-                int shotInterval = enraged ? 60 : 95;
-                if (NPC.ai[0] >= shotInterval)
+                if (NPC.ai[1] > 0f)
                 {
-                    NPC.ai[0] = 0;
-                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    NPC.ai[1]--;
+                    if (NPC.ai[1] == 7f && Main.netMode != NetmodeID.MultiplayerClient)
                         FireFan(target, enraged);
+                }
+                else
+                {
+                    NPC.ai[0]++;
+                    int shotInterval = enraged ? 55 : 82;
+                    if (NPC.ai[0] >= shotInterval)
+                    {
+                        NPC.ai[0] = 0f;
+                        NPC.ai[1] = 24f;
+                        NPC.localAI[0] = 24f;
+                        NPC.netUpdate = true;
+                    }
                 }
 
                 if (enraged)
                 {
                     NPC.ai[2]++;
-                    if (NPC.ai[2] >= 260)
+                    if (NPC.ai[2] >= 260f && NPC.ai[1] <= 0f)
                     {
-                        NPC.ai[2] = 0;
+                        NPC.ai[2] = 0f;
                         NPC.ai[3] = 1f;
-                        NPC.velocity *= 0.5f;
+                        NPC.localAI[0] = 0f;
+                        NPC.velocity *= 0.45f;
                         NPC.netUpdate = true;
                     }
+                }
+                else
+                {
+                    NPC.ai[2] = 0f;
                 }
             }
             else
             {
                 RunJumpSlam(target);
+            }
+        }
+
+        private void RunEntrance()
+        {
+            NPC.dontTakeDamage = true;
+            NPC.damage = 0;
+            NPC.noTileCollide = true;
+            NPC.velocity *= 0.8f;
+            NPC.ai[2]++;
+
+            if (NPC.localAI[3] == 0f)
+            {
+                NPC.localAI[3] = 1f;
+                if (Main.netMode != NetmodeID.Server)
+                {
+                    SoundEngine.PlaySound(AwakeningSound, NPC.Center);
+                    if (Main.LocalPlayer.active)
+                        Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 110);
+                }
+            }
+
+            NPC.alpha = System.Math.Max(0, 255 - (int)(NPC.ai[2] * 6f));
+            if (NPC.ai[2] % 7f == 0f)
+                SpawnEntranceEmbers();
+
+            if (NPC.ai[2] == 46f && Main.netMode != NetmodeID.Server)
+                SoundEngine.PlaySound(SlamSound, NPC.Center);
+
+            if (NPC.ai[2] >= 82f)
+            {
+                NPC.ai[2] = 0f;
+                NPC.ai[3] = 0f;
+                NPC.alpha = 0;
+                NPC.dontTakeDamage = false;
+                NPC.netUpdate = true;
+            }
+        }
+
+        private void SpawnEntranceEmbers()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                int dustIndex = Dust.NewDust(NPC.position, NPC.width, NPC.height, DustID.Torch);
+                Vector2 direction = (Main.dust[dustIndex].position - NPC.Center).SafeNormalize(Vector2.UnitY);
+                Main.dust[dustIndex].velocity = direction * Main.rand.NextFloat(2f, 6f);
+                Main.dust[dustIndex].noGravity = true;
+                Main.dust[dustIndex].scale = Main.rand.NextFloat(1.2f, 2.2f);
             }
         }
 
@@ -110,9 +223,9 @@ namespace WikiStarter.Content.NPCs
             {
                 case 1: // wind-up
                     NPC.velocity *= 0.72f;
-                    if (NPC.ai[2] >= 16)
+                    if (NPC.ai[2] >= 16f)
                     {
-                        NPC.ai[2] = 0;
+                        NPC.ai[2] = 0f;
                         NPC.ai[3] = 2f;
                         NPC.velocity = new Vector2(horizontalAim, -13f);
                         NPC.netUpdate = true;
@@ -122,34 +235,40 @@ namespace WikiStarter.Content.NPCs
                 case 2: // rise
                     NPC.velocity.X = MathHelper.Lerp(NPC.velocity.X, horizontalAim, 0.12f);
                     NPC.velocity.Y = -11f;
-                    if (NPC.ai[2] >= 20)
+                    if (NPC.ai[2] >= 20f)
                     {
-                        NPC.ai[2] = 0;
+                        NPC.ai[2] = 0f;
                         NPC.ai[3] = 3f;
                         NPC.velocity.Y = 14f;
+                        NPC.noTileCollide = false;
                         NPC.netUpdate = true;
                     }
                     break;
 
-                case 3: // slam down toward the player
+                case 3: // descend and hit the floor near the player
+                    NPC.noTileCollide = false;
                     NPC.velocity.X = MathHelper.Lerp(NPC.velocity.X, horizontalAim, 0.12f);
                     NPC.velocity.Y = 14f;
-                    if (NPC.Center.Y >= target.Center.Y - 45f || NPC.ai[2] >= 32)
+                    if (NPC.collideY || NPC.Bottom.Y >= target.Bottom.Y - 2f || NPC.ai[2] >= 42f)
                     {
-                        NPC.ai[2] = 0;
+                        NPC.ai[2] = 0f;
                         NPC.ai[3] = 4f;
                         NPC.velocity = Vector2.Zero;
+                        NPC.noTileCollide = true;
                         if (Main.netMode != NetmodeID.MultiplayerClient)
                             FireSlamBurst();
+                        if (Main.netMode != NetmodeID.Server)
+                            SoundEngine.PlaySound(SlamSound, NPC.Center);
                         NPC.netUpdate = true;
                     }
                     break;
 
                 case 4: // recovery
+                    NPC.noTileCollide = true;
                     NPC.velocity *= 0.75f;
-                    if (NPC.ai[2] >= 18)
+                    if (NPC.ai[2] >= 18f)
                     {
-                        NPC.ai[2] = 0;
+                        NPC.ai[2] = 0f;
                         NPC.ai[3] = 0f;
                         NPC.netUpdate = true;
                     }
@@ -186,7 +305,6 @@ namespace WikiStarter.Content.NPCs
                     ModContent.ProjectileType<GodfireBolt>(), 38, 0f);
             }
 
-            // Two low firebolts race outward from the impact like ground shockwaves.
             Vector2 groundPoint = NPC.Bottom - new Vector2(0f, 18f);
             Projectile.NewProjectile(NPC.GetSource_FromAI(), groundPoint, new Vector2(-10f, 0f),
                 ModContent.ProjectileType<GodfireBolt>(), 42, 0f);
