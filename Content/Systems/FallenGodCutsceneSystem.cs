@@ -18,23 +18,9 @@ namespace WikiStarter.Content.Systems
             bossIndex = npcIndex;
             ticksLeft = duration;
             elapsedTicks = 0;
-        }
 
-        public override void ModifyScreenPosition()
-        {
-            if (ticksLeft <= 0 || bossIndex < 0 || bossIndex >= Main.maxNPCs || !Main.LocalPlayer.active)
-                return;
-
-            NPC boss = Main.npc[bossIndex];
-            if (!boss.active)
-                return;
-
-            // ModSystem's camera hook runs after Terraria's normal camera lerp, so this pan is not overwritten.
-            Vector2 focus = ticksLeft > 38
-                ? Vector2.Lerp(Main.LocalPlayer.Center, boss.Center, 0.58f)
-                : Main.LocalPlayer.Center;
-            Vector2 desiredScreenPosition = focus - new Vector2(Main.screenWidth * 0.5f, Main.screenHeight * 0.5f);
-            Main.screenPosition = Vector2.Lerp(Main.screenPosition, desiredScreenPosition, 0.13f);
+            if (Main.netMode != Terraria.ID.NetmodeID.Server && Main.LocalPlayer.active)
+                Main.instance.CameraModifiers.Add(new FallenGodCameraModifier(npcIndex, duration));
         }
 
         public override void PostDrawInterface(SpriteBatch spriteBatch)
@@ -48,6 +34,10 @@ namespace WikiStarter.Content.Systems
             int barHeight = (int)(Main.screenHeight * 0.075f * opacity);
             if (barHeight <= 0)
                 return;
+
+            Texture2D backdrop = ModContent.Request<Texture2D>("WikiStarter/Content/Systems/FallenGodCutsceneBackdrop").Value;
+            spriteBatch.Draw(backdrop, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
+                Color.White * (opacity * 0.28f));
 
             Texture2D pixel = TextureAssets.MagicPixel.Value;
             Color barColor = Color.Black * opacity;

@@ -37,9 +37,10 @@ namespace WikiStarter.Content.NPCs
 
         public override void SetDefaults()
         {
-            NPC.width = 104;
-            NPC.height = 160;
-            NPC.damage = 45;
+            NPC.width = 128;
+            NPC.height = 184;
+            NPC.scale = 1.3f;
+            NPC.damage = 42;
             NPC.defense = 15;
             NPC.lifeMax = 7000;
             NPC.value = Item.buyPrice(gold: 8);
@@ -136,7 +137,7 @@ namespace WikiStarter.Content.NPCs
                 NPC.localAI[0]--;
 
             bool enraged = NPC.life < NPC.lifeMax / 2;
-            NPC.damage = finalPhase ? 45 : enraged ? 55 : 45;
+            NPC.damage = finalPhase ? 38 : enraged ? 48 : 42;
             NPC.defense = finalPhase ? 18 : enraged ? 20 : 15;
             NPC.direction = target.Center.X >= NPC.Center.X ? 1 : -1;
             NPC.spriteDirection = NPC.direction;
@@ -154,7 +155,7 @@ namespace WikiStarter.Content.NPCs
             if (NPC.ai[3] == 0f)
             {
                 // Keep the boss close; reduced final-phase tracking leaves a clearer opening to dodge.
-                float horizontalOffset = finalPhase ? 68f : enraged ? 72f : 104f;
+                float horizontalOffset = finalPhase ? 82f : enraged ? 84f : 112f;
                 float verticalOffset = finalPhase ? -48f : enraged ? -60f : -86f;
                 float flightSpeed = finalPhase ? 7.3f : enraged ? 7.8f : 7.5f;
                 float tracking = finalPhase ? 0.06f : enraged ? 0.07f : 0.075f;
@@ -240,7 +241,7 @@ namespace WikiStarter.Content.NPCs
                 SoundEngine.PlaySound(AwakeningSound, NPC.Center);
                 ShakeCamera(9f);
                 if (Main.LocalPlayer.active)
-                    Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 170);
+                    Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 210);
             }
 
             if (NPC.ai[2] % 6f == 0f)
@@ -277,7 +278,7 @@ namespace WikiStarter.Content.NPCs
                 {
                     SoundEngine.PlaySound(AwakeningSound, NPC.Center);
                     if (Main.LocalPlayer.active)
-                        Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 150);
+                        Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 180);
                 }
             }
 
