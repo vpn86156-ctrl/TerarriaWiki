@@ -1,49 +1,48 @@
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
+using WikiStarter.Content.Items;
+using WikiStarter.Content.Systems;
 
 namespace WikiStarter.Content.Players
 {
     public class GodslayerPlayer : ModPlayer
     {
         public int DivineWaveCooldown;
-        private int bossIntroTicks;
-        private int bossIntroNpc = -1;
 
         public override void PostUpdate()
         {
             if (DivineWaveCooldown > 0)
                 DivineWaveCooldown--;
+
+            AddGreatswordFlameTrail();
         }
 
         public void BeginBossIntro(int npcIndex, int duration)
         {
-            bossIntroNpc = npcIndex;
-            bossIntroTicks = duration;
+            FallenGodCutsceneSystem.Begin(npcIndex, duration);
         }
 
-        public override void ModifyScreenPosition()
+        private void AddGreatswordFlameTrail()
         {
-            if (bossIntroTicks <= 0 || bossIntroNpc < 0 || bossIntroNpc >= Main.maxNPCs)
+            if (Main.netMode == NetmodeID.Server || Player.itemAnimation <= 0 || Player.itemAnimationMax <= 0)
+                return;
+            if (Player.HeldItem.type != ModContent.ItemType<FallenGodsFlame>() || Player.itemAnimation % 3 != 0)
                 return;
 
-            NPC boss = Main.npc[bossIntroNpc];
-            if (!boss.active)
+            float progress = MathHelper.Clamp(1f - Player.itemAnimation / (float)Player.itemAnimationMax, 0f, 1f);
+            progress = progress * progress * (3f - 2f * progress);
+            for (int i = 0; i < 2; i++)
             {
-                bossIntroTicks = 0;
-                bossIntroNpc = -1;
-                return;
+                float arc = MathHelper.Lerp(-1.9f, 1.15f, MathHelper.Clamp(progress + i * 0.07f, 0f, 1f));
+                Vector2 offset = new Vector2(48f * Player.direction, 0f).RotatedBy(arc * Player.direction);
+                Vector2 position = Player.MountedCenter + offset;
+                int dustIndex = Dust.NewDust(position, 5, 5, DustID.Torch, 0f, 0f, 80, new Color(255, 125, 25), 1.45f);
+                Dust dust = Main.dust[dustIndex];
+                dust.velocity = new Vector2(-offset.Y, offset.X).SafeNormalize(Vector2.Zero) * 2.4f;
+                dust.noGravity = true;
             }
-
-            Vector2 focus = bossIntroTicks > 30
-                ? Vector2.Lerp(Player.Center, boss.Center, 0.58f)
-                : Player.Center;
-            Vector2 targetScreen = focus - new Vector2(Main.screenWidth * 0.5f, Main.screenHeight * 0.5f);
-            Main.screenPosition = Vector2.Lerp(Main.screenPosition, targetScreen, 0.12f);
-
-            bossIntroTicks--;
-            if (bossIntroTicks == 0)
-                bossIntroNpc = -1;
         }
     }
 }

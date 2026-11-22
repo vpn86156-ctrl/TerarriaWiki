@@ -35,6 +35,18 @@ namespace WikiStarter.Content.Items
             return true;
         }
 
+        public override void UseStyle(Player player, Rectangle heldItemFrame)
+        {
+            if (player.altFunctionUse == 2 || player.itemAnimationMax <= 0)
+                return;
+
+            // Give the normal slash a deliberate, wide arc instead of the default short swing.
+            float progress = MathHelper.Clamp(1f - player.itemAnimation / (float)player.itemAnimationMax, 0f, 1f);
+            progress = progress * progress * (3f - 2f * progress);
+            float swingAngle = MathHelper.Lerp(-1.35f, 1.2f, progress);
+            player.itemRotation = swingAngle * player.direction * player.gravDir;
+        }
+
         public override bool CanUseItem(Player player)
         {
             if (player.altFunctionUse == 2)

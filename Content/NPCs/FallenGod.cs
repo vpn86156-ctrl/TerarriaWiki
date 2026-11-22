@@ -3,14 +3,17 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent.ItemDropRules;
+using Terraria.Graphics.CameraModifiers;
 using Terraria.ID;
 using Terraria.ModLoader;
 using WikiStarter.Content.Items;
 using WikiStarter.Content.Players;
 using WikiStarter.Content.Projectiles;
+using WikiStarter.Content.UI;
 
 namespace WikiStarter.Content.NPCs
 {
+    [AutoloadBossHead]
     public class FallenGod : ModNPC
     {
         private static readonly SoundStyle AwakeningSound = new SoundStyle("WikiStarter/Sounds/FallenGodAwakening")
@@ -28,6 +31,8 @@ namespace WikiStarter.Content.NPCs
         public override void SetStaticDefaults()
         {
             Main.npcFrameCount[Type] = 9;
+            NPCID.Sets.MPAllowedEnemies[Type] = true;
+            NPCID.Sets.BossBestiaryPriority.Add(Type);
         }
 
         public override void SetDefaults()
@@ -40,6 +45,7 @@ namespace WikiStarter.Content.NPCs
             NPC.value = Item.buyPrice(gold: 8);
             NPC.knockBackResist = 0f;
             NPC.boss = true;
+            NPC.BossBar = ModContent.GetInstance<FallenGodBossBar>();
             NPC.noGravity = true;
             NPC.noTileCollide = true;
             NPC.lavaImmune = true;
@@ -82,8 +88,8 @@ namespace WikiStarter.Content.NPCs
                 frame = 6; // gather a fireball
             else if (NPC.ai[3] == 0f && NPC.localAI[0] > 0f)
                 frame = 7; // release the fireball
-            else if (NPC.ai[3] == 0f && System.Math.Abs(NPC.velocity.X) > 1.6f)
-                frame = 4 + (int)(Main.GameUpdateCount / 7 % 2); // horizontal flight cycle
+            else if (NPC.ai[3] == 0f && System.Math.Abs(NPC.velocity.X) > 2.2f)
+                frame = 4; // keep the matching horizontal-flight pose; switching to the upright pose looked like a flicker
 
             NPC.frame.Y = frameHeight * frame;
         }
@@ -130,19 +136,28 @@ namespace WikiStarter.Content.NPCs
                 NPC.localAI[0]--;
 
             bool enraged = NPC.life < NPC.lifeMax / 2;
-            NPC.damage = finalPhase ? 68 : enraged ? 55 : 45;
-            NPC.defense = finalPhase ? 26 : enraged ? 20 : 15;
+            NPC.damage = finalPhase ? 45 : enraged ? 55 : 45;
+            NPC.defense = finalPhase ? 18 : enraged ? 20 : 15;
             NPC.direction = target.Center.X >= NPC.Center.X ? 1 : -1;
             NPC.spriteDirection = NPC.direction;
             NPC.noTileCollide = NPC.ai[3] != 3f;
+            if (NPC.ai[3] == 0f)
+            {
+                float bank = MathHelper.Clamp(NPC.velocity.X * 0.004f, -0.045f, 0.045f);
+                NPC.rotation = MathHelper.Lerp(NPC.rotation, bank, 0.08f);
+            }
+            else
+            {
+                NPC.rotation = MathHelper.Lerp(NPC.rotation, 0f, 0.12f);
+            }
 
             if (NPC.ai[3] == 0f)
             {
-                // The god now stays within striking distance and accelerates in his final phase.
-                float horizontalOffset = finalPhase ? 58f : enraged ? 88f : 118f;
-                float verticalOffset = finalPhase ? -48f : enraged ? -72f : -98f;
-                float flightSpeed = finalPhase ? 12.5f : enraged ? 9.5f : 7.5f;
-                float tracking = finalPhase ? 0.14f : 0.085f;
+                // Keep the boss close; reduced final-phase tracking leaves a clearer opening to dodge.
+                float horizontalOffset = finalPhase ? 68f : enraged ? 72f : 104f;
+                float verticalOffset = finalPhase ? -48f : enraged ? -60f : -86f;
+                float flightSpeed = finalPhase ? 7.3f : enraged ? 7.8f : 7.5f;
+                float tracking = finalPhase ? 0.06f : enraged ? 0.07f : 0.075f;
                 Vector2 hoverPoint = target.Center + new Vector2(-NPC.direction * horizontalOffset, verticalOffset);
                 Vector2 desiredVelocity = (hoverPoint - NPC.Center).SafeNormalize(Vector2.Zero) * flightSpeed;
                 NPC.velocity = Vector2.Lerp(NPC.velocity, desiredVelocity, tracking);
@@ -151,12 +166,17 @@ namespace WikiStarter.Content.NPCs
                 {
                     NPC.ai[1]--;
                     if (NPC.ai[1] == 7f && Main.netMode != NetmodeID.MultiplayerClient)
-                        FireFan(target, enraged, finalPhase);
+                    {
+                        if (finalPhase && Main.rand.NextBool(2))
+                            FireCrescentVolley(target);
+                        else
+                            FireFan(target, enraged, finalPhase);
+                    }
                 }
                 else
                 {
                     NPC.ai[0]++;
-                    int shotInterval = finalPhase ? 38 : enraged ? 55 : 82;
+                    int shotInterval = finalPhase ? 62 : enraged ? 62 : 82;
                     if (NPC.ai[0] >= shotInterval)
                     {
                         NPC.ai[0] = 0f;
@@ -169,7 +189,7 @@ namespace WikiStarter.Content.NPCs
                 if (enraged)
                 {
                     NPC.ai[2]++;
-                    float jumpInterval = finalPhase ? 170f : 260f;
+                    float jumpInterval = finalPhase ? 240f : 260f;
                     if (NPC.ai[2] >= jumpInterval && NPC.ai[1] <= 0f)
                     {
                         NPC.ai[2] = 0f;
@@ -187,7 +207,7 @@ namespace WikiStarter.Content.NPCs
                 if (finalPhase)
                 {
                     NPC.localAI[1]++;
-                    if (NPC.localAI[1] >= 190f)
+                    if (NPC.localAI[1] >= 300f)
                     {
                         NPC.localAI[1] = 0f;
                         if (Main.netMode != NetmodeID.MultiplayerClient)
@@ -201,7 +221,7 @@ namespace WikiStarter.Content.NPCs
             }
             else
             {
-                RunJumpSlam(target);
+                RunJumpSlam(target, finalPhase);
             }
         }
 
@@ -212,29 +232,33 @@ namespace WikiStarter.Content.NPCs
             NPC.noTileCollide = true;
             NPC.velocity *= 0.82f;
             NPC.ai[2]++;
-            NPC.alpha = NPC.ai[2] % 12f < 6f ? 72 : 0;
+            NPC.alpha = NPC.ai[2] < 75f ? System.Math.Max(0, 180 - (int)(NPC.ai[2] * 2.4f)) : 0;
+            Lighting.AddLight(NPC.Center, 1.1f, 0.32f, 0.06f);
 
             if (NPC.ai[2] == 1f && Main.netMode != NetmodeID.Server)
             {
                 SoundEngine.PlaySound(AwakeningSound, NPC.Center);
+                ShakeCamera(9f);
                 if (Main.LocalPlayer.active)
-                    Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 90);
+                    Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 170);
             }
 
             if (NPC.ai[2] % 6f == 0f)
                 SpawnEntranceEmbers();
 
-            if (NPC.ai[2] >= 60f)
+            if (NPC.ai[2] >= 150f)
             {
                 NPC.ai[2] = 0f;
                 NPC.ai[3] = 0f;
                 NPC.alpha = 0;
                 NPC.dontTakeDamage = false;
                 NPC.netUpdate = true;
-                if (Main.netMode != NetmodeID.MultiplayerClient)
-                    FireSlamBurst();
+                SpawnEntranceEmbers();
                 if (Main.netMode != NetmodeID.Server)
+                {
                     SoundEngine.PlaySound(SlamSound, NPC.Center);
+                    ShakeCamera(17f);
+                }
             }
         }
 
@@ -253,7 +277,7 @@ namespace WikiStarter.Content.NPCs
                 {
                     SoundEngine.PlaySound(AwakeningSound, NPC.Center);
                     if (Main.LocalPlayer.active)
-                        Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 110);
+                        Main.LocalPlayer.GetModPlayer<GodslayerPlayer>().BeginBossIntro(NPC.whoAmI, 150);
                 }
             }
 
@@ -262,7 +286,10 @@ namespace WikiStarter.Content.NPCs
                 SpawnEntranceEmbers();
 
             if (NPC.ai[2] == 46f && Main.netMode != NetmodeID.Server)
+            {
                 SoundEngine.PlaySound(SlamSound, NPC.Center);
+                ShakeCamera(14f);
+            }
 
             if (NPC.ai[2] >= 82f)
             {
@@ -272,6 +299,15 @@ namespace WikiStarter.Content.NPCs
                 NPC.dontTakeDamage = false;
                 NPC.netUpdate = true;
             }
+        }
+
+        private void ShakeCamera(float strength)
+        {
+            if (Main.netMode == NetmodeID.Server || Main.LocalPlayer == null || !Main.LocalPlayer.active)
+                return;
+
+            PunchCameraModifier punch = new PunchCameraModifier(NPC.Center, Vector2.UnitY, strength, 6f, 18, 900f, "WikiStarter:FallenGod");
+            Main.instance.CameraModifiers.Add(punch);
         }
 
         private void SpawnEntranceEmbers()
@@ -286,7 +322,7 @@ namespace WikiStarter.Content.NPCs
             }
         }
 
-        private void RunJumpSlam(Player target)
+        private void RunJumpSlam(Player target, bool finalPhase)
         {
             NPC.ai[2]++;
             float horizontalAim = MathHelper.Clamp((target.Center.X - NPC.Center.X) * 0.025f, -7f, 7f);
@@ -328,9 +364,12 @@ namespace WikiStarter.Content.NPCs
                         NPC.velocity = Vector2.Zero;
                         NPC.noTileCollide = true;
                         if (Main.netMode != NetmodeID.MultiplayerClient)
-                            FireSlamBurst();
+                            FireSlamBurst(finalPhase);
                         if (Main.netMode != NetmodeID.Server)
+                        {
                             SoundEngine.PlaySound(SlamSound, NPC.Center);
+                            ShakeCamera(finalPhase ? 11f : 8f);
+                        }
                         NPC.netUpdate = true;
                     }
                     break;
@@ -351,10 +390,10 @@ namespace WikiStarter.Content.NPCs
         private void FireFan(Player target, bool enraged, bool finalPhase)
         {
             Vector2 aim = (target.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
-            int projectileCount = finalPhase ? 7 : enraged ? 5 : 3;
-            float spread = finalPhase ? 1.05f : enraged ? 0.72f : 0.48f;
-            float speed = finalPhase ? 10f : enraged ? 9f : 8f;
-            int damage = finalPhase ? 42 : enraged ? 32 : 24;
+            int projectileCount = finalPhase ? 5 : enraged ? 5 : 3;
+            float spread = finalPhase ? 0.82f : enraged ? 0.72f : 0.48f;
+            float speed = finalPhase ? 8f : enraged ? 8.5f : 7.8f;
+            int damage = finalPhase ? 24 : enraged ? 30 : 22;
 
             for (int i = 0; i < projectileCount; i++)
             {
@@ -366,35 +405,55 @@ namespace WikiStarter.Content.NPCs
             }
         }
 
-        private void FireMeteorRain(Player target)
+        private void FireCrescentVolley(Player target)
         {
-            const int meteorCount = 7;
-            for (int i = 0; i < meteorCount; i++)
+            Vector2 aim = (target.Center - NPC.Center).SafeNormalize(Vector2.UnitY);
+            Vector2 side = aim.RotatedBy(MathHelper.PiOver2);
+            const int projectileCount = 5;
+
+            for (int i = 0; i < projectileCount; i++)
             {
-                float offset = (i - (meteorCount - 1) / 2f) * 92f;
-                Vector2 spawnPosition = target.Center + new Vector2(offset, -440f);
-                Vector2 velocity = new Vector2(-offset * 0.009f, 10.5f);
-                Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnPosition, velocity,
-                    ModContent.ProjectileType<GodfireBolt>(), 40, 0f);
+                float curve = i / (float)(projectileCount - 1) * 2f - 1f;
+                Vector2 origin = NPC.Center + aim * (16f - System.Math.Abs(curve) * 10f) + side * curve * 22f;
+                Vector2 velocity = aim.RotatedBy(curve * 0.32f) * 7f;
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), origin, velocity,
+                    ModContent.ProjectileType<GodfireBolt>(), 22, 0f);
             }
         }
 
-        private void FireSlamBurst()
+        private void FireMeteorRain(Player target)
+        {
+            const int meteorCount = 5;
+            for (int i = 0; i < meteorCount; i++)
+            {
+                float offset = (i - (meteorCount - 1) / 2f) * 112f;
+                Vector2 spawnPosition = target.Center + new Vector2(offset, -360f);
+                Vector2 velocity = new Vector2(-offset * 0.004f, 7.2f);
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), spawnPosition, velocity,
+                    ModContent.ProjectileType<GodfireBolt>(), 20, 0f);
+            }
+        }
+
+        private void FireSlamBurst(bool finalPhase)
         {
             const int boltCount = 8;
             for (int i = 0; i < boltCount; i++)
             {
                 float angle = MathHelper.TwoPi * i / boltCount;
-                Vector2 velocity = new Vector2((float)System.Math.Cos(angle), (float)System.Math.Sin(angle)) * 7f;
+                float speed = finalPhase ? 5.8f : 6.5f;
+                int damage = finalPhase ? 22 : 30;
+                Vector2 velocity = new Vector2((float)System.Math.Cos(angle), (float)System.Math.Sin(angle)) * speed;
                 Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center, velocity,
-                    ModContent.ProjectileType<GodfireBolt>(), 38, 0f);
+                    ModContent.ProjectileType<GodfireBolt>(), damage, 0f);
             }
 
             Vector2 groundPoint = NPC.Bottom - new Vector2(0f, 18f);
-            Projectile.NewProjectile(NPC.GetSource_FromAI(), groundPoint, new Vector2(-10f, 0f),
-                ModContent.ProjectileType<GodfireBolt>(), 42, 0f);
-            Projectile.NewProjectile(NPC.GetSource_FromAI(), groundPoint, new Vector2(10f, 0f),
-                ModContent.ProjectileType<GodfireBolt>(), 42, 0f);
+            float groundSpeed = finalPhase ? 7.5f : 8.5f;
+            int groundDamage = finalPhase ? 22 : 32;
+            Projectile.NewProjectile(NPC.GetSource_FromAI(), groundPoint, new Vector2(-groundSpeed, 0f),
+                ModContent.ProjectileType<GodfireBolt>(), groundDamage, 0f);
+            Projectile.NewProjectile(NPC.GetSource_FromAI(), groundPoint, new Vector2(groundSpeed, 0f),
+                ModContent.ProjectileType<GodfireBolt>(), groundDamage, 0f);
         }
 
         public override void ModifyNPCLoot(NPCLoot npcLoot)
